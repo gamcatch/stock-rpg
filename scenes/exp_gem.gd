@@ -26,6 +26,10 @@ func _process(delta):
 		var dir = (target_player.global_position - global_position).normalized()
 		global_position += dir * speed * delta
 		return
+	else:
+		var p = target_player if is_instance_valid(target_player) else get_tree().get_first_node_in_group("player")
+		if is_instance_valid(p) and global_position.distance_to(p.global_position) < 600.0:
+			attract_to(p)
 
 	# Staggered periodic cull check for abandoned distant gems
 	cull_timer += delta

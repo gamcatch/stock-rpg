@@ -38,27 +38,24 @@ func _physics_process(delta: float):
 
 	orbit_angle += delta * 2.5
 	
-	# 1. 자동 목표 탐색 및 전진 (Auto-Nav)
+	# 1. 자동 목표 탐색 및 좌우 조준 기동 (방치형 RPG 레이아웃)
 	var target = _find_nearest_enemy()
+	var base_y = 820.0
+	
 	if target and is_instance_valid(target):
-		var to_target = (target.global_position - global_position)
-		var dist = to_target.length()
+		var target_x = clamp(target.global_position.x, 180.0, 900.0)
+		var desired_pos = Vector2(target_x, base_y)
+		global_position = global_position.lerp(desired_pos, 6.0 * delta)
 		
-		# 사거리 유지하며 접근
-		if dist > 200.0:
-			velocity = to_target.normalized() * move_speed
-		elif dist < 120.0:
-			velocity = -to_target.normalized() * (move_speed * 0.5)
-		else:
-			velocity = Vector2(-to_target.y, to_target.x).normalized() * (move_speed * 0.6)
-			
-		rotation = lerp_angle(rotation, to_target.angle(), 12.0 * delta)
+		# 전방 적 조준
+		var aim_angle = (target.global_position - global_position).angle()
+		rotation = lerp_angle(rotation, aim_angle, 15.0 * delta)
 	else:
-		# 적이 없으면 전방(위쪽)으로 완만히 전진
-		velocity = Vector2(0, -move_speed * 0.8)
-		rotation = lerp_angle(rotation, -PI/2.0, 8.0 * delta)
+		# 적이 없으면 중앙 복귀 및 전방 조준
+		var center_pos = Vector2(540.0, base_y)
+		global_position = global_position.lerp(center_pos, 4.0 * delta)
+		rotation = lerp_angle(rotation, -PI / 2.0, 10.0 * delta)
 		
-	move_and_slide()
 	queue_redraw()
 	
 	# 2. 자동 사격 프로세스

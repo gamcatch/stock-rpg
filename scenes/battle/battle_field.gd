@@ -18,33 +18,34 @@ var player: CharacterBody2D = null
 var scroll_offset_y: float = 0.0
 
 func _ready():
-	# 1. 단일 개미 플레이어 생성
+	# 1. 단일 개미 플레이어 생성 (하단 앵커)
 	player = player_ant_scene.instantiate()
-	player.position = Vector2(540, 600)
+	player.position = Vector2(540, 820)
 	add_child(player)
 	
 	# 2. 실시간 속보 시그널 연결
 	if MarketDataManager.has_signal("breaking_news_alert"):
 		MarketDataManager.breaking_news_alert.connect(_on_breaking_news_received)
 		
-	# 3. 초기 스폰 3개 종목
-	for i in range(3):
-		_spawn_random_stock_enemy(Vector2(randf_range(200, 880), player.position.y - randf_range(300, 600)))
+	# 3. 초기 스폰 4개 종목 (상단~중단)
+	for i in range(4):
+		_spawn_random_stock_enemy(Vector2(randf_range(200, 880), randf_range(150, 450)))
 
 func _process(delta: float):
 	if Global.is_game_over or Global.is_paused:
 		return
 		
-	scroll_offset_y += delta * 60.0
+	# 시원하게 아래로 스크롤되는 속도감 (전진하는 연출)
+	scroll_offset_y += delta * 220.0
 	queue_redraw()
 	
-	# 캔들 몬스터 주기적 스폰
+	# 캔들 몬스터 주기적 스폰 (상단에서 등장)
 	spawn_timer += delta
 	if spawn_timer >= spawn_interval:
 		spawn_timer = 0.0
 		var enemies_count = get_tree().get_nodes_in_group("enemies").size()
-		if enemies_count < 12 and player != null:
-			var spawn_pos = Vector2(randf_range(160, 920), player.position.y - randf_range(350, 650))
+		if enemies_count < 10 and player != null:
+			var spawn_pos = Vector2(randf_range(180, 900), randf_range(-60, 20))
 			_spawn_random_stock_enemy(spawn_pos)
 
 # ------------------------------------------------------------------------------
@@ -98,9 +99,8 @@ func _on_breaking_news_received(headline: String, sector_key: String, effect_typ
 	print("[BattleField] 주식 속보 수신! 개미 전방에 긴급 이벤트 포털을 생성합니다: ", headline)
 	
 	var portal = news_portal_scene.instantiate()
-	# 개미 전방 180px 위치에 스폰
-	var spawn_offset = Vector2(0, -180).rotated(player.rotation)
-	portal.position = player.position + spawn_offset
+	# 개미 전방(위쪽) 200px 위치에 스폰
+	portal.position = Vector2(player.position.x, player.position.y - 200.0)
 	
 	var stock_name = "관련 우량주"
 	if headline.contains("한미반도체"): stock_name = "한미반도체"
@@ -113,19 +113,35 @@ func _on_breaking_news_received(headline: String, sector_key: String, effect_typ
 	add_child(portal)
 
 # ------------------------------------------------------------------------------
-# 🎨 배경 차트 그리드 렌더링 (사이버틱 네온 MTS 분위기)
+# 🎨 배경 차트 고속도로 렌더링 (살아 숨쉬는 증시 전장)
 # ------------------------------------------------------------------------------
 func _draw():
+	var font = ThemeDB.fallback_font
+	
+	# 1. 짙은 사이버 차트 배경
 	var bg_rect = Rect2(0, 0, 1080, 1080)
-	draw_rect(bg_rect, Color(0.04, 0.06, 0.10))
+	draw_rect(bg_rect, Color(0.03, 0.05, 0.08))
 	
-	# 네온 그리드 라인
-	var grid_size = 120.0
-	var offset_y = fmod(scroll_offset_y, grid_size)
+	# 2. 고속도로 사이드 네온 가드레일 (좌/우)
+	draw_line(Vector2(120, 0), Vector2(120, 1080), Color(0.18, 0.75, 1.0, 0.6), 3.0)
+	draw_line(Vector2(960, 0), Vector2(960, 1080), Color(0.18, 0.75, 1.0, 0.6), 3.0)
 	
-	for y in range(int(-grid_size), 1080 + int(grid_size), int(grid_size)):
-		var line_y = float(y) + offset_y
-		draw_line(Vector2(0, line_y), Vector2(1080, line_y), Color(0.12, 0.20, 0.32, 0.4), 1.0)
-		
-	for x in range(0, 1080, int(grid_size)):
-		draw_line(Vector2(x, 0), Vector2(x, 1080), Color(0.12, 0.20, 0.32, 0.3), 1.0)
+	# 3. 아래로 고속 질주하는 도로 차선 (Street Dashes)
+	var dash_length = 60.0
+	var gap = 50.0
+	var total_step = dash_length + gap
+	var scroll_y = fmod(scroll_offset_y, total_step)
+	
+	var lanes = [380.0, 540.0, 700.0]
+	for lane_x in lanes:
+		for y in range(-int(total_step), 1080 + int(total_step), int(total_step)):
+			var start_pt = Vector2(lane_x, float(y) + scroll_y)
+			var end_pt = Vector2(lane_x, float(y) + scroll_y + dash_length)
+			draw_line(start_pt, end_pt, Color(0.3, 0.8, 1.0, 0.45), 2.5)
+			
+	# 4. 도로 바닥에 은은하게 흐르는 홀로그램 상승 텍스트 ("BULL RUN ▲ 떡상")
+	var text_step = 360.0
+	var text_scroll_y = fmod(scroll_offset_y * 0.7, text_step)
+	for ty in range(-int(text_step), 1080 + int(text_step), int(text_step)):
+		var pos_y = float(ty) + text_scroll_y
+		draw_string(font, Vector2(500, pos_y), "▲ BULL RUN", HORIZONTAL_ALIGNMENT_CENTER, -1, 18, Color(1.0, 0.25, 0.25, 0.18))

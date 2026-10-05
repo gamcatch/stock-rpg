@@ -22,7 +22,10 @@ var is_bull: bool = true
 var hit_flash_timer: float = 0.0
 var exp_gem_scene: PackedScene = preload("res://scenes/exp_gem.tscn")
 
+var floating_damages: Array = [] # { text, pos, alpha, life }
+
 func _ready():
+	add_to_group("enemy")
 	add_to_group("enemies")
 	current_hp = max_hp
 	is_bull = (rate >= 0.0)
@@ -34,11 +37,11 @@ func setup_stock_data(s_name: String, s_rate: float, s_price: String, s_sector: 
 	sector = s_sector
 	is_bull = (rate >= 0.0)
 	
-	# 등락률에 따른 스탯 조정
+	# 등락률에 따른 스탯 조정 (상한가일수록 더 큰 보너스)
 	if is_bull:
-		max_hp = 80.0 + min(rate * 15.0, 300.0)
+		max_hp = 50.0 + min(rate * 10.0, 200.0)
 	else:
-		max_hp = 120.0 + min(abs(rate) * 20.0, 400.0) # 하락장일수록 더 단단한 저항
+		max_hp = 70.0 + min(abs(rate) * 12.0, 250.0)
 	current_hp = max_hp
 	queue_redraw()
 
@@ -49,26 +52,52 @@ func _physics_process(delta: float):
 	if hit_flash_timer > 0:
 		hit_flash_timer -= delta
 		
+	# 플로팅 데미지 텍스트 갱신
+	for i in range(floating_damages.size() - 1, -1, -1):
+		var fd = floating_damages[i]
+		fd["life"] -= delta
+		fd["pos"].y -= 40.0 * delta
+		fd["alpha"] = clamp(fd["life"] / 0.8, 0.0, 1.0)
+		if fd["life"] <= 0:
+			floating_damages.remove_at(i)
+		
 	var player = get_tree().get_first_node_in_group("player")
 	if player and is_instance_valid(player):
-		var dir = (player.global_position - global_position).normalized()
+		# 플레이어 방향으로 전진
+		var to_player = (player.global_position - global_position)
+		var dir = to_player.normalized()
 		velocity = dir * move_speed
-		rotation = lerp_angle(rotation, dir.angle(), 8.0 * delta)
-		move_and_slide()
 		
-		# 플레이어 접촉 공격
-		if global_position.distance_to(player.global_position) < 32.0:
-			player.current_hp -= 15.0 * delta
-			Global.player_hp = player.current_hp
-			
+		# 플레이어 접촉 시 약한 피해
+		if to_player.length() < 36.0:
+			if player.has_method("take_hit"):
+				player.take_hit(12.0 * delta)
+			elif "current_hp" in player:
+				player.current_hp -= 12.0 * delta
+				Global.player_hp = player.current_hp
+	else:
+		# 플레이어가 없으면 화면 아래로 이동
+		velocity = Vector2(0, move_speed)
+		
+	move_and_slide()
 	queue_redraw()
 
-func take_damage(amount: float, is_crit: bool = false):
+func take_damage(amount: float, extra_arg = null):
 	current_hp -= amount
-	hit_flash_timer = 0.12
+	hit_flash_timer = 0.15
 	SoundManager.play_hit()
 	
+	# 플로팅 데미지 숫자 생성
+	floating_damages.append({
+		"text": "-%d" % int(amount),
+		"pos": Vector2(randf_range(-15, 15), -20),
+		"color": Color(1.0, 0.9, 0.2) if is_bull else Color(0.4, 0.8, 1.0),
+		"life": 0.8,
+		"alpha": 1.0
+	})
+	
 	if current_hp <= 0:
+		_die()
 		_die()
 
 func _die():
@@ -114,4 +143,11 @@ func _draw():
 	# 4. 체력 게이지
 	var hp_ratio = clamp(current_hp / max_hp, 0.0, 1.0)
 	draw_rect(Rect2(-20, 36, 40, 5), Color(0.1, 0.1, 0.1, 0.8))
+	draw_rect(Rect2(-20, 36, 40 * hp_ratio, 5), candle_color)
+	
+	# 5. 플로팅 데미지 텍스트 렌더링
+	for fd in floating_damages:
+		var c = fd.get("color", Color.YELLOW)
+		c.a = fd.get("alpha", 1.0)
+		draw_string(font, fd["pos"], fd["text"], HORIZONTAL_ALIGNMENT_CENTER, -1, 14, c)
 	draw_rect(Rect2(-20, 36, 40 * hp_ratio, 5), candle_color)
