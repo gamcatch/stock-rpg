@@ -42,6 +42,10 @@ var joystick_vector: Vector2 = Vector2.ZERO # Mobile virtual joystick input
 var bonus_damage_multiplier: float = 1.0
 var bonus_speed_multiplier: float = 1.0
 
+# 🏆 최종 보스(TRUMP) 격파 이후 '포스트 보스(무한 강세장)' 단계에서만 레벨 비례 적 강화 적용
+var trump_defeated_count: int = 0
+var level_at_first_trump_kill: int = 0
+
 # 방치형 생존 & 무적/회복 시스템
 var player_iframe_timer: float = 0.0
 var emergency_hodl_ready: bool = true
@@ -122,6 +126,8 @@ func reset_game():
 	bonus_speed_multiplier = 1.0
 	in_bear_hazard = false
 	in_bull_zone = false
+	trump_defeated_count = 0
+	level_at_first_trump_kill = 0
 	
 	skills["green_beam"]["level"] = 1
 	skills["dca_shield"]["level"] = 0

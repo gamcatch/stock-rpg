@@ -67,11 +67,14 @@ func _exit_tree():
 func _on_player_level_up(_new_level: int):
 	if is_dead:
 		return
-	# 🐜 개미(플레이어) 레벨업 시 이미 필드에 소환되어 있는 적들도 즉시 강화 (+18% HP, +8% 데미지)
-	var hp_boost = 1.18
+	# 최종 보스 격파 전에는 필드 적 강화 없음 (개미가 성장하는 재미 보장)
+	if Global.trump_defeated_count <= 0:
+		return
+	# 🐜 포스트 보스 단계: 레벨업 시 필드 적들도 즉시 강화 (+12% HP, +6% 데미지)
+	var hp_boost = 1.12
 	max_hp *= hp_boost
 	hp *= hp_boost
-	contact_damage *= 1.08
+	contact_damage *= 1.06
 	queue_redraw()
 
 func _setup_stats():
@@ -79,19 +82,24 @@ func _setup_stats():
 	var hurt_shape = $HurtArea/CollisionShape2D if has_node("HurtArea/CollisionShape2D") else null
 	var r = 24.0
 
-	# 🐜 개미(플레이어) 레벨 및 게임 시간에 따른 복합 능력치 스케일링
-	var player_lvl = max(1, Global.player_level)
-	var level_hp_scale = 1.0 + (player_lvl - 1) * 0.18 # 개미 1레벨당 +18% 체력 증가
-	var time_hp_scale = 1.0 + (Global.game_time / 60.0) * 0.15 # 게임 시간 1분당 +15% 체력 증가
-	var total_hp_scale = level_hp_scale * time_hp_scale
-
-	# 공격력 스케일링 (1레벨당 +8%, 1분당 +8%)
-	var level_dmg_scale = 1.0 + (player_lvl - 1) * 0.08
+	# ⏱️ 기본: 게임 시간 기반 점진적 강화 (1분당 HP +15%, 공격력 +8%)
+	var time_hp_scale = 1.0 + (Global.game_time / 60.0) * 0.15
 	var time_dmg_scale = 1.0 + (Global.game_time / 60.0) * 0.08
-	var total_dmg_scale = level_dmg_scale * time_dmg_scale
 
-	# 경험치 보상 스케일링 (강해진 적 처치 시 보상 강화)
-	var exp_scale = 1.0 + (player_lvl - 1) * 0.07
+	# 🏆 최종 보스(TRUMP) 격파 이후에만 개미 레벨 비례 강화 발동
+	#    (격파 시점 레벨을 기준점으로, 이후 오른 레벨만큼만 가산)
+	var level_hp_scale = 1.0
+	var level_dmg_scale = 1.0
+	var exp_scale = 1.0
+	if Global.trump_defeated_count > 0:
+		var post_lvls = max(0, Global.player_level - Global.level_at_first_trump_kill)
+		var tier_bonus = 1.0 + (Global.trump_defeated_count - 1) * 0.25 # 추가 TRUMP 격파마다 +25%
+		level_hp_scale = (1.0 + post_lvls * 0.12) * tier_bonus
+		level_dmg_scale = 1.0 + post_lvls * 0.06
+		exp_scale = 1.0 + post_lvls * 0.07
+
+	var total_hp_scale = level_hp_scale * time_hp_scale
+	var total_dmg_scale = level_dmg_scale * time_dmg_scale
 
 	if archetype != CharacterArchetype.DEFAULT:
 		match archetype:
@@ -746,8 +754,11 @@ func _die():
 	
 	if is_boss:
 		if type == EnemyType.TRUMP_BOSS:
-			# 방치형 RPG: 보스 처치 시 종료되지 않고 축제 보상 및 무한 랠리 지속!
-			Global.market_event_triggered.emit("🏆 [보스 격파!] 관세맨 TRUMP 격파!", "관세 장벽 돌파 완료! 글로벌 강세장 랠리가 계속 이어집니다!")
+			# 🏆 최종 보스 격파 → 이후부터 개미 레벨 비례 적 강화 단계 진입
+			if Global.trump_defeated_count == 0:
+				Global.level_at_first_trump_kill = Global.player_level
+			Global.trump_defeated_count += 1
+			Global.market_event_triggered.emit("🏆 [보스 격파!] 관세맨 TRUMP 격파!", "관세 장벽 돌파! 이제 시장이 개미의 성장에 맞춰 더 강해집니다! (심화 %d단계)" % Global.trump_defeated_count)
 			SoundManager.play_level_up()
 			LeaderboardManager.unlock_achievement("trump_slayer")
 			Global.heal_player(Global.player_max_hp)
