@@ -430,14 +430,13 @@ func _process_sector_mechanics(delta):
 	elif effective_rate <= -2.5:
 		Global.in_bear_hazard = true
 		Global.in_bull_zone = false
-		Global.player_speed_modifier = 0.80
-		Global.exp_multiplier = 0.6
+		Global.player_speed_modifier = 0.90
+		Global.exp_multiplier = 0.8
 		
-		Global.take_player_damage(1.5 * 0.2 * 2.5)
-		Global.portfolio_return = max(0.0, Global.portfolio_return - 4.0 * 0.2)
+		Global.portfolio_return = max(0.0, Global.portfolio_return - 1.0 * 0.2)
 		
 		if effective_rate <= -6.0:
-			Global.portfolio_return = max(0.0, Global.portfolio_return - 6.0 * 0.2)
+			Global.portfolio_return = max(0.0, Global.portfolio_return - 2.0 * 0.2)
 			
 	else:
 		Global.in_bull_zone = false

@@ -31,8 +31,8 @@ var in_bull_zone: bool = false
 var player_level: int = 1
 var current_exp: int = 0
 var exp_to_next_level: int = 10
-var player_hp: float = 100.0
-var player_max_hp: float = 100.0
+var player_hp: float = 350.0
+var player_max_hp: float = 350.0
 var kills_count: int = 0
 var total_damage_dealt: float = 0.0
 var portfolio_return: float = 0.0 # Yield percentage calculation
@@ -41,6 +41,12 @@ var current_return_rate: float = 0.0 # 누적 수익률 %
 var joystick_vector: Vector2 = Vector2.ZERO # Mobile virtual joystick input
 var bonus_damage_multiplier: float = 1.0
 var bonus_speed_multiplier: float = 1.0
+
+# 방치형 생존 & 무적/회복 시스템
+var player_iframe_timer: float = 0.0
+var emergency_hodl_ready: bool = true
+var emergency_hodl_cooldown: float = 60.0
+var natural_regen_timer: float = 0.0
 
 # Skill levels
 var skills = {
@@ -58,6 +64,28 @@ var skills = {
 func _ready():
 	DisplayServer.screen_set_orientation(DisplayServer.SCREEN_PORTRAIT)
 
+func _process(delta: float):
+	if is_game_over or is_paused:
+		return
+		
+	# 1. 피격 무적 시간 (i-frame) 감쇄
+	if player_iframe_timer > 0.0:
+		player_iframe_timer -= delta
+		
+	# 2. 비상 존버 실드 쿨다운 회복 (60초 주기)
+	if not emergency_hodl_ready:
+		emergency_hodl_cooldown -= delta
+		if emergency_hodl_cooldown <= 0.0:
+			emergency_hodl_ready = true
+			emergency_hodl_cooldown = 60.0
+			
+	# 3. 방치형 기본 배당금 자연 치유 (초당 4.0 HP 지속 회복)
+	if player_hp < player_max_hp:
+		natural_regen_timer += delta
+		if natural_regen_timer >= 1.0:
+			natural_regen_timer = 0.0
+			heal_player(4.0)
+
 func reset_game():
 	game_time = 0.0
 	is_game_over = false
@@ -65,8 +93,11 @@ func reset_game():
 	player_level = 1
 	current_exp = 0
 	exp_to_next_level = 10
-	player_max_hp = 100.0
-	player_hp = 100.0
+	player_max_hp = 350.0
+	player_hp = 350.0
+	player_iframe_timer = 0.0
+	emergency_hodl_ready = true
+	emergency_hodl_cooldown = 60.0
 	kills_count = 0
 	total_damage_dealt = 0.0
 	portfolio_return = 0.0
@@ -101,21 +132,39 @@ func add_exp(amount: int):
 		current_exp -= exp_to_next_level
 		player_level += 1
 		exp_to_next_level = int(exp_to_next_level * 1.35 + 5)
+		
+		# 📈 레벨업 보너스: 최대 HP 증가 및 35% 즉시 회복!
+		player_max_hp += 20.0
+		heal_player(player_max_hp * 0.35)
+		
 		emit_signal("level_up", player_level)
 	emit_signal("exp_changed", current_exp, exp_to_next_level)
 
 func take_player_damage(amount: float):
 	if is_game_over:
 		return
+		
+	# 피격 무적 판정 (연타로 순식간에 녹는 현상 방지)
+	if player_iframe_timer > 0.0:
+		return
 	
-	var damage_multiplier = 1.0
+	var damage_multiplier = 0.45 # 방치형 RPG 편안한 난이도 튜닝
 	if skills["leverage_100x"]["level"] > 0:
-		damage_multiplier = 5.0 # 5x damage taken on 100x leverage!
+		damage_multiplier = 2.0
 		
 	var actual_damage = amount * damage_multiplier
 	player_hp = max(0.0, player_hp - actual_damage)
+	player_iframe_timer = 0.45 # 피격 후 0.45초간 무적 보호
 	SoundManager.haptic_impact()
 	emit_signal("hp_changed", player_hp, player_max_hp)
+	
+	# 🛡️ HP 20% 이하 위기 시 자동 [비상 존버] 발동 (1회 생명선)
+	if player_hp > 0 and (player_hp / player_max_hp) <= 0.20 and emergency_hodl_ready:
+		emergency_hodl_ready = false
+		player_iframe_timer = 3.0 # 3초간 절대 무적
+		heal_player(player_max_hp * 0.35) # 35% 긴급 수혈
+		SoundManager.play_level_up()
+		market_event_triggered.emit("🛡️ [개미의 비상 존버 발동!]", "HP 위기 감지! 3초간 절대 무적 & 35% 긴급 수혈 완료!")
 	
 	if player_hp <= 0 and not is_game_over:
 		trigger_game_over(false)

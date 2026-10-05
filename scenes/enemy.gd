@@ -37,34 +37,34 @@ func _setup_stats():
 
 	match type:
 		EnemyType.PANIC_SELL:
-			max_hp = 25.0
-			move_speed = 195.0
-			contact_damage = 10.0
+			max_hp = 20.0
+			move_speed = 135.0
+			contact_damage = 6.0
 			exp_reward = 2
 			r = 24.0
 		EnemyType.FAKE_NEWS:
-			max_hp = 55.0
-			move_speed = 135.0
-			contact_damage = 15.0
+			max_hp = 45.0
+			move_speed = 110.0
+			contact_damage = 9.0
 			exp_reward = 5
 			r = 28.0
 		EnemyType.RED_CANDLE:
-			max_hp = 120.0
-			move_speed = 110.0
-			contact_damage = 25.0
+			max_hp = 85.0
+			move_speed = 85.0
+			contact_damage = 14.0
 			exp_reward = 10
 			r = 34.0
 		EnemyType.BEAR_BOSS:
-			max_hp = 800.0
-			move_speed = 120.0
-			contact_damage = 35.0
+			max_hp = 650.0
+			move_speed = 95.0
+			contact_damage = 22.0
 			exp_reward = 50
 			is_boss = true
 			r = 60.0
 		EnemyType.TRUMP_BOSS:
-			max_hp = 3500.0
-			move_speed = 95.0
-			contact_damage = 50.0
+			max_hp = 2500.0
+			move_speed = 80.0
+			contact_damage = 32.0
 			exp_reward = 350
 			is_boss = true
 			r = 80.0
@@ -482,9 +482,9 @@ func _physics_process(delta):
 			if collider.is_hodl_active:
 				take_damage(80.0, -dir * 600.0)
 			else:
-				Global.take_player_damage(contact_damage * delta * 2.0)
+				Global.take_player_damage(contact_damage)
 				if polarity == Polarity.BEAR:
-					Global.portfolio_return = max(0.0, Global.portfolio_return - 8.0 * delta)
+					Global.portfolio_return = max(0.0, Global.portfolio_return - 2.0 * delta)
 				
 	# Ranged attacks for bosses and fake news monsters
 	_process_attacks(delta, dir)

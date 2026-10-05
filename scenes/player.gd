@@ -66,11 +66,16 @@ func _draw():
 		draw_arc(Vector2.ZERO, mag_r + pulse, 0.0, TAU, 36, Color(0.2, 0.75, 1.0, 0.12 + mag_lvl * 0.03), 2.0)
 
 	# 1. Zone Buff/Debuff Auras
-	if Global.in_bear_hazard:
+	if Global.player_iframe_timer > 0.0:
+		# Invincible Barrier Visual
+		var shield_pulse = sin(Global.game_time * 18.0) * 4.0
+		draw_arc(Vector2.ZERO, 44.0 + shield_pulse, 0.0, TAU, 28, Color(1.0, 0.88, 0.3, 0.9), 3.0)
+		draw_circle(Vector2.ZERO, 40.0, Color(1.0, 0.9, 0.3, 0.18))
+	elif Global.in_bear_hazard:
 		# Icy Frost Aura & Slowdown Indicator
 		draw_circle(Vector2.ZERO, 36.0, Color(0.2, 0.55, 1.0, 0.28))
 		draw_arc(Vector2.ZERO, 36.0, 0.0, TAU, 24, Color(0.4, 0.75, 1.0, 0.8), 2.5)
-		draw_string(font, Vector2(-40, -38), "⚠️ 혹한기 감속 -20%", HORIZONTAL_ALIGNMENT_CENTER, -1, 14, Color(0.6, 0.85, 1.0))
+		draw_string(font, Vector2(-40, -38), "⚠️ 혹한기 감속 -10%", HORIZONTAL_ALIGNMENT_CENTER, -1, 14, Color(0.6, 0.85, 1.0))
 	elif Global.in_bull_zone:
 		# Golden Bullish Flame Aura
 		draw_circle(Vector2.ZERO, 36.0, Color(1.0, 0.3, 0.2, 0.25))
@@ -286,7 +291,7 @@ func _process_weapons(delta):
 	if gbeam_lvl > 0:
 		green_beam_timer += delta
 		var scalping_lvl = Global.skills["scalping"]["level"] if Global.skills.has("scalping") else 0
-		var cooldown = max(0.12, (1.2 - gbeam_lvl * 0.18) * (1.0 - scalping_lvl * 0.10))
+		var cooldown = max(0.10, (0.65 - gbeam_lvl * 0.10) * (1.0 - scalping_lvl * 0.10))
 		if green_beam_timer >= cooldown:
 			green_beam_timer = 0.0
 			_fire_green_beam(gbeam_lvl)
@@ -352,9 +357,9 @@ func _fire_green_beam(level: int):
 			var angle = i * (TAU / 8.0)
 			var proj = proj_scene.instantiate()
 			proj.type = proj.Type.GREEN_BEAM
-			proj.damage = 35.0
-			proj.speed = 700.0
-			proj.pierce_count = 10 + quant_lvl * 2
+			proj.damage = 50.0
+			proj.speed = 750.0
+			proj.pierce_count = 12 + quant_lvl * 2
 			proj.global_position = global_position
 			proj.direction = Vector2.RIGHT.rotated(angle)
 			proj.rotation = angle
@@ -371,8 +376,8 @@ func _fire_green_beam(level: int):
 			var spread = (i - (count - 1) * 0.5) * 0.18
 			var proj = proj_scene.instantiate()
 			proj.type = proj.Type.GREEN_BEAM
-			proj.damage = 22.0 + level * 6.0
-			proj.speed = 650.0
+			proj.damage = 30.0 + level * 8.0
+			proj.speed = 700.0
 			proj.pierce_count = 2 + level + quant_lvl
 			proj.global_position = global_position
 			proj.direction = target_dir.rotated(spread)
