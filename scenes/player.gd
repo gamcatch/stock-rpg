@@ -64,9 +64,9 @@ func _rotate_to_next_sector():
 	if not current_target_stock.is_empty():
 		var old_stock_name = current_target_stock.get("name", "")
 		var old_sec_key = current_target_stock.get("sector_key", "")
-		visited_stock_cooldowns[old_stock_name] = 60.0 # 동일 종목 60초간 재방문 방지
+		visited_stock_cooldowns[old_stock_name] = 300.0 # 파밍 완료 종목 5분(300초)간 재방문 금지!
 		if not old_sec_key.is_empty():
-			visited_sector_cooldowns[old_sec_key] = 45.0 # 동일 섹터 45초간 재방문 방지 (타 섹터 적극 순회!)
+			visited_sector_cooldowns[old_sec_key] = 90.0 # 동일 섹터 90초간 재방문 방지 (타 섹터 적극 순회!)
 	current_target_stock = _select_best_rising_stock()
 	auto_play_state = AutoPlayState.TRAVELING
 	stay_at_target_timer = 0.0
@@ -79,7 +79,7 @@ func _rotate_to_next_sector():
 
 func _on_stock_vi_triggered(stock_name: String, _duration: float):
 	if not current_target_stock.is_empty() and current_target_stock.get("name", "") == stock_name:
-		visited_stock_cooldowns[stock_name] = 75.0
+		visited_stock_cooldowns[stock_name] = 120.0 # VI 발동 종목 2분(120초) 쿨타임
 		stay_at_target_timer = 0.0
 		_rotate_to_next_sector()
 		var new_name = current_target_stock.get("name", "다음 급등주")
@@ -260,50 +260,58 @@ func _select_best_rising_stock() -> Dictionary:
 	var best_stock: Dictionary = {}
 	var best_score: float = -999999.0
 	
-	for sec_key in MarketDataManager.sectors.keys():
-		var sec = MarketDataManager.sectors[sec_key]
-		if not sec.has("stocks"):
-			continue
-		for stock in sec["stocks"]:
-			# 🚨 VI 발동(거래 정지/서킷 브레이커) 중인 종목은 즉시 제외!
-			if stock.get("is_halted", false):
+	# 1차 패스: 5분 쿨타임이 끝난 미방문 종목들 중에서 최선 종목 탐색
+	for allow_cooldown in [false, true]:
+		for sec_key in MarketDataManager.sectors.keys():
+			var sec = MarketDataManager.sectors[sec_key]
+			if not sec.has("stocks"):
 				continue
+			for stock in sec["stocks"]:
+				# 🚨 VI 발동(거래 정지/서킷 브레이커) 중인 종목은 항상 제외!
+				if stock.get("is_halted", false):
+					continue
+					
+				# 쿨타임 중인 종목은 1차 패스(allow_cooldown == false)에서 엄격히 배제!
+				var is_on_cooldown = visited_stock_cooldowns.has(stock["name"])
+				if not allow_cooldown and is_on_cooldown:
+					continue
+					
+				var rate = stock.get("rate", 0.0)
+				var st_pos = stock.get("world_pos", sec.get("position", Vector2.ZERO))
+				var dist = global_position.distance_to(st_pos)
 				
-			var rate = stock.get("rate", 0.0)
-			var st_pos = stock.get("world_pos", sec.get("position", Vector2.ZERO))
-			var dist = global_position.distance_to(st_pos)
-			
-			# 1. 상승률(rate) 기본 점수 (1%당 300점)
-			var score = (rate * 300.0)
-			
-			# 2. 양수(상승) 프리미엄
-			if rate > 0.0:
-				score += 3000.0
-			if rate >= 8.0:
-				score += 1500.0 # 고수익 급등주 추가 보너스
+				# 1. 상승률(rate) 기본 점수 (1%당 300점)
+				var score = (rate * 300.0)
 				
-			# 3. 새로운 섹터 우선 탐방 보너스 (여러 섹터 적극 순회!)
-			if not current_target_stock.is_empty():
-				var cur_sec = current_target_stock.get("sector_key", "")
-				if sec_key != cur_sec and not visited_sector_cooldowns.has(sec_key):
-					score += 2500.0 # 다른 미방문 섹터로 이동하는 강력한 인센티브!
-			
-			# 4. 최근 방문 종목/섹터 감점 (방금 수확 완료한 곳 제외)
-			if visited_stock_cooldowns.has(stock["name"]):
-				score -= 8000.0
-			if visited_sector_cooldowns.has(sec_key):
-				score -= 4000.0
+				# 2. 양수(상승) 프리미엄
+				if rate > 0.0:
+					score += 3000.0
+				if rate >= 8.0:
+					score += 1500.0 # 고수익 급등주 추가 보너스
+					
+				# 3. 새로운 섹터 우선 탐방 보너스 (여러 섹터 적극 순회!)
+				if not current_target_stock.is_empty():
+					var cur_sec = current_target_stock.get("sector_key", "")
+					if sec_key != cur_sec and not visited_sector_cooldowns.has(sec_key):
+						score += 2500.0 # 다른 미방문 섹터로 이동하는 강력한 인센티브!
 				
-			# 5. 거리 감점 대폭 완화 (기존 dist / 10.0 -> dist * 0.015 로 98% 완화!)
-			# 5000px 거리라도 감점은 고작 75점에 불과하여 전 섹터를 자유롭게 순회!
-			score -= (dist * 0.015)
-				
-			if score > best_score:
-				best_score = score
-				best_stock = stock.duplicate()
-				best_stock["sector_key"] = sec_key
-				best_stock["sector_name"] = sec.get("name", "")
-				
+				# 4. 최근 섹터 감점
+				if visited_sector_cooldowns.has(sec_key):
+					score -= 3000.0
+					
+				# 5. 거리 감점 완화 (전 섹터 자유 순회)
+				score -= (dist * 0.015)
+					
+				if score > best_score:
+					best_score = score
+					best_stock = stock.duplicate()
+					best_stock["sector_key"] = sec_key
+					best_stock["sector_name"] = sec.get("name", "")
+					
+		# 1차 패스(쿨타임 미적용 종목)에서 유효한 타겟을 찾았으면 즉시 반환!
+		if not best_stock.is_empty():
+			break
+					
 	return best_stock
 
 func _calculate_auto_play_direction(delta: float) -> Vector2:
