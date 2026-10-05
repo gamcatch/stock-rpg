@@ -7,8 +7,12 @@ signal game_over_signal(victory)
 signal upgrade_selected(upgrade_id)
 signal color_theme_changed(is_korean)
 signal market_event_triggered(event_name, event_desc)
+signal auto_play_toggled(is_enabled)
+signal game_speed_toggled(new_speed)
 
 var is_korean_market_colors: bool = true # True: Red=Rise (한국형), False: Green=Rise (글로벌형)
+var auto_play_enabled: bool = true # 방치형 오토플레이 기본 활성화
+var game_speed_scale: float = 1.0 # 게임 진행 배속 (1.0x / 2.0x)
 
 var game_time: float = 0.0
 var is_game_over: bool = false

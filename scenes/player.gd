@@ -14,12 +14,46 @@ var iframe_timer: float = 0.0
 var dividend_regen_timer: float = 0.0
 var magnet_pulse_timer: float = 0.0
 
+# --- 방치형 RPG AUTO-PLAY AI 시스템 ---
+var is_auto_play: bool = true
+var manual_override_timer: float = 0.0
+var auto_target_pos: Vector2 = Vector2.ZERO
+var auto_status_text: String = "🤖 AUTO 사냥 중"
+var patrol_timer: float = 0.0
+
 func _ready():
 	add_to_group("player")
 	var magnet_area = $MagnetArea
 	if magnet_area:
 		magnet_area.area_entered.connect(_on_magnet_area_entered)
 	update_magnet_radius()
+	
+	if MarketDataManager.has_signal("breaking_news_alert"):
+		MarketDataManager.breaking_news_alert.connect(_on_breaking_news_nav)
+	if Global.has_signal("auto_play_toggled"):
+		Global.auto_play_toggled.connect(_on_auto_play_toggled)
+	is_auto_play = Global.auto_play_enabled
+
+func _on_auto_play_toggled(enabled: bool):
+	is_auto_play = enabled
+	if not enabled:
+		auto_status_text = "🕹️ 수동 모드"
+	else:
+		manual_override_timer = 0.0
+		auto_status_text = "🤖 AUTO 사냥 중"
+
+func _on_breaking_news_nav(headline: String, sector_key: String, effect_type: String, duration: float):
+	if MarketDataManager.sectors.has(sector_key):
+		var sec = MarketDataManager.sectors[sector_key]
+		var target = sec.get("position", Vector2.ZERO)
+		if sec.has("stocks"):
+			for st in sec["stocks"]:
+				if st.get("name", "") in headline:
+					target = st.get("world_pos", target)
+					break
+		auto_target_pos = target
+		auto_status_text = "🚨 속보 출동: %s" % sec.get("name", sector_key)
+		print("[PlayerAnt AI] 주식 속보 발생! 해당 좌표로 자동 질주: ", target)
 
 func _draw():
 	var font = ThemeDB.fallback_font
@@ -112,21 +146,47 @@ func _draw():
 	draw_circle(head_pos + Vector2(16, -13), 2.5, body_black)
 	draw_circle(head_pos + Vector2(16, 13), 2.5, body_black)
 
+	# 8. 방치형 AUTO-PLAY 상태 머리 위 네온 뱃지 (월드 방향 수평 유지)
+	var badge_pos = Vector2(0, -42).rotated(-rotation) + Vector2(-60, 0)
+	var badge_color = Color(1.0, 0.88, 0.25) if is_auto_play else Color(0.4, 0.8, 1.0)
+	draw_string(font, badge_pos, auto_status_text, HORIZONTAL_ALIGNMENT_CENTER, 120, 13, badge_color)
+
 
 func _physics_process(delta):
 	if Global.is_game_over or Global.is_paused:
 		return
 		
-	# Movement input (Keyboard or Mobile Virtual Joystick)
+	# 1. 수동 입력 확인 (키보드 또는 가상 조이스틱)
 	var input_dir = Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	if input_dir == Vector2.ZERO and Global.joystick_vector.length() > 0:
 		input_dir = Global.joystick_vector
+		
+	if input_dir.length() > 0.1:
+		manual_override_timer = 3.0 # 유저 터치 시 3초간 수동 조작 우선
+		is_auto_play = false
+		auto_status_text = "🕹️ 수동 조작 중"
+	else:
+		if manual_override_timer > 0:
+			manual_override_timer -= delta
+		elif Global.auto_play_enabled:
+			is_auto_play = true # 손을 떼면 방치형 AUTO-PLAY 모드로 자동 전환!
+		else:
+			is_auto_play = false
+			auto_status_text = "🕹️ 수동 대기 중"
+
 	var scalping_lvl = Global.skills["scalping"]["level"] if Global.skills.has("scalping") else 0
 	var speed_mult = (1.6 if is_hodl_active else 1.0) * Global.player_speed_modifier * Global.bonus_speed_multiplier * (1.0 + scalping_lvl * 0.10)
-	velocity = input_dir.normalized() * move_speed * speed_mult
 	
-	if input_dir.length() > 0:
-		rotation = lerp_angle(rotation, input_dir.angle(), 15.0 * delta)
+	if not is_auto_play:
+		velocity = input_dir.normalized() * move_speed * speed_mult
+		if input_dir.length() > 0:
+			rotation = lerp_angle(rotation, input_dir.angle(), 15.0 * delta)
+	else:
+		# 🤖 방치형 AUTO-PLAY AI 계산
+		var auto_dir = _calculate_auto_play_direction(delta)
+		velocity = auto_dir.normalized() * move_speed * speed_mult
+		if auto_dir.length() > 0.05:
+			rotation = lerp_angle(rotation, auto_dir.angle(), 12.0 * delta)
 		
 	move_and_slide()
 	queue_redraw()
@@ -136,6 +196,89 @@ func _physics_process(delta):
 	
 	if iframe_timer > 0:
 		iframe_timer -= delta
+
+# ------------------------------------------------------------------------------
+# 🤖 방치형 자율 사냥 & 섹터 순회 AI (Auto-Play Logic)
+# ------------------------------------------------------------------------------
+func _calculate_auto_play_direction(delta: float) -> Vector2:
+	# 1. 속보 긴급 목표가 유효하고 아직 도착하지 않았을 때
+	if auto_target_pos != Vector2.ZERO:
+		var to_news = auto_target_pos - global_position
+		if to_news.length() > 220.0:
+			auto_status_text = "🚨 속보 성역으로 고속도로 질주!"
+			return to_news.normalized()
+		else:
+			auto_target_pos = Vector2.ZERO # 도착 완료
+			
+	# 2. 반경 700px 내 가장 가까운 적 탐색 & 사거리 유지 카이팅
+	var enemies = get_tree().get_nodes_in_group("enemy")
+	var nearest_enemy: Node2D = null
+	var min_dist: float = 750.0
+	
+	for e in enemies:
+		if is_instance_valid(e):
+			var d = global_position.distance_to(e.global_position)
+			if d < min_dist:
+				min_dist = d
+				nearest_enemy = e
+				
+	if nearest_enemy:
+		var to_enemy = nearest_enemy.global_position - global_position
+		var e_name = nearest_enemy.get("stock_name") if "stock_name" in nearest_enemy else "적군"
+		auto_status_text = "⚔️ 사냥 중: %s (거리 %dm)" % [str(e_name), int(min_dist)]
+		
+		# 적정 사거리(220px) 유지하며 빔 공격
+		if min_dist > 250.0:
+			return to_enemy.normalized()
+		elif min_dist < 130.0:
+			return -to_enemy.normalized() # 너무 가까우면 후퇴
+		else:
+			# 측면 공전 카이팅
+			return Vector2(-to_enemy.y, to_enemy.x).normalized()
+
+	# 3. 근처 배당금 젬(EXP) 흡수
+	var gems = get_tree().get_nodes_in_group("exp_gem")
+	if not gems.is_empty():
+		for g in gems:
+			if is_instance_valid(g) and global_position.distance_to(g.global_position) < 450.0:
+				auto_status_text = "🎁 수익 젬 흡수 중"
+				return (g.global_position - global_position).normalized()
+				
+	# 4. 평상시: 당일 상승 1위 섹터 및 종목 제단 순회
+	patrol_timer += delta
+	var target_sec_key = "semiconductor"
+	for skey in MarketDataManager.sectors.keys():
+		if MarketDataManager.sectors[skey].get("is_top_bull", false):
+			target_sec_key = skey
+			break
+			
+	if MarketDataManager.sectors.has(target_sec_key):
+		var sec = MarketDataManager.sectors[target_sec_key]
+		var s_pos = sec.get("position", Vector2(0, -4800))
+		var to_sec = s_pos - global_position
+		
+		# 고속도로를 통해 해당 섹터로 이동 중
+		if to_sec.length() > 650.0:
+			auto_status_text = "🛣️ [%s 고속도로] 이동 중" % sec.get("name", target_sec_key)
+			return to_sec.normalized()
+		else:
+			# 섹터 내부: 각 종목 성역(삼성전자, SK하이닉스 등)을 15초마다 순회 탐방!
+			if sec.has("stocks") and sec["stocks"].size() > 0:
+				var st_idx = int(patrol_timer / 15.0) % sec["stocks"].size()
+				var target_stock = sec["stocks"][st_idx]
+				var st_pos = target_stock.get("world_pos", s_pos)
+				var to_st = st_pos - global_position
+				if to_st.length() > 200.0:
+					auto_status_text = "📍 [%s] 성역 방문 중" % target_stock.get("name", "")
+					return to_st.normalized()
+				else:
+					auto_status_text = "💎 [%s] 배당 체류 중" % target_stock.get("name", "")
+					return Vector2(cos(patrol_timer * 0.8), sin(patrol_timer * 0.8)) * 0.4
+			else:
+				auto_status_text = "🗺️ %s 순회 탐험 중" % sec.get("name", target_sec_key)
+				return Vector2(cos(patrol_timer * 0.5), sin(patrol_timer * 0.5))
+			
+	return Vector2(cos(patrol_timer * 0.8), sin(patrol_timer * 0.8))
 
 func _process_weapons(delta):
 	# 1. Green Candle Beam

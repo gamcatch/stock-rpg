@@ -19,35 +19,30 @@ stock-rpg/
 │   └── icons/                       # 차트 캔들스틱, 섹터 아이콘, 배당금 코인
 ├── doc/                             # 기획 및 기술 명세 아카이브 (PRD, GDD, Architecture 등)
 ├── scenes/
-│   ├── battle/                      # ⚔️ 방치형 자동 전투 필드 및 단일 플레이어
-│   │   ├── battle_field.tscn        # 상단 자동 전투 메인 필드 (배경, 웨이브 제어)
-│   │   ├── battle_field.gd          # 캔들 몬스터 스폰, 웨이브 루프, 보스전 진입 관리
-│   │   ├── player_ant.tscn          # 단일 주인공 개미 플레이어 인스턴스
-│   │   ├── player_ant.gd            # 개미 100% 자율 전진, 자동 사격, 위성 오브 공전
-│   │   ├── stock_candle_enemy.tscn  # 실제 종목 데이터 기반 상승(🔴)/하락(🔵) 캔들 몬스터
-│   │   ├── stock_candle_enemy.gd    # 등락률 기반 오라, 피격 및 배당 젬 드랍
-│   │   ├── stock_orbiter.tscn       # 보유 종목 위성 오브 (개미 주변 공전 자동사격)
-│   │   ├── news_event_portal.tscn   # 속보 발령 시 개미 근처에 스폰되는 긴급 포털
-│   │   └── damage_number.tscn       # MTS 스타일 플로팅 데미지/회복 텍스트
-│   ├── ui/                          # 📱 세로 화면 UI 및 탭 시스템
-│   │   ├── main_screen.tscn         # 세로 분할 메인 컨테이너 (상단 뷰포트 + 하단 탭)
-│   │   ├── main_screen.gd           # Safe Area 보정, 탭 전환, 실시간 티커 전광판 제어
-│   │   ├── tab_stats.tscn           # 개미 기본 스탯 강화 탭 (공격력/체력/치명타)
-│   │   ├── tab_portfolio.tscn       # 실제 종목 매수/보유 현황 및 배당금 탭
-│   │   ├── tab_market.tscn          # 8대 섹터 증시 현황 및 던전 선택 탭
-│   │   ├── idle_reward_popup.tscn   # 오프라인 방치 배당금 수령 모달 팝업
-│   │   └── share_receipt.tscn       # MTS 수익률 인증 영수증 캡처 & 공유 모달
+│   ├── main.tscn                    # 🌐 대형 오픈월드 증시 맵 (중앙 증시 대교차로 + 8방위 고속도로 + 8대 섹터 성역)
+│   ├── main.gd                      # 고속도로 렌더링, 섹터 바이옴, 종목별 성역/제단 및 몬스터 스폰 루프
+│   ├── player.tscn                  # 🐜 단일 주인공 개미 투자자 (Ant Investor)
+│   ├── player.gd                    # 방치형 자율 사냥 AI, 고속도로 순회, 속보 제단 출동, 터치 조작 오버라이드
+│   ├── enemy.tscn                   # 📉 캔들스틱 몬스터 (패닉셀, 가짜뉴스, 거대 음봉, 공매도 베어보스, 트럼프 보스)
+│   ├── exp_gem.tscn                 # 💎 배당금 젬 인스턴스 (수익률 누적 및 레벨업 EXP)
+│   ├── projectile.tscn              # 🟢 양봉 빔, 손절 라이트닝, 유동성 투사체
+│   └── ui/                          # 📱 세로 화면 HUD 및 편의 시스템
+│       ├── hud.tscn                 # 실시간 뉴스 티커, 섹터 현황 전광판, 레이더 미니맵, [AUTO], [1X/2X], [국장/미장]
+│       ├── hud.gd                   # HUD 애니메이션, 실시간 속보 수신, 방치형 AUTO 및 배속 제어
+│       ├── radar_minimap.gd         # 360도 8방위 고속도로 및 섹터 허브 레이더 네비게이션
+│       ├── waypoint_overlay.gd      # 화면 외곽 섹터 및 중앙 광장 하이테크 웨이포인트 화살표
+│       ├── level_up_menu.tscn       # 📈 투자 전략 매수 카드 선택창 (방치형 3.5초 자동선택 타이머 탑재)
+│       ├── virtual_joystick.tscn    # 모바일 터치 가상 조이스틱
+│       └── game_over_menu.tscn      # 정산 및 KOSPI 재도전 메뉴
 ├── scripts/
-│   ├── autoload/                    # 🌐 전역 싱글톤 매니저
-│   │   ├── global.gd                # 전역 상태, 계좌 총자산, 스테이지 진행도, 컬러 테마
-│   │   ├── portfolio_manager.gd     # 단일 개미의 종목 매수/보유 지분 및 위성 오브 관리
-│   │   ├── idle_manager.gd          # 오프라인 경과 시간 계산 및 분당 배당금 정산
-│   │   ├── market_data_manager.gd   # 실시간 한·미 증시 데이터 통신 & 주식 속보 타전
-│   │   ├── sound_manager.gd         # 절차적 오디오 신시사이저 (MTS 체결음, 레벨업음)
-│   │   └── save_system.gd           # 로컬 JSON 암호화 세이브 & 무결성 검증
+│   ├── global.gd                    # 전역 상태, 방치형 AUTO 플래그, 게임 배속, 계좌 총자산, 스킬 트리
+│   ├── market_data_manager.gd       # 8대 섹터 및 80+ 종목 실시간 시세 연동, 속보 타전, 성역 좌표 매핑
+│   ├── market_data_fetcher.gd       # 실시간 국내/해외 주식 시세 및 속보 HTTP 수신
+│   ├── sound_manager.gd             # 절차적 오디오 신시사이저 (MTS 체결음, 레벨업음, 경보음)
+│   └── portfolio_manager.gd         # 단일 개미의 종목 매수/보유 지분 및 배당금 관리
 ├── export_presets.cfg               # 안드로이드 익스포트 프리셋 (com.ddan.stockrpg)
 ├── Makefile                         # 빌드/설치 파이프라인 (stock_rpg.apk)
-└── project.godot                    # 뷰포트 1080×2400 (세로 모드), 오토로드 등록
+└── project.godot                    # 뷰포트 1080×2400 (세로 모드), main_scene="res://scenes/main.tscn"
 ```
 
 ---

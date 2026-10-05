@@ -88,8 +88,7 @@ graph TD
 ## 5. 단계별 개발 로드맵
 
 | 단계 | 목표 작업 | 산출물 |
-| :--- | :--- | :--- |
-| **Phase 1: 단일 개미 자동 전투 & 주식 몬스터 스폰** | • 단일 개미 플레이어 자동 전진 및 자율 공격 AI<br>• 실제 종목 데이터 기반 상승(🔴)/하락(🔵) 캔들 몬스터 자동 스폰<br>• 상단 전투 + 하단 관리 세로 뷰포트 레이아웃 | `scenes/battle/`, `scenes/ui/main_screen.tscn` |
+| **Phase 1: 오픈월드 증시 맵 복원 & 단일 개미 방치형 AI** | • 중앙 증시 광장, 8방위 고속도로, 8대 섹터 및 종목 성역 오픈월드 복원<br>• 단일 개미 자율 고속도로 순회, 종목 성역 탐방, 자동 사냥 & 젬 진공 AI<br>• HUD에 [AUTO], [1X/2X 배속], 3.5초 레벨업 자동선택 타이머 탑재 | `scenes/main.tscn`, `scenes/player.gd`, `scenes/ui/hud.tscn` |
 | **Phase 2: 포트폴리오 종목 매수 & 방치 배당금** | • 사냥 골드로 종목 지분 매수 및 위성 오브 공전 공격<br>• 오프라인 24시간 배당금 누적 엔진 (`IdleManager`) | `portfolio_manager.gd`, `idle_manager.gd` |
 | **Phase 3: 주식 속보 돌발 이벤트 & 보스전** | • 속보 타전 시 개미 주변 긴급 포털/상자 스폰 시스템<br>• 공매도 곰, 음봉 군단, 트럼프 보스전 | `event_manager.gd`, 보스 씬 |
 | **Phase 4: 폴리싱 & 안드로이드 패키징** | • 절전 다크 스크린 모드, 영수증 인증 공유, 사운드<br>• `com.ddan.stockrpg` APK 최종 빌드 | `stock_rpg.apk` |

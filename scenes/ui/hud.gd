@@ -11,6 +11,8 @@ extends CanvasLayer
 @onready var kills_label: Label = $HUDControl/HeaderPanel/KillsLabel
 @onready var yield_label: Label = $HUDControl/HeaderPanel/YieldLabel
 @onready var theme_button: Button = $HUDControl/HeaderPanel/ThemeButton
+@onready var auto_button: Button = $HUDControl/HeaderPanel/AutoButton
+@onready var speed_button: Button = $HUDControl/HeaderPanel/SpeedButton
 @onready var sector_panel: Panel = $HUDControl/SectorPanel
 @onready var sector_ticker_label: Label = $HUDControl/SectorPanel/SectorTickerLabel
 @onready var radar_minimap: Control = $HUDControl/RadarMinimap
@@ -44,6 +46,12 @@ func _ready():
 	
 	if theme_button:
 		theme_button.pressed.connect(_on_theme_button_pressed)
+	if auto_button:
+		auto_button.pressed.connect(_on_auto_button_pressed)
+		_update_auto_button_ui()
+	if speed_button:
+		speed_button.pressed.connect(_on_speed_button_pressed)
+		_update_speed_button_ui()
 		
 	get_tree().root.size_changed.connect(_apply_safe_area)
 	_apply_safe_area()
@@ -253,6 +261,41 @@ func _on_theme_button_pressed():
 	SoundManager.haptic_tap()
 	var next_type = MarketDataManager.MarketType.US if MarketDataManager.current_market_type == MarketDataManager.MarketType.KOREA else MarketDataManager.MarketType.KOREA
 	MarketDataManager.switch_market(next_type)
+
+func _on_auto_button_pressed():
+	SoundManager.haptic_tap()
+	Global.auto_play_enabled = !Global.auto_play_enabled
+	Global.auto_play_toggled.emit(Global.auto_play_enabled)
+	_update_auto_button_ui()
+
+func _update_auto_button_ui():
+	if auto_button:
+		if Global.auto_play_enabled:
+			auto_button.text = "🤖 AUTO"
+			auto_button.add_theme_color_override("font_color", Color(0.3, 1.0, 0.4))
+		else:
+			auto_button.text = "🕹️ 수동"
+			auto_button.add_theme_color_override("font_color", Color(0.7, 0.85, 1.0))
+
+func _on_speed_button_pressed():
+	SoundManager.haptic_tap()
+	if Engine.time_scale <= 1.0:
+		Engine.time_scale = 2.0
+		Global.game_speed_scale = 2.0
+	else:
+		Engine.time_scale = 1.0
+		Global.game_speed_scale = 1.0
+	Global.game_speed_toggled.emit(Global.game_speed_scale)
+	_update_speed_button_ui()
+
+func _update_speed_button_ui():
+	if speed_button:
+		if Engine.time_scale > 1.0:
+			speed_button.text = "⚡ 2X"
+			speed_button.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
+		else:
+			speed_button.text = "⚡ 1X"
+			speed_button.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))
 
 func _on_color_theme_changed(is_korean: bool):
 	_update_theme_ui(is_korean)

@@ -4,11 +4,28 @@ extends CanvasLayer
 @onready var title_label: Label = $Control/Panel/TitleLabel
 
 var pending_level_ups: int = 0
+var auto_pick_timer: float = 3.5
+var current_level_shown: int = 1
 
 func _ready():
 	process_mode = PROCESS_MODE_ALWAYS
 	visible = false
 	Global.level_up.connect(_on_level_up)
+
+func _process(delta):
+	if visible and Global.auto_play_enabled:
+		auto_pick_timer -= delta
+		if auto_pick_timer <= 0.0:
+			auto_pick_timer = 3.5
+			_auto_pick_card()
+		else:
+			title_label.text = "📈 투자 전략 매수 (Lv. %d)  [🤖 %d초 후 자동선택]" % [current_level_shown, int(ceil(auto_pick_timer))]
+
+func _auto_pick_card():
+	if card_container.get_child_count() > 0:
+		var first_card = card_container.get_child(0)
+		if first_card is Button:
+			first_card.emit_signal("pressed")
 
 func _on_level_up(new_level: int):
 	pending_level_ups += 1
@@ -19,6 +36,8 @@ func _show_level_up_screen(level_to_show: int):
 	SoundManager.play_level_up()
 	get_tree().paused = true
 	visible = true
+	current_level_shown = level_to_show
+	auto_pick_timer = 3.5
 	
 	# Check if all main skills are maxed
 	var pool: Array = []
