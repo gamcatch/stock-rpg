@@ -560,6 +560,26 @@ func _on_live_news_updated(news_list: Array):
 const START_POS = Vector2(0, 0)
 const CENTER_POS = Vector2(0, 0)
 
+# 🗺️ 맵 확장 레이아웃 (12섹터 × 8종목 = 192종목 대응)
+# - 원본 데이터: 섹터 거리 4800, 종목 링 반경 650, 섹터 반경 1250
+# - 확장 후: 섹터 거리 8000 (인접 섹터 간 약 4140), 종목 링 반경 1300 (종목 간 약 995), 섹터 반경 1800
+const SECTOR_DISTANCE_SCALE: float = 8000.0 / 4800.0
+const STOCK_RING_SCALE: float = 2.0
+const SECTOR_RADIUS: float = 1800.0
+const WORLD_RADIUS: float = 10200.0 # 섹터 거리 + 섹터 반경 + 여유
+
+func _apply_expanded_layout():
+	for k in sectors.keys():
+		var sec = sectors[k]
+		var old_center: Vector2 = sec["position"]
+		var new_center: Vector2 = old_center * SECTOR_DISTANCE_SCALE
+		sec["position"] = new_center
+		sec["radius"] = SECTOR_RADIUS
+		if sec.has("stocks"):
+			for stock in sec["stocks"]:
+				var old_pos: Vector2 = stock.get("world_pos", old_center)
+				stock["world_pos"] = new_center + (old_pos - old_center) * STOCK_RING_SCALE
+
 func init_market_data():
 	sectors.clear()
 	sector_stay_times.clear()
@@ -1451,6 +1471,8 @@ func init_market_data():
 			{"headline": "🛒 [속보] 10시 리테일 코스트코·월마트 견조한 내수 소비 서프라이즈 랠리!", "sector": "retail", "type": "buff", "duration": 15.0},
 			{"headline": "🚜 [속보] 11시 산업재 캐터필러 인프라 수주 잭팟! 중장비 주문 쇄도!", "sector": "industrial_infra", "type": "buff", "duration": 15.0}
 		]
+
+	_apply_expanded_layout()
 
 	for k in sectors.keys():
 		sector_stay_times[k] = 0.0

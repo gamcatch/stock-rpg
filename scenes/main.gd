@@ -25,9 +25,9 @@ func _ready():
 		chart_points.append(Vector2(i * 120 - 2800, randf_range(-350, 350)))
 		
 	# 2. Atmospheric Candlestick columns across world
-	for i in range(40):
+	for i in range(110):
 		var angle = randf() * TAU
-		var dist = randf_range(600.0, 7500.0)
+		var dist = randf_range(600.0, MarketDataManager.WORLD_RADIUS)
 		bg_candlesticks.append({
 			"pos": Vector2(cos(angle), sin(angle)) * dist,
 			"height": randf_range(60.0, 180.0),
@@ -126,7 +126,7 @@ func _draw_world_infrastructure(cam_pos: Vector2, view_rect: Rect2):
 	# 1. Draw Grand Radial Expressways (320px wide asphalt with glowing guardrails and lampposts)
 	_draw_expressways(cam_pos, view_rect, font, center, t)
 
-	# 2. Outer Orbital Ring Road (Connecting Sectors at ~4800m radius)
+	# 2. Outer Orbital Ring Road (Connecting Sectors at ~8000m radius)
 	var sec_keys = MarketDataManager.sectors.keys()
 	for i in range(sec_keys.size()):
 		var p1 = MarketDataManager.sectors[sec_keys[i]]["position"]
@@ -199,7 +199,7 @@ func _draw_expressways(cam_pos: Vector2, view_rect: Rect2, font: Font, center: V
 			c_dist += chevron_spacing
 
 		# F. Highway Overhead Gantry Milestone Signs (every 1000m along expressway)
-		var milestone_distances = [1000.0, 2000.0, 3000.0, 4000.0]
+		var milestone_distances = [1500.0, 3000.0, 4500.0, 6000.0]
 		for m_dist in milestone_distances:
 			var m_pos = center + dir * m_dist
 			if cam_pos.distance_to(m_pos) < 1400.0:
@@ -217,7 +217,7 @@ func _draw_expressways(cam_pos: Vector2, view_rect: Rect2, font: Font, center: V
 		if sec.has("stocks"):
 			for stock in sec["stocks"]:
 				var st_pos = stock.get("world_pos", s_pos)
-				if cam_pos.distance_to(st_pos) < 2200.0 or cam_pos.distance_to(s_pos) < 2200.0:
+				if cam_pos.distance_to(st_pos) < 2200.0 or cam_pos.distance_to(s_pos) < 2800.0:
 					draw_line(s_pos, st_pos, Color(0.08, 0.15, 0.28, 0.8), 120.0)
 					draw_line(s_pos, st_pos, Color(theme_col.r, theme_col.g, theme_col.b, 0.4), 2.5)
 

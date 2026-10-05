@@ -2,7 +2,7 @@ extends Control
 
 # High-Tech Cyber Radar Minimap & Off-Screen Waypoint Navigation
 var radar_radius: float = 80.0
-var world_max_radius: float = 8500.0
+var world_max_radius: float = MarketDataManager.WORLD_RADIUS
 var target_player: Node2D = null
 
 func _ready():
