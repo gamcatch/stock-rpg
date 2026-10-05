@@ -573,17 +573,17 @@ func _get_archetype_for_sector(sec_key: String) -> Enemy.CharacterArchetype:
 	match sec_key:
 		"semiconductor", "ai_chips":
 			return Enemy.CharacterArchetype.CHIP_GOLEM
-		"battery", "ev_auto":
+		"battery", "ev_auto", "automotive":
 			return Enemy.CharacterArchetype.BATTERY_MECHA
 		"bio", "pharma":
 			return Enemy.CharacterArchetype.BIO_CHIMERA
-		"robot_ai", "big_tech":
+		"robot_ai", "big_tech", "gaming_platform", "cyber_saas":
 			return Enemy.CharacterArchetype.AI_ANDROID
-		"power_grid", "ai_power":
+		"power_grid", "ai_power", "traditional_energy":
 			return Enemy.CharacterArchetype.REACTOR_TITAN
-		"shipbuilding":
+		"shipbuilding", "industrial_infra":
 			return Enemy.CharacterArchetype.DREADNOUGHT
-		"finance", "wall_street":
+		"finance", "wall_street", "entertainment", "media_entertain", "food_consumer", "retail":
 			return Enemy.CharacterArchetype.GOLD_VAULT
 		"defense", "defense_tech":
 			return Enemy.CharacterArchetype.DEFENSE_MECHA

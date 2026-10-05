@@ -53,108 +53,133 @@ func _ready():
 	player = get_tree().get_first_node_in_group("player")
 	_setup_stats()
 	_setup_speech_bubble()
+	if not Global.level_up.is_connected(_on_player_level_up):
+		Global.level_up.connect(_on_player_level_up)
 	# 스폰 직후 유저와 마주쳤을 때 0.4~1.5초 내에 첫 대사를 바로 발동하도록 단축
 	bubble_check_timer = randf_range(0.4, 1.5)
 
 func _exit_tree():
+	if Global.level_up.is_connected(_on_player_level_up):
+		Global.level_up.disconnect(_on_player_level_up)
 	if is_instance_valid(speech_bubble):
 		speech_bubble.queue_free()
+
+func _on_player_level_up(_new_level: int):
+	if is_dead:
+		return
+	# 🐜 개미(플레이어) 레벨업 시 이미 필드에 소환되어 있는 적들도 즉시 강화 (+18% HP, +8% 데미지)
+	var hp_boost = 1.18
+	max_hp *= hp_boost
+	hp *= hp_boost
+	contact_damage *= 1.08
+	queue_redraw()
 
 func _setup_stats():
 	var col_shape = $CollisionShape2D if has_node("CollisionShape2D") else null
 	var hurt_shape = $HurtArea/CollisionShape2D if has_node("HurtArea/CollisionShape2D") else null
 	var r = 24.0
 
-	# 시간 경과에 따른 점진적 체력 보정 (게임 시간 1분당 +15% 체력 증가)
-	var time_hp_scale = 1.0 + (Global.game_time / 60.0) * 0.15
+	# 🐜 개미(플레이어) 레벨 및 게임 시간에 따른 복합 능력치 스케일링
+	var player_lvl = max(1, Global.player_level)
+	var level_hp_scale = 1.0 + (player_lvl - 1) * 0.18 # 개미 1레벨당 +18% 체력 증가
+	var time_hp_scale = 1.0 + (Global.game_time / 60.0) * 0.15 # 게임 시간 1분당 +15% 체력 증가
+	var total_hp_scale = level_hp_scale * time_hp_scale
+
+	# 공격력 스케일링 (1레벨당 +8%, 1분당 +8%)
+	var level_dmg_scale = 1.0 + (player_lvl - 1) * 0.08
+	var time_dmg_scale = 1.0 + (Global.game_time / 60.0) * 0.08
+	var total_dmg_scale = level_dmg_scale * time_dmg_scale
+
+	# 경험치 보상 스케일링 (강해진 적 처치 시 보상 강화)
+	var exp_scale = 1.0 + (player_lvl - 1) * 0.07
 
 	if archetype != CharacterArchetype.DEFAULT:
 		match archetype:
 			CharacterArchetype.CHIP_GOLEM:
-				max_hp = 140.0 * time_hp_scale # 기존 35 -> 140 (4배)
+				max_hp = 140.0 * total_hp_scale
 				move_speed = 120.0
-				contact_damage = 7.0
-				exp_reward = 16
+				contact_damage = 7.0 * total_dmg_scale
+				exp_reward = int(round(16 * exp_scale))
 				r = 26.0
 			CharacterArchetype.BATTERY_MECHA:
-				max_hp = 130.0 * time_hp_scale # 기존 30 -> 130 (4.3배)
+				max_hp = 130.0 * total_hp_scale
 				move_speed = 140.0
-				contact_damage = 7.0
-				exp_reward = 16
+				contact_damage = 7.0 * total_dmg_scale
+				exp_reward = int(round(16 * exp_scale))
 				r = 26.0
 			CharacterArchetype.BIO_CHIMERA:
-				max_hp = 170.0 * time_hp_scale # 기존 42 -> 170 (4배)
+				max_hp = 170.0 * total_hp_scale
 				move_speed = 110.0
-				contact_damage = 6.0
-				exp_reward = 18
+				contact_damage = 6.0 * total_dmg_scale
+				exp_reward = int(round(18 * exp_scale))
 				r = 28.0
 			CharacterArchetype.AI_ANDROID:
-				max_hp = 150.0 * time_hp_scale # 기존 36 -> 150 (4.1배)
+				max_hp = 150.0 * total_hp_scale
 				move_speed = 125.0
-				contact_damage = 7.0
-				exp_reward = 16
+				contact_damage = 7.0 * total_dmg_scale
+				exp_reward = int(round(16 * exp_scale))
 				r = 26.0
 			CharacterArchetype.REACTOR_TITAN:
-				max_hp = 220.0 * time_hp_scale # 기존 55 -> 220 (4배)
+				max_hp = 220.0 * total_hp_scale
 				move_speed = 95.0
-				contact_damage = 10.0
-				exp_reward = 22
+				contact_damage = 10.0 * total_dmg_scale
+				exp_reward = int(round(22 * exp_scale))
 				r = 30.0
 			CharacterArchetype.DREADNOUGHT:
-				max_hp = 260.0 * time_hp_scale # 기존 65 -> 260 (4배)
+				max_hp = 260.0 * total_hp_scale
 				move_speed = 90.0
-				contact_damage = 11.0
-				exp_reward = 24
+				contact_damage = 11.0 * total_dmg_scale
+				exp_reward = int(round(24 * exp_scale))
 				r = 32.0
 			CharacterArchetype.GOLD_VAULT:
-				max_hp = 190.0 * time_hp_scale # 기존 48 -> 190 (4배)
+				max_hp = 190.0 * total_hp_scale
 				move_speed = 105.0
-				contact_damage = 8.0
-				exp_reward = 28
+				contact_damage = 8.0 * total_dmg_scale
+				exp_reward = int(round(28 * exp_scale))
 				r = 28.0
 			CharacterArchetype.DEFENSE_MECHA:
-				max_hp = 160.0 * time_hp_scale # 기존 40 -> 160 (4배)
+				max_hp = 160.0 * total_hp_scale
 				move_speed = 130.0
-				contact_damage = 8.0
-				exp_reward = 18
+				contact_damage = 8.0 * total_dmg_scale
+				exp_reward = int(round(18 * exp_scale))
 				r = 28.0
 		hp = max_hp
 	else:
 		match type:
 			EnemyType.PANIC_SELL:
-				max_hp = 90.0 * time_hp_scale # 기존 20 -> 90 (4.5배)
+				max_hp = 90.0 * total_hp_scale
 				move_speed = 135.0
-				contact_damage = 6.0
-				exp_reward = 8
+				contact_damage = 6.0 * total_dmg_scale
+				exp_reward = int(round(8 * exp_scale))
 				r = 24.0
 			EnemyType.FAKE_NEWS:
-				max_hp = 180.0 * time_hp_scale # 기존 45 -> 180 (4배)
+				max_hp = 180.0 * total_hp_scale
 				move_speed = 110.0
-				contact_damage = 9.0
-				exp_reward = 18
+				contact_damage = 9.0 * total_dmg_scale
+				exp_reward = int(round(18 * exp_scale))
 				r = 28.0
 			EnemyType.RED_CANDLE:
-				max_hp = 350.0 * time_hp_scale # 기존 85 -> 350 (4.1배)
+				max_hp = 350.0 * total_hp_scale
 				move_speed = 85.0
-				contact_damage = 14.0
-				exp_reward = 36
+				contact_damage = 14.0 * total_dmg_scale
+				exp_reward = int(round(36 * exp_scale))
 				r = 34.0
 			EnemyType.BEAR_BOSS:
-				max_hp = 3500.0 * time_hp_scale # 3500
+				max_hp = 4500.0 * total_hp_scale
 				move_speed = 95.0
-				contact_damage = 22.0
-				exp_reward = 160
+				contact_damage = 25.0 * total_dmg_scale
+				exp_reward = int(round(200 * exp_scale))
 				is_boss = true
 				r = 60.0
 			EnemyType.TRUMP_BOSS:
-				max_hp = 11000.0 * time_hp_scale # 11000
+				max_hp = 14000.0 * total_hp_scale
 				move_speed = 80.0
-				contact_damage = 32.0
-				exp_reward = 1000
+				contact_damage = 38.0 * total_dmg_scale
+				exp_reward = int(round(1200 * exp_scale))
 				is_boss = true
 				r = 80.0
 		hp = max_hp
-	
+
 	# Scale collision shapes to match bigger visuals
 	if col_shape and col_shape.shape is CircleShape2D:
 		col_shape.shape = col_shape.shape.duplicate()
