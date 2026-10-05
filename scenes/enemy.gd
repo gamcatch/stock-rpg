@@ -53,8 +53,8 @@ func _ready():
 	player = get_tree().get_first_node_in_group("player")
 	_setup_stats()
 	_setup_speech_bubble()
-	# 각 적마다 서로 다른 타이밍에 첫 대사를 검토하도록 1~4초 랜덤 오프셋
-	bubble_check_timer = randf_range(1.0, 4.0)
+	# 스폰 직후 유저와 마주쳤을 때 0.4~1.5초 내에 첫 대사를 바로 발동하도록 단축
+	bubble_check_timer = randf_range(0.4, 1.5)
 
 func _exit_tree():
 	if is_instance_valid(speech_bubble):
@@ -65,52 +65,55 @@ func _setup_stats():
 	var hurt_shape = $HurtArea/CollisionShape2D if has_node("HurtArea/CollisionShape2D") else null
 	var r = 24.0
 
+	# 시간 경과에 따른 점진적 체력 보정 (게임 시간 1분당 +15% 체력 증가)
+	var time_hp_scale = 1.0 + (Global.game_time / 60.0) * 0.15
+
 	if archetype != CharacterArchetype.DEFAULT:
 		match archetype:
 			CharacterArchetype.CHIP_GOLEM:
-				max_hp = 35.0
+				max_hp = 140.0 * time_hp_scale # 기존 35 -> 140 (4배)
 				move_speed = 120.0
 				contact_damage = 7.0
 				exp_reward = 16
 				r = 26.0
 			CharacterArchetype.BATTERY_MECHA:
-				max_hp = 30.0
+				max_hp = 130.0 * time_hp_scale # 기존 30 -> 130 (4.3배)
 				move_speed = 140.0
 				contact_damage = 7.0
 				exp_reward = 16
 				r = 26.0
 			CharacterArchetype.BIO_CHIMERA:
-				max_hp = 42.0
+				max_hp = 170.0 * time_hp_scale # 기존 42 -> 170 (4배)
 				move_speed = 110.0
 				contact_damage = 6.0
 				exp_reward = 18
 				r = 28.0
 			CharacterArchetype.AI_ANDROID:
-				max_hp = 36.0
+				max_hp = 150.0 * time_hp_scale # 기존 36 -> 150 (4.1배)
 				move_speed = 125.0
 				contact_damage = 7.0
 				exp_reward = 16
 				r = 26.0
 			CharacterArchetype.REACTOR_TITAN:
-				max_hp = 55.0
+				max_hp = 220.0 * time_hp_scale # 기존 55 -> 220 (4배)
 				move_speed = 95.0
 				contact_damage = 10.0
 				exp_reward = 22
 				r = 30.0
 			CharacterArchetype.DREADNOUGHT:
-				max_hp = 65.0
+				max_hp = 260.0 * time_hp_scale # 기존 65 -> 260 (4배)
 				move_speed = 90.0
 				contact_damage = 11.0
 				exp_reward = 24
 				r = 32.0
 			CharacterArchetype.GOLD_VAULT:
-				max_hp = 48.0
+				max_hp = 190.0 * time_hp_scale # 기존 48 -> 190 (4배)
 				move_speed = 105.0
 				contact_damage = 8.0
 				exp_reward = 28
 				r = 28.0
 			CharacterArchetype.DEFENSE_MECHA:
-				max_hp = 40.0
+				max_hp = 160.0 * time_hp_scale # 기존 40 -> 160 (4배)
 				move_speed = 130.0
 				contact_damage = 8.0
 				exp_reward = 18
@@ -119,32 +122,32 @@ func _setup_stats():
 	else:
 		match type:
 			EnemyType.PANIC_SELL:
-				max_hp = 20.0
+				max_hp = 90.0 * time_hp_scale # 기존 20 -> 90 (4.5배)
 				move_speed = 135.0
 				contact_damage = 6.0
 				exp_reward = 8
 				r = 24.0
 			EnemyType.FAKE_NEWS:
-				max_hp = 45.0
+				max_hp = 180.0 * time_hp_scale # 기존 45 -> 180 (4배)
 				move_speed = 110.0
 				contact_damage = 9.0
 				exp_reward = 18
 				r = 28.0
 			EnemyType.RED_CANDLE:
-				max_hp = 85.0
+				max_hp = 350.0 * time_hp_scale # 기존 85 -> 350 (4.1배)
 				move_speed = 85.0
 				contact_damage = 14.0
 				exp_reward = 36
 				r = 34.0
 			EnemyType.BEAR_BOSS:
-				max_hp = 2800.0 # 기존 650 -> 2800 (약 4.3배 상향)
+				max_hp = 3500.0 * time_hp_scale # 3500
 				move_speed = 95.0
 				contact_damage = 22.0
 				exp_reward = 160
 				is_boss = true
 				r = 60.0
 			EnemyType.TRUMP_BOSS:
-				max_hp = 9500.0 # 기존 2500 -> 9500 (약 3.8배 상향)
+				max_hp = 11000.0 * time_hp_scale # 11000
 				move_speed = 80.0
 				contact_damage = 32.0
 				exp_reward = 1000
@@ -657,6 +660,10 @@ func take_damage(amount: float, kb_dir: Vector2 = Vector2.ZERO):
 	else:
 		if is_boss or (randf() < 0.40 and final_dmg > 15.0):
 			_spawn_damage_text(final_dmg)
+			
+		# 피격 시 적이 반발하며 40% 확률로 즉시 말풍선 대사 출력!
+		if not is_speech_active and randf() < 0.40:
+			_maybe_trigger_speech(true)
 
 func _spawn_damage_text(amount: float):
 	var now = Time.get_ticks_msec()
@@ -874,20 +881,21 @@ func _process_speech_bubble(delta: float):
 			bubble_check_timer = randf_range(2.0, 4.0)
 			_maybe_trigger_speech()
 
-func _maybe_trigger_speech():
+func _maybe_trigger_speech(force_immediate: bool = false):
 	if is_dead or not is_instance_valid(player):
 		return
 	# 화면 안 (플레이어와 850px 이내)에 있을 때 발동
 	if global_position.distance_to(player.global_position) > 850.0:
 		return
 	var now = Time.get_ticks_msec()
-	# 화면에서 적들이 활발히 말할 수 있도록 글로벌 쿨다운 0.8초로 완화
-	if not is_boss and (now - last_enemy_speech_time_msec < 800):
+	# 화면에서 적들이 활발히 말할 수 있도록 글로벌 쿨다운 0.5초로 완화 (피격 시 즉시 발동 가능)
+	if not force_immediate and not is_boss and (now - last_enemy_speech_time_msec < 500):
 		return
-	# 보스는 70% 확률, 일반 적은 45% 확률로 풍성하게 대사 발동!
-	var chance = 0.70 if is_boss else 0.45
-	if randf() > chance:
-		return
+	if not force_immediate:
+		# 보스는 70% 확률, 일반 적은 45% 확률로 풍성하게 대사 발동!
+		var chance = 0.70 if is_boss else 0.45
+		if randf() > chance:
+			return
 	last_enemy_speech_time_msec = now
 	
 	var lines = []
