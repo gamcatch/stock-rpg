@@ -28,20 +28,24 @@ func _draw():
 	var min_y = 500.0 # Below top HUD panels
 	var max_y = vp_size.y - 320.0 # Above bottom joystick area
 	
-	# Collect navigation targets: 4 Market Sectors & Central Plaza (Neutral guidance without spoilers!)
+	# Collect navigation targets: 8 Market Sectors & Central Plaza (실시간 상승/하락 컬러 연동)
 	var targets = []
-	var neutral_nav_color = Color(0.35, 0.75, 1.0)
 	
 	for sec_key in MarketDataManager.sectors.keys():
 		var sec = MarketDataManager.sectors[sec_key]
 		var s_pos = sec.get("position", Vector2.ZERO)
 		var dist = p_pos.distance_to(s_pos)
+		var rate = sec.get("change_rate", 0.0)
+		var is_up = rate >= 0.0
+		var sec_col = Global.get_up_color() if is_up else Global.get_down_color()
+		var sign_char = "▲+" if is_up else "▼"
+		var rate_str = "%s%.1f%%" % [sign_char, abs(rate)]
 		targets.append({
-			"name": sec["name"],
+			"name": "%s %s" % [sec["name"], rate_str],
 			"pos": s_pos,
 			"dist": dist,
-			"icon": "🧭",
-			"color": neutral_nav_color
+			"icon": "📈" if is_up else "📉",
+			"color": sec_col
 		})
 	
 	# Central Exchange Plaza (Show when far)
