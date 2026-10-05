@@ -14,7 +14,7 @@ var iframe_timer: float = 0.0
 var dividend_regen_timer: float = 0.0
 var magnet_pulse_timer: float = 0.0
 
-# --- 방치형 RPG AUTO-PLAY AI 시스템 ---
+# --- 방치형 RPG AUTO-PLAY AI & 말풍선 혼잣말 시스템 ---
 var is_auto_play: bool = true
 var manual_override_timer: float = 0.0
 var auto_target_pos: Vector2 = Vector2.ZERO
@@ -26,12 +26,23 @@ var is_on_highway_cruise: bool = false
 var visited_stock_cooldowns: Dictionary = {}
 var visited_sector_cooldowns: Dictionary = {}
 
+# 말풍선 (Speech Bubble) 노드 및 애니메이션 타이머
+var speech_bubble: PanelContainer = null
+var speech_label: Label = null
+var speech_tail: Control = null
+var bubble_visible_timer: float = 0.0
+var bubble_silence_timer: float = 1.0 # 게임 시작 1초 후 첫 혼잣말 출력
+var is_bubble_showing: bool = false
+var bubble_tween: Tween = null
+
 func _ready():
 	add_to_group("player")
 	var magnet_area = $MagnetArea
 	if magnet_area:
 		magnet_area.area_entered.connect(_on_magnet_area_entered)
 	update_magnet_radius()
+	
+	_setup_speech_bubble()
 	
 	if MarketDataManager.has_signal("breaking_news_alert"):
 		MarketDataManager.breaking_news_alert.connect(_on_breaking_news_nav)
@@ -41,6 +52,10 @@ func _ready():
 		Global.auto_play_toggled.connect(_on_auto_play_toggled)
 	is_auto_play = Global.auto_play_enabled
 
+func _exit_tree():
+	if is_instance_valid(speech_bubble):
+		speech_bubble.queue_free()
+
 func _rotate_to_next_sector():
 	if not current_target_stock.is_empty():
 		var old_stock_name = current_target_stock.get("name", "")
@@ -49,6 +64,11 @@ func _rotate_to_next_sector():
 		if not old_sec_key.is_empty():
 			visited_sector_cooldowns[old_sec_key] = 45.0 # 동일 섹터 45초간 재방문 방지 (타 섹터 적극 순회!)
 	current_target_stock = _select_best_rising_stock()
+	if not current_target_stock.is_empty():
+		var st_name = current_target_stock.get("name", "")
+		var sec_name = current_target_stock.get("sector_name", "")
+		var st_rate = current_target_stock.get("rate", 0.0)
+		say_monologue("🚀 다음 목표는 [%s %s (+%.1f%%)]! 전력 질주!" % [sec_name, st_name, st_rate], 3.8, true)
 
 func _on_stock_vi_triggered(stock_name: String, _duration: float):
 	if not current_target_stock.is_empty() and current_target_stock.get("name", "") == stock_name:
@@ -58,15 +78,18 @@ func _on_stock_vi_triggered(stock_name: String, _duration: float):
 		var new_name = current_target_stock.get("name", "다음 급등주")
 		var new_sec = current_target_stock.get("sector_name", "")
 		auto_status_text = "🚨 [%s VI 발동] -> [%s (%s)] 즉시 이동!" % [stock_name, new_name, new_sec]
+		say_monologue("🚨 앗, [%s] VI 걸렸다! 얼른 [%s]로 튀자!" % [stock_name, new_name], 4.0, true)
 		print("[AutoPlay AI] VI 발동 감지! %s 거래 정지 -> 새로운 섹터 %s(%s)로 이동!" % [stock_name, new_name, new_sec])
 
 func _on_auto_play_toggled(enabled: bool):
 	is_auto_play = enabled
 	if not enabled:
 		auto_status_text = "🕹️ 수동 모드"
+		say_monologue("🕹️ 수동 모드 전환! 직접 지휘해주세요!", 3.0, true)
 	else:
 		manual_override_timer = 0.0
 		auto_status_text = "🤖 AUTO 사냥 중"
+		say_monologue("🤖 방치형 AUTO-PLAY 모드 재개! 급등주 찾아 고고~", 3.0, true)
 
 func _on_breaking_news_nav(headline: String, sector_key: String, effect_type: String, duration: float):
 	if MarketDataManager.sectors.has(sector_key):
@@ -177,15 +200,13 @@ func _draw():
 	draw_circle(head_pos + Vector2(16, -13), 2.5, body_black)
 	draw_circle(head_pos + Vector2(16, 13), 2.5, body_black)
 
-	# 8. 방치형 AUTO-PLAY 상태 머리 위 네온 뱃지 (월드 방향 수평 유지)
-	var badge_pos = Vector2(0, -44).rotated(-rotation) + Vector2(-120, 0)
-	var badge_color = Color(1.0, 0.88, 0.25) if is_auto_play else Color(0.4, 0.8, 1.0)
-	draw_string(font, badge_pos, auto_status_text, HORIZONTAL_ALIGNMENT_CENTER, 240, 13, badge_color)
-
 
 func _physics_process(delta):
 	if Global.is_game_over or Global.is_paused:
 		return
+		
+	# 말풍선 위치 고정 및 혼잣말 타이머 업데이트
+	_process_speech_bubble(delta)
 		
 	# 1. 수동 입력 확인 (키보드 또는 가상 조이스틱)
 	var input_dir = Input.get_vector("move_left", "move_right", "move_up", "move_down")
@@ -355,7 +376,10 @@ func _calculate_auto_play_direction(delta: float) -> Vector2:
 			return to_st.normalized()
 		else:
 			# 성역 도착: 해당 종목 제단 주변에서 16초간 체류하며 집중 사냥 & 배당 수확!
-			is_on_highway_cruise = false
+			if is_on_highway_cruise:
+				is_on_highway_cruise = false
+				say_monologue("🔥 [%s +%.1f%%] 도착! 폭풍 사냥 시작!" % [st_name, st_rate], 3.5, true)
+			
 			stay_at_target_timer += delta
 			var time_left = int(ceil(max(0.0, 16.0 - stay_at_target_timer)))
 			auto_status_text = "🔥 [%s +%.1f%%] 수확 중 (%ds)" % [st_name, st_rate, time_left]
@@ -364,10 +388,6 @@ func _calculate_auto_play_direction(delta: float) -> Vector2:
 			if stay_at_target_timer >= 16.0:
 				stay_at_target_timer = 0.0
 				_rotate_to_next_sector()
-				if not current_target_stock.is_empty():
-					var next_st = current_target_stock.get("name", "")
-					var next_sec = current_target_stock.get("sector_name", "")
-					auto_status_text = "✅ [%s] 수확 완료! -> [%s (%s)] 출발!" % [st_name, next_st, next_sec]
 				return Vector2.ZERO
 				
 			patrol_timer += delta
@@ -534,3 +554,140 @@ func update_magnet_radius():
 	if magnet_shape and magnet_shape.shape is CircleShape2D:
 		# Base 180px, +140px per level (Lv 5 = 880px!)
 		magnet_shape.shape.radius = 180.0 + mag_lvl * 140.0
+
+# ------------------------------------------------------------------------------
+# 💬 방치형 개미 말풍선 혼잣말 시스템 (Speech Bubble Monologue System)
+# ------------------------------------------------------------------------------
+func _setup_speech_bubble():
+	speech_bubble = PanelContainer.new()
+	speech_bubble.set_as_top_level(true)
+	speech_bubble.z_index = 120
+	speech_bubble.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	
+	# Glassmorphism cyber bubble style
+	var sb = StyleBoxFlat.new()
+	sb.bg_color = Color(0.04, 0.08, 0.16, 0.94)
+	sb.border_color = Color(1.0, 0.85, 0.25, 0.95) # Gold border
+	sb.set_border_width_all(2)
+	sb.set_corner_radius_all(16)
+	sb.content_margin_left = 20.0
+	sb.content_margin_right = 20.0
+	sb.content_margin_top = 10.0
+	sb.content_margin_bottom = 10.0
+	sb.shadow_color = Color(0, 0, 0, 0.6)
+	sb.shadow_size = 8
+	speech_bubble.add_theme_stylebox_override("panel", sb)
+	
+	speech_label = Label.new()
+	speech_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	speech_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	speech_label.add_theme_font_size_override("font_size", 22) # 큰 폰트로 시원하고 또렷하게!
+	speech_label.add_theme_color_override("font_color", Color(1.0, 0.95, 0.85))
+	speech_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
+	speech_label.add_theme_constant_override("shadow_offset_x", 1)
+	speech_label.add_theme_constant_override("shadow_offset_y", 1)
+	speech_label.text = "🐜 성투를 향해 출발!"
+	speech_bubble.add_child(speech_label)
+	
+	# Speech bubble downward triangle tail
+	speech_tail = Control.new()
+	speech_tail.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	speech_tail.draw.connect(func():
+		var pts = PackedVector2Array([
+			Vector2(-8, 0),
+			Vector2(8, 0),
+			Vector2(0, 10)
+		])
+		speech_tail.draw_colored_polygon(pts, Color(1.0, 0.85, 0.25, 0.95))
+	)
+	speech_bubble.add_child(speech_tail)
+	
+	speech_bubble.modulate.a = 0.0
+	add_child(speech_bubble)
+
+func say_monologue(text: String, duration: float = 3.5, priority: bool = false):
+	if not is_instance_valid(speech_bubble) or not is_instance_valid(speech_label):
+		return
+		
+	# 이미 말풍선이 떠있고 우선순위가 아니면 덮어쓰지 않음
+	if is_bubble_showing and not priority:
+		return
+		
+	speech_label.text = text
+	speech_bubble.reset_size()
+	speech_bubble.pivot_offset = speech_bubble.size * 0.5
+	
+	if is_instance_valid(bubble_tween) and bubble_tween.is_valid():
+		bubble_tween.kill()
+		
+	is_bubble_showing = true
+	bubble_visible_timer = duration
+	
+	# 팝업 바운스 & 페이드인 연출
+	speech_bubble.scale = Vector2(0.85, 0.85)
+	bubble_tween = create_tween()
+	bubble_tween.tween_property(speech_bubble, "modulate:a", 1.0, 0.18)
+	bubble_tween.parallel().tween_property(speech_bubble, "scale", Vector2(1.06, 1.06), 0.15)
+	bubble_tween.tween_property(speech_bubble, "scale", Vector2(1.0, 1.0), 0.1)
+
+func _process_speech_bubble(delta: float):
+	if not is_instance_valid(speech_bubble):
+		return
+		
+	# 말풍선 위치 고정: 개미 머리 위 중앙 (회전하지 않고 항상 수평 유지!)
+	var b_size = speech_bubble.size
+	speech_bubble.global_position = global_position - Vector2(b_size.x * 0.5, b_size.y + 40.0)
+	speech_bubble.rotation = 0.0
+	if is_instance_valid(speech_tail):
+		speech_tail.position = Vector2(b_size.x * 0.5, b_size.y - 1.0)
+		speech_tail.queue_redraw()
+		
+	if is_bubble_showing:
+		bubble_visible_timer -= delta
+		if bubble_visible_timer <= 0.0:
+			# 자연스럽게 페이드아웃하며 사라짐
+			is_bubble_showing = false
+			bubble_silence_timer = randf_range(3.0, 5.0) # 3~5초 침묵 후 다음 혼잣말
+			if is_instance_valid(bubble_tween) and bubble_tween.is_valid():
+				bubble_tween.kill()
+			bubble_tween = create_tween()
+			bubble_tween.tween_property(speech_bubble, "modulate:a", 0.0, 0.35)
+			bubble_tween.parallel().tween_property(speech_bubble, "scale", Vector2(0.9, 0.9), 0.35)
+	else:
+		# 말풍선이 사라져 있는 동안 침묵 타이머 카운트다운 -> 주기적 혼잣말 출력
+		bubble_silence_timer -= delta
+		if bubble_silence_timer <= 0.0:
+			_trigger_context_monologue()
+
+func _trigger_context_monologue():
+	if not is_auto_play:
+		say_monologue("🕹️ 수동 조작 모드! 직접 지휘하시는 중!", 3.0)
+		return
+		
+	if is_on_highway_cruise and not current_target_stock.is_empty():
+		var st_name = current_target_stock.get("name", "")
+		var sec_name = current_target_stock.get("sector_name", "")
+		var st_rate = current_target_stock.get("rate", 0.0)
+		var highway_lines = [
+			"🛣️ [%s] %s (+%.1f%%) 향해 고속 순항 중~" % [sec_name, st_name, st_rate],
+			"💨 고속도로 바람 시원하다! 다음 대장주 나와라!",
+			"🚗 늦기 전에 [%s] 잡으러 달리는 중!" % st_name
+		]
+		say_monologue(highway_lines.pick_random(), 3.5)
+	elif not current_target_stock.is_empty() and stay_at_target_timer > 0.0:
+		var st_name = current_target_stock.get("name", "")
+		var st_rate = current_target_stock.get("rate", 0.0)
+		var farm_lines = [
+			"🔥 [%s +%.1f%%] 수확 중! 짭짤하네~" % [st_name, st_rate],
+			"⚔️ 하락 세력 싹 쓸어버리고 배당금 챙기자!",
+			"💰 복리 마법 가속 중! 차트가 아주 예뻐~"
+		]
+		say_monologue(farm_lines.pick_random(), 3.5)
+	else:
+		var idle_lines = [
+			"📈 100배 레버리지의 꿈은 이루어진다!",
+			"👀 다음 상한가 칠 종목이 어디 있더라?",
+			"☕ 커피 한잔 하면서 차트 구경하는 맛이지!",
+			"🛡️ 개미의 끈기를 보여주마!"
+		]
+		say_monologue(idle_lines.pick_random(), 3.2)
