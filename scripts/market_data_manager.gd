@@ -229,6 +229,8 @@ var news_timer: float = 0.0
 var next_news_interval: float = 25.0 # Every 25~40s
 
 var fetcher: Node = null
+var live_sync_timer: float = 0.0
+const LIVE_SYNC_INTERVAL: float = 45.0 # 45초마다 실제 시장 정보 실시간 동기화
 
 func _ready():
 	detect_and_set_current_market()
@@ -257,6 +259,12 @@ func _process(delta: float):
 		
 	match_total_time += delta
 	update_stock_cooldowns(delta)
+	
+	# 실시간 실제 시장 정보 주기적 자동 동기화 (실시간 느낌 강화)
+	live_sync_timer += delta
+	if live_sync_timer >= LIVE_SYNC_INTERVAL:
+		live_sync_timer = 0.0
+		refresh_live_data()
 	
 	# Rotate news headlines every 4.0 seconds for in-world billboards and HUD
 	news_cycle_timer += delta
@@ -361,6 +369,7 @@ func _on_live_rates_updated(m_type: MarketType, stock_dict: Dictionary):
 	save_market_cache()
 	emit_signal("market_mode_changed", market_name, Global.is_korean_market_colors)
 	emit_signal("live_rates_applied", m_type)
+	Global.market_event_triggered.emit("📡 [실시간 시세 동기화]", "실제 시장 최신 체결가 및 등락률 갱신 완료!")
 
 func _on_live_news_updated(news_list: Array):
 	if news_list.is_empty():

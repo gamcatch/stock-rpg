@@ -20,6 +20,8 @@ var manual_override_timer: float = 0.0
 var auto_target_pos: Vector2 = Vector2.ZERO
 var auto_status_text: String = "🤖 AUTO 사냥 중"
 var patrol_timer: float = 0.0
+var current_target_stock: Dictionary = {}
+var target_reevaluate_timer: float = 0.0
 
 func _ready():
 	add_to_group("player")
@@ -30,9 +32,20 @@ func _ready():
 	
 	if MarketDataManager.has_signal("breaking_news_alert"):
 		MarketDataManager.breaking_news_alert.connect(_on_breaking_news_nav)
+	if MarketDataManager.has_signal("stock_vi_triggered"):
+		MarketDataManager.stock_vi_triggered.connect(_on_stock_vi_triggered)
 	if Global.has_signal("auto_play_toggled"):
 		Global.auto_play_toggled.connect(_on_auto_play_toggled)
 	is_auto_play = Global.auto_play_enabled
+
+func _on_stock_vi_triggered(stock_name: String, _duration: float):
+	if not current_target_stock.is_empty() and current_target_stock.get("name", "") == stock_name:
+		var old_name = current_target_stock.get("name", "")
+		current_target_stock = _select_best_rising_stock()
+		var new_name = current_target_stock.get("name", "다음 급등주")
+		var new_rate = current_target_stock.get("rate", 0.0)
+		auto_status_text = "🚨 [%s VI 발동] -> [%s (+%.1f%%)] 이동!" % [old_name, new_name, new_rate]
+		print("[AutoPlay AI] VI 발동 감지! %s 거래 정지 -> 새로운 상승 종목 %s(으)로 즉시 전환!" % [old_name, new_name])
 
 func _on_auto_play_toggled(enabled: bool):
 	is_auto_play = enabled
@@ -152,9 +165,9 @@ func _draw():
 	draw_circle(head_pos + Vector2(16, 13), 2.5, body_black)
 
 	# 8. 방치형 AUTO-PLAY 상태 머리 위 네온 뱃지 (월드 방향 수평 유지)
-	var badge_pos = Vector2(0, -42).rotated(-rotation) + Vector2(-60, 0)
+	var badge_pos = Vector2(0, -44).rotated(-rotation) + Vector2(-120, 0)
 	var badge_color = Color(1.0, 0.88, 0.25) if is_auto_play else Color(0.4, 0.8, 1.0)
-	draw_string(font, badge_pos, auto_status_text, HORIZONTAL_ALIGNMENT_CENTER, 120, 13, badge_color)
+	draw_string(font, badge_pos, auto_status_text, HORIZONTAL_ALIGNMENT_CENTER, 240, 13, badge_color)
 
 
 func _physics_process(delta):
@@ -203,8 +216,41 @@ func _physics_process(delta):
 		iframe_timer -= delta
 
 # ------------------------------------------------------------------------------
-# 🤖 방치형 자율 사냥 & 섹터 순회 AI (Auto-Play Logic)
+# 🤖 방치형 자율 사냥 & 급등주 추적 AI (Auto-Play Logic)
 # ------------------------------------------------------------------------------
+func _select_best_rising_stock() -> Dictionary:
+	var best_stock: Dictionary = {}
+	var best_score: float = -99999.0
+	
+	for sec_key in MarketDataManager.sectors.keys():
+		var sec = MarketDataManager.sectors[sec_key]
+		if not sec.has("stocks"):
+			continue
+		for stock in sec["stocks"]:
+			# 🚨 VI 발동(거래 정지/서킷 브레이커) 중인 종목은 즉시 제외!
+			if stock.get("is_halted", false):
+				continue
+				
+			var rate = stock.get("rate", 0.0)
+			var st_pos = stock.get("world_pos", sec.get("position", Vector2.ZERO))
+			var dist = global_position.distance_to(st_pos)
+			
+			# 상승 종목 최우선 가중치 (상승률이 높을수록 압도적 우선순위)
+			# 1. 상승률 가산: 1%당 200점
+			# 2. 양수(상승) 프리미엄: +2000점
+			# 3. 거리 패널티: 1000px당 100점 (너무 먼 곳보다는 합리적 경로)
+			var score = (rate * 200.0) - (dist / 10.0)
+			if rate > 0.0:
+				score += 2000.0
+			if rate >= 8.0:
+				score += 1000.0 # 상한가/급등주 초우선
+				
+			if score > best_score:
+				best_score = score
+				best_stock = stock
+				
+	return best_stock
+
 func _calculate_auto_play_direction(delta: float) -> Vector2:
 	# 1. 속보 긴급 목표가 유효하고 아직 도착하지 않았을 때
 	if auto_target_pos != Vector2.ZERO:
@@ -215,74 +261,66 @@ func _calculate_auto_play_direction(delta: float) -> Vector2:
 		else:
 			auto_target_pos = Vector2.ZERO # 도착 완료
 			
-	# 2. 반경 700px 내 가장 가까운 적 탐색 & 사거리 유지 카이팅
+	# 2. 주기적으로 최적의 상승 종목 재평가 (6초 주기 또는 타겟이 비었거나 VI에 걸렸을 때)
+	target_reevaluate_timer += delta
+	if current_target_stock.is_empty() or current_target_stock.get("is_halted", false) or target_reevaluate_timer >= 6.0:
+		target_reevaluate_timer = 0.0
+		var new_target = _select_best_rising_stock()
+		if not new_target.is_empty():
+			current_target_stock = new_target
+
+	# 3. 주변 적 위험 감지 (근접 위협 적 회피 & 카이팅)
 	var enemies = get_tree().get_nodes_in_group("enemy")
-	var nearest_enemy: Node2D = null
-	var min_dist: float = 750.0
+	var danger_enemy: Node2D = null
+	var min_danger_dist: float = 230.0
 	
 	for e in enemies:
-		if is_instance_valid(e):
+		if is_instance_valid(e) and not e.is_dead:
 			var d = global_position.distance_to(e.global_position)
-			if d < min_dist:
-				min_dist = d
-				nearest_enemy = e
+			if d < min_danger_dist:
+				min_danger_dist = d
+				danger_enemy = e
 				
-	if nearest_enemy:
-		var to_enemy = nearest_enemy.global_position - global_position
-		var e_name = nearest_enemy.get("stock_name") if "stock_name" in nearest_enemy else "적군"
-		auto_status_text = "⚔️ 사냥 중: %s (거리 %dm)" % [str(e_name), int(min_dist)]
-		
-		# 적정 사거리(220px) 유지하며 빔 공격
-		if min_dist > 250.0:
-			return to_enemy.normalized()
-		elif min_dist < 130.0:
-			return -to_enemy.normalized() # 너무 가까우면 후퇴
+	if danger_enemy:
+		var to_danger = danger_enemy.global_position - global_position
+		var e_name = danger_enemy.get("stock_name") if "stock_name" in danger_enemy else "적"
+		auto_status_text = "⚔️ 근접 교전: %s" % str(e_name)
+		if min_danger_dist < 120.0:
+			return -to_danger.normalized() # 너무 가까우면 즉시 후퇴
 		else:
-			# 측면 공전 카이팅
-			return Vector2(-to_enemy.y, to_enemy.x).normalized()
+			# 측면 회피 기동
+			return Vector2(-to_danger.y, to_danger.x).normalized() * 0.85
 
-	# 3. 근처 배당금 젬(EXP) 흡수
+	# 4. 근처 배당금 젬(EXP) 흡수 (가까운 반경 220px)
 	var gems = get_tree().get_nodes_in_group("exp_gem")
 	if not gems.is_empty():
 		for g in gems:
-			if is_instance_valid(g) and global_position.distance_to(g.global_position) < 450.0:
-				auto_status_text = "🎁 수익 젬 흡수 중"
+			if is_instance_valid(g) and global_position.distance_to(g.global_position) < 220.0:
 				return (g.global_position - global_position).normalized()
-				
-	# 4. 평상시: 당일 상승 1위 섹터 및 종목 제단 순회
-	patrol_timer += delta
-	var target_sec_key = "semiconductor"
-	for skey in MarketDataManager.sectors.keys():
-		if MarketDataManager.sectors[skey].get("is_top_bull", false):
-			target_sec_key = skey
-			break
-			
-	if MarketDataManager.sectors.has(target_sec_key):
-		var sec = MarketDataManager.sectors[target_sec_key]
-		var s_pos = sec.get("position", Vector2(0, -4800))
-		var to_sec = s_pos - global_position
+
+	# 5. 상승 종목 성역으로 질주 & 수확
+	if not current_target_stock.is_empty():
+		var st_name = current_target_stock.get("name", "상승 종목")
+		var st_rate = current_target_stock.get("rate", 0.0)
+		var st_pos = current_target_stock.get("world_pos", global_position)
+		var to_st = st_pos - global_position
+		var dist_to_st = to_st.length()
 		
-		# 고속도로를 통해 해당 섹터로 이동 중
-		if to_sec.length() > 650.0:
-			auto_status_text = "🛣️ [%s 고속도로] 이동 중" % sec.get("name", target_sec_key)
-			return to_sec.normalized()
+		# 해당 종목 성역으로 이동 중
+		if dist_to_st > 320.0:
+			var sign_str = "+" if st_rate >= 0.0 else ""
+			auto_status_text = "🚀 [급등주 추적] %s (%s%.1f%%)" % [st_name, sign_str, st_rate]
+			return to_st.normalized()
 		else:
-			# 섹터 내부: 각 종목 성역(삼성전자, SK하이닉스 등)을 15초마다 순회 탐방!
-			if sec.has("stocks") and sec["stocks"].size() > 0:
-				var st_idx = int(patrol_timer / 15.0) % sec["stocks"].size()
-				var target_stock = sec["stocks"][st_idx]
-				var st_pos = target_stock.get("world_pos", s_pos)
-				var to_st = st_pos - global_position
-				if to_st.length() > 200.0:
-					auto_status_text = "📍 [%s] 성역 방문 중" % target_stock.get("name", "")
-					return to_st.normalized()
-				else:
-					auto_status_text = "💎 [%s] 배당 체류 중" % target_stock.get("name", "")
-					return Vector2(cos(patrol_timer * 0.8), sin(patrol_timer * 0.8)) * 0.4
-			else:
-				auto_status_text = "🗺️ %s 순회 탐험 중" % sec.get("name", target_sec_key)
-				return Vector2(cos(patrol_timer * 0.5), sin(patrol_timer * 0.5))
-			
+			# 성역 도착: 해당 종목 제단 주변을 순회하며 집중 사냥 & 배당 수확!
+			patrol_timer += delta
+			auto_status_text = "🔥 [%s +%.1f%%] 상승 랠리 집중 사냥" % [st_name, st_rate]
+			var orbit_vec = Vector2(cos(patrol_timer * 1.6), sin(patrol_timer * 1.6)) * 140.0
+			var patrol_target = st_pos + orbit_vec
+			return (patrol_target - global_position).normalized()
+
+	# 6. 기본 폴백: 중앙 광장 주변 완만한 패트롤
+	patrol_timer += delta
 	return Vector2(cos(patrol_timer * 0.8), sin(patrol_timer * 0.8))
 
 func _process_weapons(delta):
@@ -413,15 +451,21 @@ func _trigger_stop_loss(level: int):
 
 func _find_nearest_enemy() -> Node2D:
 	var enemies = get_tree().get_nodes_in_group("enemy")
-	var nearest: Node2D = null
-	var min_dist: float = 99999.0
+	var best_target: Node2D = null
+	var best_score: float = -99999.0
 	for e in enemies:
-		if is_instance_valid(e):
+		if is_instance_valid(e) and not e.is_dead:
 			var d = global_position.distance_to(e.global_position)
-			if d < min_dist:
-				min_dist = d
-				nearest = e
-	return nearest
+			if d <= 900.0:
+				var score = (900.0 - d)
+				if e.is_boss:
+					score += 600.0
+				elif e.polarity == Enemy.Polarity.BULL:
+					score += 250.0 # 상승 랠리 종목 적 우선 타겟팅
+				if score > best_score:
+					best_score = score
+					best_target = e
+	return best_target
 
 func _on_magnet_area_entered(area):
 	if area.is_in_group("exp_gem") and area.has_method("attract_to"):
