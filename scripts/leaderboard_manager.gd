@@ -9,10 +9,10 @@ signal achievement_unlocked(ach_id, ach_name, ach_desc)
 var high_scores: Array = [] # [{ "date": "...", "return": 1420.5, "time": 180, "kills": 80 }]
 var achievements = {
 	"first_margin_call": { "name": "첫 깡통의 눈물", "desc": "첫 게임 오버를 당했습니다.", "unlocked": false },
-	"moon_shot": { "name": "화성 갈끄니까!", "desc": "수익률 +1,000% 이상을 달성했습니다.", "unlocked": false },
-	"super_rich": { "name": "슈퍼 개미 탄생", "desc": "수익률 +3,000% 이상을 달성했습니다.", "unlocked": false },
+	"moon_shot": { "name": "화성 갈끄니까!", "desc": "수익률 +50% 이상을 달성했습니다.", "unlocked": false },
+	"super_rich": { "name": "슈퍼 개미 탄생", "desc": "수익률 +100% 이상을 달성했습니다.", "unlocked": false },
 	"leverage_master": { "name": "야수의 심장", "desc": "100배 레버리지를 켜고 1분 이상 생존했습니다.", "unlocked": false },
-	"trump_slayer": { "name": "관세맨 길들이기", "desc": "최종 결전 보스 트럼프를 격파하고 글로벌 증시를 구원했습니다.", "unlocked": false }
+	"trump_slayer": { "name": "관세맨 길들이기", "desc": "주요 결전 보스 트럼프를 격파하고 글로벌 증시를 수호했습니다.", "unlocked": false }
 }
 
 func _ready():
@@ -32,10 +32,10 @@ func save_record(portfolio_return: float, game_time: float, kills: int) -> bool:
 	if high_scores.size() > 5:
 		high_scores = high_scores.slice(0, 5)
 		
-	# Check Achievements
-	if portfolio_return >= 1000.0:
+	# Check Achievements (방치형 지속 플레이에 맞춘 현실적인 수익률 구간)
+	if portfolio_return >= 50.0:
 		unlock_achievement("moon_shot")
-	if portfolio_return >= 3000.0:
+	if portfolio_return >= 100.0:
 		unlock_achievement("super_rich")
 		
 	save_data()

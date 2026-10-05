@@ -47,6 +47,8 @@ var player_iframe_timer: float = 0.0
 var emergency_hodl_ready: bool = true
 var emergency_hodl_cooldown: float = 60.0
 var natural_regen_timer: float = 0.0
+var emergency_bailouts: int = 3 # 방치형 RPG 긴급 구제금융 (Bailout) 생명선
+var bailout_recharge_timer: float = 0.0
 
 # Skill levels
 var skills = {
@@ -86,6 +88,13 @@ func _process(delta: float):
 			natural_regen_timer = 0.0
 			heal_player(4.0)
 
+	# 4. 방치형 긴급 구제금융(Bailout) 180초마다 1회씩 충전 (최대 3회)
+	if emergency_bailouts < 3:
+		bailout_recharge_timer += delta
+		if bailout_recharge_timer >= 180.0:
+			bailout_recharge_timer = 0.0
+			emergency_bailouts += 1
+
 func reset_game():
 	game_time = 0.0
 	is_game_over = false
@@ -98,6 +107,8 @@ func reset_game():
 	player_iframe_timer = 0.0
 	emergency_hodl_ready = true
 	emergency_hodl_cooldown = 60.0
+	emergency_bailouts = 3
+	bailout_recharge_timer = 0.0
 	kills_count = 0
 	total_damage_dealt = 0.0
 	portfolio_return = 0.0
@@ -127,7 +138,8 @@ func add_exp(amount: int):
 		return
 	var actual_amount = int(amount * exp_multiplier)
 	current_exp += actual_amount
-	portfolio_return += actual_amount * 1.5
+	# 방치형 지속 플레이에 맞춘 현실적인 점진적 복리 수익률 (+0.005% * 젬가치)
+	portfolio_return += actual_amount * 0.005
 	while current_exp >= exp_to_next_level:
 		current_exp -= exp_to_next_level
 		player_level += 1
@@ -167,7 +179,16 @@ func take_player_damage(amount: float):
 		market_event_triggered.emit("🛡️ [개미의 비상 존버 발동!]", "HP 위기 감지! 3초간 절대 무적 & 35% 긴급 수혈 완료!")
 	
 	if player_hp <= 0 and not is_game_over:
-		trigger_game_over(false)
+		# 🚨 방치형 RPG 자동 구제금융 (Bailout): 갑작스러운 게임 종료 방지
+		if emergency_bailouts > 0:
+			emergency_bailouts -= 1
+			player_hp = player_max_hp * 0.6
+			player_iframe_timer = 4.0 # 4초간 무적
+			SoundManager.play_level_up()
+			market_event_triggered.emit("🚨 [긴급 구제금융 가동!]", "중앙은행 무제한 유동성 공급! HP 60% 회복 & 4초 무적 (잔여 구제: %d회)" % emergency_bailouts)
+			emit_signal("hp_changed", player_hp, player_max_hp)
+		else:
+			trigger_game_over(false)
 
 func heal_player(amount: float):
 	player_hp = min(player_max_hp, player_hp + amount)

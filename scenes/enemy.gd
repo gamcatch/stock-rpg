@@ -574,7 +574,7 @@ func _physics_process(delta):
 			else:
 				Global.take_player_damage(contact_damage)
 				if polarity == Polarity.BEAR:
-					Global.portfolio_return = max(0.0, Global.portfolio_return - 2.0 * delta)
+					Global.portfolio_return = max(0.0, Global.portfolio_return - 0.1 * delta)
 				
 	# Ranged attacks for bosses and fake news monsters
 	_process_attacks(delta, dir)
@@ -640,7 +640,7 @@ func _spawn_damage_text(amount: float):
 	last_damage_text_msec = now
 
 	var label = Label.new()
-	label.text = "+%.0f%%" % amount if randf() > 0.3 else "상한가!"
+	label.text = "-%.0f" % amount if amount <= 30.0 else "CRIT -%.0f" % amount
 	label.modulate = Color(0.2, 1.0, 0.4) if amount > 30 else Color(1.0, 0.9, 0.2)
 	label.global_position = global_position + Vector2(randf_range(-15, 15), randf_range(-25, -10))
 	label.z_index = 100
@@ -671,25 +671,42 @@ func _die():
 	SoundManager.play_enemy_death(polarity == Polarity.BULL)
 	
 	# Polarity Rewards:
-	# 🔴 BULL (상승/과열) 적 처치: 상승 랠리 수익 (+2.5% * exp_reward)
-	# 🔵 BEAR (하락/공매도) 적 처치: 공매도 숏스퀴즈/방어 성공 (+1.5% * exp_reward)
+	# 🔴 BULL (상승/과열) 적 처치: 상승 랠리 수익 (+0.04% * exp_reward)
+	# 🔵 BEAR (하락/공매도) 적 처치: 공매도 숏스퀴즈/방어 성공 (+0.02% * exp_reward)
 	if polarity == Polarity.BULL:
-		var yield_gain = exp_reward * 2.5
+		var yield_gain = exp_reward * 0.04
 		Global.portfolio_return += yield_gain
-		_try_spawn_return_popup("+%.1f%% 떡상!" % yield_gain, Global.get_up_color())
+		if randf() < 0.25 or is_boss:
+			_try_spawn_return_popup("+%.2f%% 떡상!" % yield_gain, Global.get_up_color())
 	else:
-		var yield_gain = exp_reward * 1.5
+		var yield_gain = exp_reward * 0.02
 		Global.portfolio_return += yield_gain
-		_try_spawn_return_popup("+%.1f%% 숏커버링!" % yield_gain, Global.get_down_color())
+		if randf() < 0.25 or is_boss:
+			_try_spawn_return_popup("+%.2f%% 숏커버링!" % yield_gain, Global.get_down_color())
 	
 	# Spawn exp gem
 	_spawn_exp_gem()
 	
 	if is_boss:
 		if type == EnemyType.TRUMP_BOSS:
-			Global.trigger_game_over(true) # Victory!
+			# 방치형 RPG: 보스 처치 시 종료되지 않고 축제 보상 및 무한 랠리 지속!
+			Global.market_event_triggered.emit("🏆 [보스 격파!] 관세맨 TRUMP 격파!", "관세 장벽 돌파 완료! 글로벌 강세장 랠리가 계속 이어집니다!")
+			SoundManager.play_level_up()
+			LeaderboardManager.unlock_achievement("trump_slayer")
+			Global.heal_player(Global.player_max_hp)
+			Global.portfolio_return += 2.0
+			Global.emergency_bailouts = min(3, Global.emergency_bailouts + 1)
+			
+			for i in range(16):
+				var extra_gem = gem_scene.instantiate()
+				extra_gem.exp_value = 15
+				extra_gem.global_position = global_position + Vector2(randf_range(-60, 60), randf_range(-60, 60))
+				get_parent().call_deferred("add_child", extra_gem)
 		else:
 			# Mid boss exp explosion
+			SoundManager.play_level_up()
+			Global.portfolio_return += 0.8
+			Global.heal_player(Global.player_max_hp * 0.4)
 			for i in range(8):
 				var extra_gem = gem_scene.instantiate()
 				extra_gem.exp_value = 10

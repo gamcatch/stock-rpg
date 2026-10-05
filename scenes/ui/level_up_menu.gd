@@ -86,13 +86,13 @@ func _generate_choices(skill_pool: Array):
 	if card_container.get_child_count() == 0:
 		var fallback_btn = Button.new()
 		fallback_btn.custom_minimum_size = Vector2(840, 240)
-		fallback_btn.text = "💰 [특별 배당금 수령]\n체력 50% 회복 & 수익률 +50% 획득\n\n[ 👆 터치하여 계속하기 ]"
+		fallback_btn.text = "💰 [특별 배당금 수령]\n체력 50% 회복 & 수익률 +1.5% 획득\n\n[ 👆 터치하여 계속하기 ]"
 		fallback_btn.alignment = HORIZONTAL_ALIGNMENT_CENTER
 		fallback_btn.add_theme_font_size_override("font_size", 32)
 		fallback_btn.pressed.connect(func():
 			_highlight_and_select(fallback_btn, func():
 				Global.heal_player(Global.player_max_hp * 0.5)
-				Global.portfolio_return += 50.0
+				Global.portfolio_return += 1.5
 				_finish_choice()
 			, "특별 배당금 수령")
 		)
@@ -175,7 +175,7 @@ func _get_bonus_cards() -> Array:
 			"icon": "💰",
 			"name": "특별 현금 배당금",
 			"action_text": "즉시 수령",
-			"desc": "보유 포트폴리오에서 현금 배당금 지급!\nHP +50% 즉시 회복 & 포트폴리오 수익률 +50%"
+			"desc": "보유 포트폴리오에서 현금 배당금 지급!\nHP +50% 즉시 회복 & 포트폴리오 수익률 +2.0%"
 		},
 		{
 			"id": "short_squeeze",
@@ -204,7 +204,7 @@ func _apply_bonus(bonus_id: String):
 	match bonus_id:
 		"dividend_payout":
 			Global.heal_player(Global.player_max_hp * 0.5)
-			Global.portfolio_return += 50.0
+			Global.portfolio_return += 2.0
 			SoundManager.play_exp_coin()
 		"short_squeeze":
 			SoundManager.play_shockwave()

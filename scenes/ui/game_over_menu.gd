@@ -89,7 +89,7 @@ func _on_game_over(victory: bool):
 		LeaderboardManager.unlock_achievement("leverage_master")
 	
 	if victory:
-		title_label.text = "🚀 [상한가 달성! TO THE MOON!]"
+		title_label.text = "👑 [전설의 슈퍼개미 달성! 포트폴리오 마감]"
 		title_label.modulate = Global.get_up_color()
 		SoundManager.play_level_up()
 	else:

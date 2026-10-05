@@ -135,7 +135,10 @@ func _process(delta):
 	
 	kills_label.text = "처치: %d" % Global.kills_count
 	var sign_str = "+" if Global.portfolio_return >= 0 else ""
-	yield_label.text = "수익률: %s%.1f%%" % [sign_str, Global.portfolio_return]
+	if abs(Global.portfolio_return) < 10.0:
+		yield_label.text = "수익률: %s%.2f%%" % [sign_str, Global.portfolio_return]
+	else:
+		yield_label.text = "수익률: %s%.1f%%" % [sign_str, Global.portfolio_return]
 	yield_label.modulate = Global.get_up_color() if Global.portfolio_return >= 0 else Global.get_down_color()
 	
 	# 1. Scroll top news ticker smoothly in 1080px width

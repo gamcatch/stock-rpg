@@ -13,6 +13,8 @@ var bg_candlesticks: Array = []
 var bear_boss_spawned: bool = false
 var candle_boss_spawned: bool = false
 var trump_boss_spawned: bool = false
+var endless_raid_cycle: int = 0
+var next_raid_time: float = 180.0
 var event_timer: float = 0.0
 var next_event_time: float = 30.0
 var sector_tick_timer: float = 0.0
@@ -433,10 +435,10 @@ func _process_sector_mechanics(delta):
 		Global.player_speed_modifier = 0.90
 		Global.exp_multiplier = 0.8
 		
-		Global.portfolio_return = max(0.0, Global.portfolio_return - 1.0 * 0.2)
+		Global.portfolio_return = max(0.0, Global.portfolio_return - 0.02 * 0.2)
 		
 		if effective_rate <= -6.0:
-			Global.portfolio_return = max(0.0, Global.portfolio_return - 2.0 * 0.2)
+			Global.portfolio_return = max(0.0, Global.portfolio_return - 0.04 * 0.2)
 			
 	else:
 		Global.in_bull_zone = false
@@ -524,12 +526,41 @@ func _process_enemy_spawning(delta):
 		SoundManager.play_boss_alert()
 		Global.market_event_triggered.emit("📉 [어닝 쇼크] 거대 하한가 캔들 출현!", "하한가 음봉 캔들이 등장했습니다!")
 		
-	# 3. 180초 (3분): 최종 결전 [관세맨 TRUMP]
+	# 3. 180초 (3분): 주요 보스 결전 [관세맨 TRUMP]
 	if Global.game_time >= 180.0 and not trump_boss_spawned:
 		trump_boss_spawned = true
+		next_raid_time = Global.game_time + 120.0
 		_spawn_boss(Enemy.EnemyType.TRUMP_BOSS)
 		SoundManager.play_boss_alert()
-		Global.market_event_triggered.emit("🏛️ [최종 결전] 관세맨 TRUMP 등장!", "🚨 전방위 관세 폭탄 100% 발령! 글로벌 증시를 구원하세요!")
+		Global.market_event_triggered.emit("🏛️ [주요 보스] 관세맨 TRUMP 등장!", "🚨 전방위 관세 폭탄 발령! 글로벌 증시 방어선을 사수하세요!")
+
+	# 4. 방치형 무한 주기 레이드 보스 순환 (Endless Periodic Raid Cycles)
+	if trump_boss_spawned and Global.game_time >= next_raid_time:
+		endless_raid_cycle += 1
+		next_raid_time = Global.game_time + randf_range(110.0, 140.0) # 약 2분마다 정기 레이드 지속
+		_spawn_endless_raid_wave(endless_raid_cycle)
+
+func _spawn_endless_raid_wave(cycle: int):
+	SoundManager.play_boss_alert()
+	match (cycle % 3):
+		1:
+			_spawn_boss(Enemy.EnemyType.BEAR_BOSS)
+			Global.market_event_triggered.emit("🚨 [무한 레이드 %d차] 각성한 공매도 수장 출현!" % cycle, "강화된 공매도 군단이 시장을 흔들기 위해 진격합니다!")
+		2:
+			if is_instance_valid(player):
+				for i in range(3):
+					var angle = i * (TAU / 3.0)
+					var spawn_pos = player.global_position + Vector2(cos(angle), sin(angle)) * 650.0
+					var candle_e = enemy_scene.instantiate()
+					candle_e.type = Enemy.EnemyType.RED_CANDLE
+					candle_e.polarity = Enemy.Polarity.BEAR
+					candle_e.stock_name = "심연의 하한가 음봉"
+					candle_e.global_position = spawn_pos
+					enemy_container.add_child(candle_e)
+			Global.market_event_triggered.emit("📉 [무한 레이드 %d차] 트리플 하한가 캔들 습격!" % cycle, "거대한 패닉셀 음봉 3기가 등장했습니다!")
+		0:
+			_spawn_boss(Enemy.EnemyType.TRUMP_BOSS)
+			Global.market_event_triggered.emit("🏛️ [무한 레이드 %d차] 초인플레이션 관세 타이탄 강림!" % cycle, "글로벌 무역 분쟁 2차 파동! 증시 방어선을 지키세요!")
 
 func _get_archetype_for_sector(sec_key: String) -> Enemy.CharacterArchetype:
 	match sec_key:
