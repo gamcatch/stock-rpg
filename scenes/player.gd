@@ -15,9 +15,13 @@ var dividend_regen_timer: float = 0.0
 var magnet_pulse_timer: float = 0.0
 
 # --- 방치형 RPG AUTO-PLAY AI & 말풍선 혼잣말 시스템 ---
+enum AutoPlayState {
+	TRAVELING, # 지정된 급등주 성역으로 고속 직진 이동 (경로 이탈 및 중간 타겟 변경 절대 불가)
+	FARMING    # 성역 도착 완료 후 16초간 제단 주변에서 배당 수확 & 집중 사냥
+}
+var auto_play_state: AutoPlayState = AutoPlayState.TRAVELING
 var is_auto_play: bool = true
 var manual_override_timer: float = 0.0
-var auto_target_pos: Vector2 = Vector2.ZERO
 var auto_status_text: String = "🤖 AUTO 사냥 중"
 var patrol_timer: float = 0.0
 var current_target_stock: Dictionary = {}
@@ -64,6 +68,9 @@ func _rotate_to_next_sector():
 		if not old_sec_key.is_empty():
 			visited_sector_cooldowns[old_sec_key] = 45.0 # 동일 섹터 45초간 재방문 방지 (타 섹터 적극 순회!)
 	current_target_stock = _select_best_rising_stock()
+	auto_play_state = AutoPlayState.TRAVELING
+	stay_at_target_timer = 0.0
+	is_on_highway_cruise = true
 	if not current_target_stock.is_empty():
 		var st_name = current_target_stock.get("name", "")
 		var sec_name = current_target_stock.get("sector_name", "")
@@ -92,17 +99,12 @@ func _on_auto_play_toggled(enabled: bool):
 		say_monologue("🤖 방치형 AUTO-PLAY 모드 재개! 급등주 찾아 고고~", 3.0, true)
 
 func _on_breaking_news_nav(headline: String, sector_key: String, effect_type: String, duration: float):
-	if MarketDataManager.sectors.has(sector_key):
-		var sec = MarketDataManager.sectors[sector_key]
-		var target = sec.get("position", Vector2.ZERO)
-		if sec.has("stocks"):
-			for st in sec["stocks"]:
-				if st.get("name", "") in headline:
-					target = st.get("world_pos", target)
-					break
-		auto_target_pos = target
-		auto_status_text = "🚨 속보 출동: %s" % sec.get("name", sector_key)
-		print("[PlayerAnt AI] 주식 속보 발생! 해당 좌표로 자동 질주: ", target)
+	# 📢 속보는 흥미진진한 주식 시장 브리핑 혼잣말로 반응하되,
+	# 현재 이동 중이거나 파밍 중인 개미의 목표를 강제로 납치하여 길을 잃게 만들지 않습니다!
+	var short_hl = headline
+	if short_hl.length() > 22:
+		short_hl = short_hl.substr(0, 20) + "..."
+	say_monologue("📢 속보: %s" % short_hl, 3.5, false)
 
 func _draw():
 	var font = ThemeDB.fallback_font
@@ -316,24 +318,26 @@ func _calculate_auto_play_direction(delta: float) -> Vector2:
 		if visited_sector_cooldowns[k] <= 0.0:
 			visited_sector_cooldowns.erase(k)
 
-	# 2. 속보 긴급 목표가 유효하고 아직 도착하지 않았을 때
-	if auto_target_pos != Vector2.ZERO:
-		var to_news = auto_target_pos - global_position
-		if to_news.length() > 220.0:
-			auto_status_text = "🚨 속보 성역으로 고속도로 질주!"
-			is_on_highway_cruise = true
-			return to_news.normalized()
-		else:
-			auto_target_pos = Vector2.ZERO # 도착 완료
-			
-	# 3. 현재 타겟 검증 및 없으면 즉시 선택
+	# 2. 현재 타겟 종목 확인 (없거나 거래 정지/VI 상태면 새로운 상승 종목 선택)
 	if current_target_stock.is_empty() or current_target_stock.get("is_halted", false):
-		current_target_stock = _select_best_rising_stock()
+		_rotate_to_next_sector()
+		if current_target_stock.is_empty():
+			# 폴백: 대기
+			is_on_highway_cruise = false
+			patrol_timer += delta
+			return Vector2(cos(patrol_timer * 0.8), sin(patrol_timer * 0.8))
 
-	# 4. 근접 위험 적 회피 & 카이팅 (< 230px)
+	var st_name = current_target_stock.get("name", "상승 종목")
+	var st_rate = current_target_stock.get("rate", 0.0)
+	var sec_name = current_target_stock.get("sector_name", "")
+	var st_pos = current_target_stock.get("world_pos", global_position)
+	var to_st = st_pos - global_position
+	var dist_to_st = to_st.length()
+
+	# 3. 근접 위험 적 회피 & 카이팅 (< 200px)
 	var enemies = get_tree().get_nodes_in_group("enemy")
 	var danger_enemy: Node2D = null
-	var min_danger_dist: float = 230.0
+	var min_danger_dist: float = 200.0
 	
 	for e in enemies:
 		if is_instance_valid(e) and not e.is_dead:
@@ -346,59 +350,56 @@ func _calculate_auto_play_direction(delta: float) -> Vector2:
 		var to_danger = danger_enemy.global_position - global_position
 		var e_name = danger_enemy.get("stock_name") if "stock_name" in danger_enemy else "적"
 		auto_status_text = "⚔️ 근접 교전: %s" % str(e_name)
-		if min_danger_dist < 120.0:
+		if min_danger_dist < 110.0:
 			return -to_danger.normalized() # 너무 가까우면 즉시 후퇴
 		else:
 			# 측면 회피 기동
 			return Vector2(-to_danger.y, to_danger.x).normalized() * 0.85
 
-	# 5. 근처 배당금 젬(EXP) 흡수 (가까운 반경 220px)
+	# 4. 근처 배당금 젬(EXP) 흡수 (가까운 반경 200px)
 	var gems = get_tree().get_nodes_in_group("exp_gem")
 	if not gems.is_empty():
 		for g in gems:
-			if is_instance_valid(g) and global_position.distance_to(g.global_position) < 220.0:
+			if is_instance_valid(g) and global_position.distance_to(g.global_position) < 200.0:
 				return (g.global_position - global_position).normalized()
 
-	# 6. 상승 종목 성역으로 질주 & 순회 파밍
-	if not current_target_stock.is_empty():
-		var st_name = current_target_stock.get("name", "상승 종목")
-		var st_rate = current_target_stock.get("rate", 0.0)
-		var sec_name = current_target_stock.get("sector_name", "")
-		var st_pos = current_target_stock.get("world_pos", global_position)
-		var to_st = st_pos - global_position
-		var dist_to_st = to_st.length()
-		
-		# 해당 종목 성역으로 이동 중 (고속도로 쾌속 이동)
-		if dist_to_st > 350.0:
+	# 5. 상태 머신: 이동(TRAVELING) vs 파밍(FARMING)
+	if auto_play_state == AutoPlayState.TRAVELING:
+		# 목표 종목 성역 제단 반경 380px 이내에 진입하면 도착으로 판정하고 FARMING 상태로 전환!
+		if dist_to_st <= 380.0:
+			auto_play_state = AutoPlayState.FARMING
+			stay_at_target_timer = 0.0
+			is_on_highway_cruise = false
+			say_monologue("🔥 [%s +%.1f%%] 도착! 폭풍 사냥 시작!" % [st_name, st_rate], 3.5, true)
+		else:
+			# 목표 지점을 향해 직진 (고속도로 쾌속 이동!)
 			is_on_highway_cruise = true
 			var sign_str = "+" if st_rate >= 0.0 else ""
-			auto_status_text = "🛣️ [%s] %s (%s%.1f%%) 고속 순항" % [sec_name, st_name, sign_str, st_rate]
+			auto_status_text = "🛣️ [%s] %s (%s%.1f%%) 고속 순항 (%.0fm)" % [sec_name, st_name, sign_str, st_rate, dist_to_st]
 			return to_st.normalized()
-		else:
-			# 성역 도착: 해당 종목 제단 주변에서 16초간 체류하며 집중 사냥 & 배당 수확!
-			if is_on_highway_cruise:
-				is_on_highway_cruise = false
-				say_monologue("🔥 [%s +%.1f%%] 도착! 폭풍 사냥 시작!" % [st_name, st_rate], 3.5, true)
-			
-			stay_at_target_timer += delta
-			var time_left = int(ceil(max(0.0, 16.0 - stay_at_target_timer)))
-			auto_status_text = "🔥 [%s +%.1f%%] 수확 중 (%ds)" % [st_name, st_rate, time_left]
-			
-			# 16초 체류 완료 시 다음 섹터 급등주로 전환!
-			if stay_at_target_timer >= 16.0:
-				stay_at_target_timer = 0.0
-				_rotate_to_next_sector()
-				return Vector2.ZERO
-				
-			patrol_timer += delta
-			var orbit_vec = Vector2(cos(patrol_timer * 1.6), sin(patrol_timer * 1.6)) * 150.0
-			var patrol_target = st_pos + orbit_vec
-			return (patrol_target - global_position).normalized()
 
-	# 7. 기본 폴백: 중앙 광장 주변 완만한 패트롤
-	is_on_highway_cruise = false
-	patrol_timer += delta
-	return Vector2(cos(patrol_timer * 0.8), sin(patrol_timer * 0.8))
+	# 6. FARMING 상태: 목표 성역에 확고히 체류하며 16초 완주 보장!
+	if auto_play_state == AutoPlayState.FARMING:
+		is_on_highway_cruise = false
+		stay_at_target_timer += delta
+		var time_left = int(ceil(max(0.0, 16.0 - stay_at_target_timer)))
+		auto_status_text = "🔥 [%s +%.1f%%] 수확 중 (%ds)" % [st_name, st_rate, time_left]
+
+		# 16초 체류 완료 시에만 다음 섹터 급등주로 전환!
+		if stay_at_target_timer >= 16.0:
+			stay_at_target_timer = 0.0
+			_rotate_to_next_sector()
+			return Vector2.ZERO
+
+		# 제단에서 너무 멀어지지 않도록 중심 반경 유지 및 원형 순회
+		patrol_timer += delta
+		var orbit_vec = Vector2(cos(patrol_timer * 1.6), sin(patrol_timer * 1.6)) * 180.0
+		var patrol_target = st_pos + orbit_vec
+		var to_patrol = patrol_target - global_position
+		return to_patrol.normalized()
+
+	# 기본 폴백
+	return Vector2.ZERO
 
 func _process_weapons(delta):
 	# 1. Green Candle Beam
