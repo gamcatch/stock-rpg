@@ -51,6 +51,7 @@ func toggle_sound() -> bool:
 
 func set_sound_enabled(enabled: bool):
 	sound_enabled = enabled
+	haptic_enabled = enabled
 	var master_bus = AudioServer.get_bus_index("Master")
 	if master_bus >= 0:
 		AudioServer.set_bus_mute(master_bus, not sound_enabled)
@@ -75,7 +76,7 @@ func _prebake_audio_streams():
 # --- Haptic Feedback Methods with Throttling ---
 
 func trigger_haptic(ms: int = 25):
-	if not haptic_enabled:
+	if not sound_enabled or not haptic_enabled:
 		return
 	var now = Time.get_ticks_msec() / 1000.0
 	if now - last_haptic_time < HAPTIC_COOLDOWN:

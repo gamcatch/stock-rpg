@@ -286,8 +286,8 @@ func _update_auto_button_ui():
 			auto_button.add_theme_color_override("font_color", Color(0.7, 0.85, 1.0))
 
 func _on_sound_button_pressed():
-	SoundManager.haptic_tap()
 	SoundManager.toggle_sound()
+	SoundManager.haptic_tap()
 	_update_sound_button_ui()
 
 func _update_sound_button_ui():
