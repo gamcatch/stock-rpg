@@ -3,10 +3,22 @@ extends CharacterBody2D
 
 enum EnemyType { PANIC_SELL, FAKE_NEWS, RED_CANDLE, BEAR_BOSS, TRUMP_BOSS }
 enum Polarity { BULL, BEAR }
+enum CharacterArchetype {
+	DEFAULT,
+	CHIP_GOLEM,       # 반도체 (삼성전자, SK하이닉스, 한미반도체, NVIDIA)
+	BATTERY_MECHA,    # 2차전지/배터리 (LG에너지솔루션, 에코프로비엠, 테슬라)
+	BIO_CHIMERA,      # 제약바이오 (알테오젠, 삼바, 셀트리온, 일라이릴리)
+	AI_ANDROID,       # 로봇 & 빅테크 (두산로보틱스, 레인보우로보, NAVER, 카카오)
+	REACTOR_TITAN,    # 전력망 & 원전 (HD현대일렉트릭, 두산에너빌리티, LS일렉트릭)
+	DREADNOUGHT,      # K-조선 & 해운 (HD한국조선해양, 한화오션, 삼성중공업)
+	GOLD_VAULT,       # 금융 & 밸류업 (KB금융, 신한지주, 메리츠금융지주)
+	DEFENSE_MECHA     # K-방산 & 우주항공 (한화에어로스페이스, LIG넥스원, 록히드마틴)
+}
 
 const ProjectileScript = preload("res://scenes/projectile.gd")
 
 @export var type: EnemyType = EnemyType.PANIC_SELL
+@export var archetype: CharacterArchetype = CharacterArchetype.DEFAULT
 @export var polarity: Polarity = Polarity.BULL
 @export var max_hp: float = 30.0
 @export var move_speed: float = 140.0
@@ -15,6 +27,7 @@ const ProjectileScript = preload("res://scenes/projectile.gd")
 @export var is_boss: bool = false
 
 var stock_name: String = ""
+var stock_rate: float = 0.0
 var hp: float = 30.0
 var is_dead: bool = false
 var player: Node2D = null
@@ -36,40 +49,92 @@ func _setup_stats():
 	var hurt_shape = $HurtArea/CollisionShape2D if has_node("HurtArea/CollisionShape2D") else null
 	var r = 24.0
 
-	match type:
-		EnemyType.PANIC_SELL:
-			max_hp = 20.0
-			move_speed = 135.0
-			contact_damage = 6.0
-			exp_reward = 8 # 1/4 스폰 주기에 맞춰 4배 상향
-			r = 24.0
-		EnemyType.FAKE_NEWS:
-			max_hp = 45.0
-			move_speed = 110.0
-			contact_damage = 9.0
-			exp_reward = 18
-			r = 28.0
-		EnemyType.RED_CANDLE:
-			max_hp = 85.0
-			move_speed = 85.0
-			contact_damage = 14.0
-			exp_reward = 36
-			r = 34.0
-		EnemyType.BEAR_BOSS:
-			max_hp = 650.0
-			move_speed = 95.0
-			contact_damage = 22.0
-			exp_reward = 160
-			is_boss = true
-			r = 60.0
-		EnemyType.TRUMP_BOSS:
-			max_hp = 2500.0
-			move_speed = 80.0
-			contact_damage = 32.0
-			exp_reward = 1000
-			is_boss = true
-			r = 80.0
-	hp = max_hp
+	if archetype != CharacterArchetype.DEFAULT:
+		match archetype:
+			CharacterArchetype.CHIP_GOLEM:
+				max_hp = 35.0
+				move_speed = 120.0
+				contact_damage = 7.0
+				exp_reward = 16
+				r = 26.0
+			CharacterArchetype.BATTERY_MECHA:
+				max_hp = 30.0
+				move_speed = 140.0
+				contact_damage = 7.0
+				exp_reward = 16
+				r = 26.0
+			CharacterArchetype.BIO_CHIMERA:
+				max_hp = 42.0
+				move_speed = 110.0
+				contact_damage = 6.0
+				exp_reward = 18
+				r = 28.0
+			CharacterArchetype.AI_ANDROID:
+				max_hp = 36.0
+				move_speed = 125.0
+				contact_damage = 7.0
+				exp_reward = 16
+				r = 26.0
+			CharacterArchetype.REACTOR_TITAN:
+				max_hp = 55.0
+				move_speed = 95.0
+				contact_damage = 10.0
+				exp_reward = 22
+				r = 30.0
+			CharacterArchetype.DREADNOUGHT:
+				max_hp = 65.0
+				move_speed = 90.0
+				contact_damage = 11.0
+				exp_reward = 24
+				r = 32.0
+			CharacterArchetype.GOLD_VAULT:
+				max_hp = 48.0
+				move_speed = 105.0
+				contact_damage = 8.0
+				exp_reward = 28
+				r = 28.0
+			CharacterArchetype.DEFENSE_MECHA:
+				max_hp = 40.0
+				move_speed = 130.0
+				contact_damage = 8.0
+				exp_reward = 18
+				r = 28.0
+		hp = max_hp
+	else:
+		match type:
+			EnemyType.PANIC_SELL:
+				max_hp = 20.0
+				move_speed = 135.0
+				contact_damage = 6.0
+				exp_reward = 8
+				r = 24.0
+			EnemyType.FAKE_NEWS:
+				max_hp = 45.0
+				move_speed = 110.0
+				contact_damage = 9.0
+				exp_reward = 18
+				r = 28.0
+			EnemyType.RED_CANDLE:
+				max_hp = 85.0
+				move_speed = 85.0
+				contact_damage = 14.0
+				exp_reward = 36
+				r = 34.0
+			EnemyType.BEAR_BOSS:
+				max_hp = 650.0
+				move_speed = 95.0
+				contact_damage = 22.0
+				exp_reward = 160
+				is_boss = true
+				r = 60.0
+			EnemyType.TRUMP_BOSS:
+				max_hp = 2500.0
+				move_speed = 80.0
+				contact_damage = 32.0
+				exp_reward = 1000
+				is_boss = true
+				r = 80.0
+		hp = max_hp
 	
 	# Scale collision shapes to match bigger visuals
 	if col_shape and col_shape.shape is CircleShape2D:
@@ -81,7 +146,7 @@ func _setup_stats():
 
 func _draw():
 	if flash_timer > 0:
-		draw_circle(Vector2.ZERO, 32.0, Color(1.0, 1.0, 1.0, 0.9))
+		draw_circle(Vector2.ZERO, 34.0, Color(1.0, 1.0, 1.0, 0.9))
 		return
 
 	# Single cohesive theme color based on stock market polarity
@@ -92,15 +157,34 @@ func _draw():
 	var glow_color = Color(0.95, 0.22, 0.25, 0.25) if is_bull else Color(0.20, 0.55, 1.0, 0.25)
 	var rim_color = Color(1.0, 0.55, 0.55) if is_bull else Color(0.65, 0.88, 1.0)
 
-	# 1. Subtle soft footprint glow (scaled up)
+	# 1. Subtle soft footprint glow
 	draw_circle(Vector2.ZERO, 28.0, glow_color)
-
 	var font = ThemeDB.fallback_font
 
-	# Stock Name Tag (종목명/섹터명 뱃지 표시)
-	if not stock_name.is_empty():
-		var tag_col = Color(1.0, 0.90, 0.35) if is_bull else Color(0.65, 0.88, 1.0)
-		draw_string(font, Vector2(-60, -32), stock_name, HORIZONTAL_ALIGNMENT_CENTER, 120, 13, tag_col)
+	# 2. Check if this is a Characterized Stock Entity (종목 캐릭터화 렌더링)
+	if archetype != CharacterArchetype.DEFAULT:
+		match archetype:
+			CharacterArchetype.CHIP_GOLEM:
+				_draw_chip_golem(theme_color, rim_color, is_bull, font)
+			CharacterArchetype.BATTERY_MECHA:
+				_draw_battery_mecha(theme_color, rim_color, is_bull, font)
+			CharacterArchetype.BIO_CHIMERA:
+				_draw_bio_chimera(theme_color, rim_color, is_bull, font)
+			CharacterArchetype.AI_ANDROID:
+				_draw_ai_android(theme_color, rim_color, is_bull, font)
+			CharacterArchetype.REACTOR_TITAN:
+				_draw_reactor_titan(theme_color, rim_color, is_bull, font)
+			CharacterArchetype.DREADNOUGHT:
+				_draw_dreadnought(theme_color, rim_color, is_bull, font)
+			CharacterArchetype.GOLD_VAULT:
+				_draw_gold_vault(theme_color, rim_color, is_bull, font)
+			CharacterArchetype.DEFENSE_MECHA:
+				_draw_defense_mecha(theme_color, rim_color, is_bull, font)
+		_draw_stock_badge_and_hp(is_bull, font)
+		return
+
+	# 3. Default Enemy Types (Panic Sell, Fake News, Red Candle, Bosses)
+	_draw_stock_badge_and_hp(is_bull, font)
 
 	match type:
 		EnemyType.PANIC_SELL:
@@ -649,3 +733,243 @@ func _try_spawn_return_popup(text_str: String, col: Color):
 	tween.tween_property(label, "global_position", label.global_position + Vector2(0, -45), 0.75)
 	tween.parallel().tween_property(label, "modulate:a", 0.0, 0.75)
 	tween.tween_callback(label.queue_free)
+
+# ------------------------------------------------------------------------------
+# 🎮 종목별 RPG 캐릭터 렌더링 시스템 (Stock Character Renderers)
+# ------------------------------------------------------------------------------
+func _draw_stock_badge_and_hp(_is_bull: bool, font: Font):
+	if stock_name.is_empty():
+		return
+	var sign_str = "▲+" if stock_rate >= 0 else "▼"
+	var rate_abs = abs(stock_rate)
+	var text_str = "%s %s%.1f%%" % [stock_name, sign_str, rate_abs] if rate_abs > 0.0 else stock_name
+	var badge_col = Global.get_up_color() if stock_rate >= 0 else Global.get_down_color()
+	
+	# Node 회전 상쇄하여 수평 유지
+	var badge_offset = Vector2(0, -44).rotated(-rotation)
+	var badge_w = clampf(text_str.length() * 15.0 + 20.0, 110.0, 230.0)
+	var badge_rect = Rect2(badge_offset + Vector2(-badge_w * 0.5, -12), Vector2(badge_w, 24))
+	
+	draw_rect(badge_rect, Color(0.04, 0.08, 0.16, 0.90), true)
+	draw_rect(badge_rect, badge_col, false, 1.8)
+	draw_string(font, badge_offset + Vector2(-badge_w * 0.5, 5), text_str, HORIZONTAL_ALIGNMENT_CENTER, badge_w, 14, badge_col)
+	
+	# Mini HP Bar
+	var hp_ratio = clampf(hp / max(1.0, max_hp), 0.0, 1.0)
+	var hp_w = 46.0
+	var hp_rect = Rect2(badge_offset + Vector2(-hp_w * 0.5, 15), Vector2(hp_w, 5))
+	draw_rect(hp_rect, Color(0.08, 0.08, 0.12, 0.85), true)
+	var hp_col = Color(0.2, 1.0, 0.4) if hp_ratio > 0.35 else Color(1.0, 0.25, 0.25)
+	draw_rect(Rect2(hp_rect.position, Vector2(hp_w * hp_ratio, 5)), hp_col, true)
+	draw_rect(hp_rect, Color(0.35, 0.6, 0.85, 0.6), false, 1.0)
+
+# 1. 반도체 실리콘 칩 골렘 (삼성전자, SK하이닉스, NVIDIA 등)
+func _draw_chip_golem(theme_color: Color, rim_color: Color, _is_bull: bool, _font: Font):
+	var t = Global.game_time
+	# A. Hexagonal Silicon Wafer Halo (헤드 뒤에서 회전하는 웨이퍼 링)
+	var halo_rot = t * 2.0
+	draw_arc(Vector2.ZERO, 34.0, halo_rot, halo_rot + TAU, 24, Color(0.3, 0.8, 1.0, 0.4), 1.8)
+	for i in range(6):
+		var wa_ang = halo_rot + i * (TAU / 6.0)
+		draw_line(Vector2.ZERO, Vector2(cos(wa_ang), sin(wa_ang)) * 34.0, Color(0.3, 0.8, 1.0, 0.25), 1.2)
+		
+	# B. Square Processor Core (마이크로칩 본체)
+	var core_rect = Rect2(-20, -20, 40, 40)
+	draw_rect(core_rect, Color(0.06, 0.12, 0.22), true)
+	draw_rect(core_rect, rim_color, false, 2.4)
+	
+	# C. Golden Pin Connectors (4방향 골드 핀 렉)
+	for i in range(-14, 18, 8):
+		draw_line(Vector2(i, -20), Vector2(i, -27), Color(1.0, 0.85, 0.25), 2.5)
+		draw_line(Vector2(i, 20), Vector2(i, 27), Color(1.0, 0.85, 0.25), 2.5)
+		draw_line(Vector2(-20, i), Vector2(-27, i), Color(1.0, 0.85, 0.25), 2.5)
+		draw_line(Vector2(20, i), Vector2(27, i), Color(1.0, 0.85, 0.25), 2.5)
+		
+	# D. Central HBM Die & PCB Traces
+	draw_rect(Rect2(-10, -10, 20, 20), theme_color, true)
+	draw_rect(Rect2(-10, -10, 20, 20), Color(1.0, 1.0, 1.0), false, 1.5)
+	
+	# E. Piercing Laser Glare Visor Eye
+	draw_line(Vector2(10, -5), Vector2(24, 0), theme_color, 3.5)
+	draw_line(Vector2(10, 5), Vector2(24, 0), theme_color, 3.5)
+	draw_circle(Vector2(24, 0), 3.0, Color(1, 1, 1))
+
+# 2. 2차전지 배터리 메카 (LG에너지솔루션, 에코프로비엠, Tesla 등)
+func _draw_battery_mecha(_theme_color: Color, rim_color: Color, _is_bull: bool, _font: Font):
+	var t = Global.game_time
+	# A. Dual Cylindrical Lithium-ion Battery Cells
+	var cell_w = 18.0
+	var cell_h = 36.0
+	var c1 = Rect2(-24, -18, cell_w, cell_h)
+	var c2 = Rect2(6, -18, cell_w, cell_h)
+	draw_rect(c1, Color(0.08, 0.14, 0.24), true)
+	draw_rect(c1, rim_color, false, 2.0)
+	draw_rect(c2, Color(0.08, 0.14, 0.24), true)
+	draw_rect(c2, rim_color, false, 2.0)
+	
+	# Positive (+) Metal Terminals on top
+	draw_rect(Rect2(-18, -24, 6, 6), Color(0.9, 0.92, 1.0), true)
+	draw_rect(Rect2(12, -24, 6, 6), Color(0.9, 0.92, 1.0), true)
+	
+	# B. Crackling High-Voltage Electric Discharge Arc between cells
+	var spark_y = sin(t * 22.0) * 12.0
+	draw_line(Vector2(-6, spark_y), Vector2(6, -spark_y), Color(1.0, 0.95, 0.4), 2.5)
+	draw_circle(Vector2(0, 0), 4.5, Color(1.0, 0.85, 0.2))
+	
+	# C. Lightning Bolt Emblem on Chest
+	var bolt = PackedVector2Array([
+		Vector2(2, -14), Vector2(-8, 0), Vector2(-1, 0),
+		Vector2(-4, 14), Vector2(6, -2), Vector2(-1, -2)
+	])
+	draw_colored_polygon(bolt, Color(1.0, 0.88, 0.2))
+	draw_polyline(bolt, Color(1.0, 1.0, 1.0), 1.5)
+
+# 3. 제약바이오 나노 키메라 (알테오젠, 삼바, 셀트리온, Eli Lilly 등)
+func _draw_bio_chimera(theme_color: Color, rim_color: Color, _is_bull: bool, _font: Font):
+	var t = Global.game_time
+	# A. Double-Helix DNA Strands on Flanks
+	for i in range(-3, 4):
+		var y = i * 8.0
+		var x_wave = sin(t * 5.0 + i * 0.8) * 12.0
+		draw_circle(Vector2(-24 + x_wave, y), 3.0, Color(0.2, 0.95, 0.65))
+		draw_circle(Vector2(24 - x_wave, y), 3.0, Color(0.3, 0.8, 1.0))
+		draw_line(Vector2(-24 + x_wave, y), Vector2(24 - x_wave, y), Color(0.25, 0.9, 0.7, 0.35), 1.5)
+		
+	# B. Bioluminescent Cellular Spirit Body (중심 구체)
+	draw_circle(Vector2.ZERO, 18.0, Color(0.06, 0.16, 0.22, 0.92))
+	draw_arc(Vector2.ZERO, 18.0, 0, TAU, 24, rim_color, 2.2)
+	draw_circle(Vector2.ZERO, 10.0, theme_color)
+	draw_circle(Vector2(4, -4), 4.0, Color(1, 1, 1))
+
+# 4. 로봇/AI 사이버 안드로이드 (두산로보틱스, 레인보우로보, NAVER 등)
+func _draw_ai_android(_theme_color: Color, rim_color: Color, _is_bull: bool, _font: Font):
+	var t = Global.game_time
+	# A. Articulated Industrial Robot Arm on Sides
+	var arm_swing = sin(t * 8.0) * 8.0
+	draw_line(Vector2(-16, -10), Vector2(-28, -20 + arm_swing), Color(0.7, 0.75, 0.85), 4.0)
+	draw_line(Vector2(-28, -20 + arm_swing), Vector2(-36, -14 + arm_swing), Color(1.0, 0.8, 0.2), 3.0)
+	draw_line(Vector2(-16, 10), Vector2(-28, 20 - arm_swing), Color(0.7, 0.75, 0.85), 4.0)
+	draw_line(Vector2(-28, 20 - arm_swing), Vector2(-36, 14 - arm_swing), Color(1.0, 0.8, 0.2), 3.0)
+	
+	# B. Sleek Octagonal Mecha Head & Torso
+	var torso_pts = PackedVector2Array([
+		Vector2(-16, -16), Vector2(12, -18), Vector2(24, 0),
+		Vector2(12, 18), Vector2(-16, 16), Vector2(-22, 0)
+	])
+	draw_colored_polygon(torso_pts, Color(0.10, 0.12, 0.20))
+	draw_polyline(torso_pts, rim_color, 2.4)
+	
+	# C. Floating Holographic 3D Data Cube over head
+	var cube_y = -34.0 + sin(t * 4.0) * 4.0
+	draw_rect(Rect2(-8, cube_y - 8, 16, 16), Color(0.8, 0.3, 1.0, 0.25), true)
+	draw_rect(Rect2(-8, cube_y - 8, 16, 16), Color(0.85, 0.4, 1.0), false, 1.8)
+	# Neural eye sensor array
+	draw_circle(Vector2(14, -6), 3.5, Color(0.85, 0.35, 1.0))
+	draw_circle(Vector2(14, 6), 3.5, Color(0.85, 0.35, 1.0))
+	draw_circle(Vector2(20, 0), 4.0, Color(1, 1, 1))
+
+# 5. 전력망/원전 아크 타이탄 (HD현대일렉트릭, 두산에너빌리티, LS일렉트릭 등)
+func _draw_reactor_titan(_theme_color: Color, rim_color: Color, _is_bull: bool, _font: Font):
+	var t = Global.game_time
+	# A. Ceramic High-Voltage Insulator Ribs (변압기 애자)
+	for i in range(3):
+		var ix = -28.0 - i * 6.0
+		draw_line(Vector2(ix, -16), Vector2(ix, 16), Color(0.4, 0.7, 0.95), 3.5)
+		
+	# B. Heavy Spherical Containment Armor
+	draw_circle(Vector2.ZERO, 26.0, Color(0.08, 0.12, 0.22))
+	draw_arc(Vector2.ZERO, 26.0, 0, TAU, 28, rim_color, 2.5)
+	
+	# C. Spinning Electron Orbital Energy Rings
+	var r_ang = t * 3.5
+	draw_arc(Vector2.ZERO, 34.0, r_ang, r_ang + PI, 16, Color(0.2, 0.85, 1.0, 0.8), 2.0)
+	draw_arc(Vector2.ZERO, 34.0, r_ang + PI * 0.5, r_ang + PI * 1.5, 16, Color(1.0, 0.85, 0.2, 0.8), 2.0)
+	
+	# D. Glowing Cherenkov Arc Reactor Core
+	draw_circle(Vector2.ZERO, 13.0, Color(0.2, 0.75, 1.0))
+	draw_circle(Vector2.ZERO, 7.0, Color(1, 1, 1))
+
+# 6. K-조선/해운 철갑 드레드노트 (HD한국조선해양, 한화오션, 삼성중공업 등)
+func _draw_dreadnought(theme_color: Color, rim_color: Color, _is_bull: bool, _font: Font):
+	var t = Global.game_time
+	# A. Twin Marine Bronze Screw Propellers Spinning at Stern
+	var p_rot = t * 14.0
+	draw_line(Vector2(-32, -14), Vector2(-32 + cos(p_rot) * 9.0, -14 + sin(p_rot) * 9.0), Color(0.9, 0.7, 0.2), 3.0)
+	draw_line(Vector2(-32, 14), Vector2(-32 + cos(-p_rot) * 9.0, 14 + sin(-p_rot) * 9.0), Color(0.9, 0.7, 0.2), 3.0)
+	
+	# B. Armored Warship Wedge Prow (철갑 함선 선수 형태)
+	var hull_pts = PackedVector2Array([
+		Vector2(32, 0),      # Sharp cutwater prow
+		Vector2(14, -20),
+		Vector2(-26, -20),
+		Vector2(-32, 0),
+		Vector2(-26, 20),
+		Vector2(14, 20)
+	])
+	draw_colored_polygon(hull_pts, Color(0.07, 0.12, 0.22))
+	draw_polyline(hull_pts, rim_color, 2.5)
+	
+	# C. Riveted Armored Plating & Twin Naval Anchor Claws
+	draw_line(Vector2(6, -20), Vector2(16, -30), Color(0.8, 0.85, 0.95), 3.0)
+	draw_line(Vector2(16, -30), Vector2(22, -26), Color(0.8, 0.85, 0.95), 3.0)
+	draw_line(Vector2(6, 20), Vector2(16, 30), Color(0.8, 0.85, 0.95), 3.0)
+	draw_line(Vector2(16, 30), Vector2(22, 26), Color(0.8, 0.85, 0.95), 3.0)
+	
+	# D. Central Conning Tower Visor
+	draw_rect(Rect2(-6, -8, 16, 16), theme_color, true)
+	draw_circle(Vector2(16, 0), 4.0, Color(1, 1, 1))
+
+# 7. 금융/밸류업 골든 볼트 가디언 (KB금융, 신한지주, 메리츠금융 등)
+func _draw_gold_vault(_theme_color: Color, _rim_color: Color, _is_bull: bool, _font: Font):
+	var t = Global.game_time
+	# A. Swept Wall Street Golden Bull Horns
+	var horn_l = PackedVector2Array([Vector2(-4, -18), Vector2(8, -32), Vector2(24, -30), Vector2(10, -22)])
+	draw_colored_polygon(horn_l, Color(1.0, 0.84, 0.2))
+	draw_polyline(horn_l, Color(1.0, 0.95, 0.6), 2.0)
+	var horn_r = PackedVector2Array([Vector2(-4, 18), Vector2(8, 32), Vector2(24, 30), Vector2(10, 22)])
+	draw_colored_polygon(horn_r, Color(1.0, 0.84, 0.2))
+	draw_polyline(horn_r, Color(1.0, 0.95, 0.6), 2.0)
+	
+	# B. Heavy Square Safe Vault Body
+	var vault_box = Rect2(-20, -20, 40, 40)
+	draw_rect(vault_box, Color(0.12, 0.10, 0.05), true)
+	draw_rect(vault_box, Color(1.0, 0.82, 0.25), false, 2.6)
+	
+	# C. Golden Combination Lock Dial in Center
+	var dial_rot = t * 3.0
+	draw_circle(Vector2.ZERO, 12.0, Color(0.2, 0.16, 0.08))
+	draw_arc(Vector2.ZERO, 12.0, 0, TAU, 20, Color(1.0, 0.88, 0.3), 2.2)
+	for i in range(4):
+		var spoke_a = dial_rot + i * (TAU / 4.0)
+		draw_line(Vector2.ZERO, Vector2(cos(spoke_a), sin(spoke_a)) * 10.0, Color(1.0, 0.9, 0.4), 2.0)
+	draw_circle(Vector2.ZERO, 3.5, Color(1.0, 1.0, 1.0))
+
+# 8. K-방산/우주항공 델타 요격 메카 (한화에어로스페이스, LIG넥스원, 록히드마틴 등)
+func _draw_defense_mecha(_theme_color: Color, rim_color: Color, _is_bull: bool, _font: Font):
+	var t = Global.game_time
+	# A. Swept Stealth Delta Wings & Missile Pods
+	var delta_wings = PackedVector2Array([
+		Vector2(28, 0),       # Stealth Nose Tip
+		Vector2(-8, -28),     # Left wing tip
+		Vector2(-24, -26),    # Left trailing edge
+		Vector2(-14, 0),      # Center engine notch
+		Vector2(-24, 26),     # Right trailing edge
+		Vector2(-8, 28)       # Right wing tip
+	])
+	draw_colored_polygon(delta_wings, Color(0.08, 0.12, 0.18))
+	draw_polyline(delta_wings, rim_color, 2.4)
+	
+	# Twin Missile Pods on Wing Rails
+	draw_rect(Rect2(-12, -26, 16, 5), Color(1.0, 0.4, 0.2), true)
+	draw_rect(Rect2(-12, 21, 16, 5), Color(1.0, 0.4, 0.2), true)
+	
+	# Twin Afterburner Cones with Flame Pulse
+	var flame_len = 8.0 + sin(t * 30.0) * 4.0
+	draw_line(Vector2(-16, -7), Vector2(-16 - flame_len, -7), Color(1.0, 0.6, 0.1), 3.0)
+	draw_line(Vector2(-16, 7), Vector2(-16 - flame_len, 7), Color(1.0, 0.6, 0.1), 3.0)
+	
+	# HUD Targeting Crosshair Eye
+	draw_circle(Vector2(14, 0), 4.0, Color(1.0, 0.3, 0.3))
+	draw_line(Vector2(8, 0), Vector2(20, 0), Color(1, 1, 1), 1.5)
+	draw_line(Vector2(14, -6), Vector2(14, 6), Color(1, 1, 1), 1.5)
+

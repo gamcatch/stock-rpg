@@ -494,8 +494,8 @@ func _end_current_event():
 
 func _process_enemy_spawning(delta):
 	spawn_timer += delta
-	# 방치형 RPG 감상 템포: 2.2초 ~ 3.4초 간격 스폰 (기존의 1/4 수준으로 대폭 완화)
-	spawn_interval = max(2.2, 3.4 - (Global.game_time / 300.0) * 0.8)
+	# 스폰 속도 2배 가속: 1.0초 ~ 1.6초 간격 (적당한 전투 긴장감과 사냥 재미 유지)
+	spawn_interval = max(1.0, 1.6 - (Global.game_time / 300.0) * 0.4)
 	
 	if spawn_timer >= spawn_interval:
 		spawn_timer = 0.0
@@ -512,7 +512,7 @@ func _process_enemy_spawning(delta):
 	if Global.game_time >= 120.0 and not candle_boss_spawned:
 		candle_boss_spawned = true
 		if is_instance_valid(player):
-			for i in range(2): # 4마리 -> 2마리로 완화
+			for i in range(2):
 				var angle = i * (TAU / 2.0)
 				var spawn_pos = player.global_position + Vector2(cos(angle), sin(angle)) * 620.0
 				var candle_e = enemy_scene.instantiate()
@@ -531,25 +531,47 @@ func _process_enemy_spawning(delta):
 		SoundManager.play_boss_alert()
 		Global.market_event_triggered.emit("🏛️ [최종 결전] 관세맨 TRUMP 등장!", "🚨 전방위 관세 폭탄 100% 발령! 글로벌 증시를 구원하세요!")
 
+func _get_archetype_for_sector(sec_key: String) -> Enemy.CharacterArchetype:
+	match sec_key:
+		"semiconductor", "ai_chips":
+			return Enemy.CharacterArchetype.CHIP_GOLEM
+		"battery", "ev_auto":
+			return Enemy.CharacterArchetype.BATTERY_MECHA
+		"bio", "pharma":
+			return Enemy.CharacterArchetype.BIO_CHIMERA
+		"robot_ai", "big_tech":
+			return Enemy.CharacterArchetype.AI_ANDROID
+		"power_grid", "ai_power":
+			return Enemy.CharacterArchetype.REACTOR_TITAN
+		"shipbuilding":
+			return Enemy.CharacterArchetype.DREADNOUGHT
+		"finance", "wall_street":
+			return Enemy.CharacterArchetype.GOLD_VAULT
+		"defense", "defense_tech":
+			return Enemy.CharacterArchetype.DEFENSE_MECHA
+		_:
+			return Enemy.CharacterArchetype.CHIP_GOLEM
+
 func _spawn_enemy_wave():
-	# 방치형 RPG: 화면 내 최대 몬스터 수를 24마리로 제한 (과도한 물량 공세 방지)
-	if enemy_container.get_child_count() >= 24:
+	# 몬스터 최대 상한 42마리로 확대 (스폰 2배 가속에 맞춤)
+	if enemy_container.get_child_count() >= 42:
 		return
 
 	if not is_instance_valid(player):
 		return
 
 	var t = Global.game_time
-	# 웨이브당 1~2마리, 후반부 최대 3마리 스폰 (기존 3~11마리에서 1/4로 축소)
-	var wave_count = int(clampf(1 + int(t / 60.0) * 0.5, 1, 3))
+	# 2배 가속 웨이브: 웨이브당 2~3마리, 후반부 4마리
+	var wave_count = int(clampf(2 + int(t / 45.0) * 0.5, 2, 4))
 	if not Global.current_market_event.is_empty():
-		wave_count = mini(wave_count + 1, 4)
+		wave_count = mini(wave_count + 1, 5)
 
 	var p_pos = player.global_position
+	var cur_sec = MarketDataManager.get_sector_at(p_pos)
 	var nearby_stocks = MarketDataManager.get_stocks_near(p_pos, 2200.0)
 
 	# 1. Nearby Stock Sanctuary Spawning:
-	# 특정 종목 성역 근처일 때는 해당 종목의 캔들 몬스터가 1~2마리 출현
+	# 특정 종목 성역 근처일 때는 해당 종목의 캐릭터화된 RPG 엔티티 출현!
 	if nearby_stocks.size() > 0:
 		var closest_stock = nearby_stocks[0]
 		var min_d = p_pos.distance_to(closest_stock.get("world_pos", Vector2.ZERO))
@@ -560,57 +582,66 @@ func _spawn_enemy_wave():
 				closest_stock = st
 				
 		var st_pos = closest_stock.get("world_pos", p_pos)
-		var is_bull = closest_stock.get("rate", 0.0) >= 0.0
 		var is_halted = closest_stock.get("is_halted", false)
+		var sec_key = closest_stock.get("sector_key", cur_sec.get("key", "semiconductor"))
+		var arch = _get_archetype_for_sector(sec_key)
 		
 		# If the stock is in VI Cooldown (거래 정지):
 		if is_halted:
 			var enemy = enemy_scene.instantiate()
-			enemy.type = _pick_enemy_type(t)
-			enemy.polarity = Enemy.Polarity.BEAR # Profit taking selling pressure!
+			enemy.archetype = arch
+			enemy.polarity = Enemy.Polarity.BEAR
 			enemy.stock_name = closest_stock["name"]
-			var spawn_pos = p_pos + Vector2(cos(randf() * TAU), sin(randf() * TAU)) * randf_range(520.0, 680.0)
+			enemy.stock_rate = closest_stock.get("rate", 0.0)
+			var spawn_pos = p_pos + Vector2(cos(randf() * TAU), sin(randf() * TAU)) * randf_range(500.0, 660.0)
 			enemy.global_position = spawn_pos
 			enemy_container.add_child(enemy)
 		else:
-			# Active Stock: 1~2마리만 성역에서 출현
-			var sanctuary_spawns = mini(wave_count, 2)
+			var sanctuary_spawns = mini(wave_count, 3)
 			MarketDataManager.record_stock_spawn(closest_stock["name"], sanctuary_spawns)
 			
 			for i in range(sanctuary_spawns):
-				var type_to_spawn = _pick_enemy_type(t)
 				var enemy = enemy_scene.instantiate()
-				enemy.type = type_to_spawn
-				enemy.polarity = Enemy.Polarity.BULL if is_bull else Enemy.Polarity.BEAR
+				enemy.archetype = arch
 				enemy.stock_name = closest_stock["name"]
+				enemy.stock_rate = closest_stock.get("rate", 0.0)
+				enemy.polarity = Enemy.Polarity.BULL if enemy.stock_rate >= 0.0 else Enemy.Polarity.BEAR
 				
 				var spawn_pos: Vector2
 				if min_d <= 750.0:
 					spawn_pos = st_pos + Vector2(randf_range(-60, 60), randf_range(-60, 60))
 				else:
 					var dir_to_player = (p_pos - st_pos).normalized()
-					var march_point = p_pos - dir_to_player * randf_range(500.0, 660.0)
+					var march_point = p_pos - dir_to_player * randf_range(480.0, 640.0)
 					spawn_pos = march_point + Vector2(randf_range(-80, 80), randf_range(-80, 80))
 					
 				enemy.global_position = spawn_pos
 				enemy_container.add_child(enemy)
 	else:
 		# 2. Open Highway / Central Plaza Spawning:
-		var cur_sec = MarketDataManager.get_sector_at(p_pos)
-		var rate = cur_sec.get("change_rate", 0.0)
-		var bull_chance = clampf(0.50 + rate * 0.08, 0.15, 0.85)
+		# 섹터 정보를 바탕으로 해당 섹터의 대표 종목 RPG 캐릭터 자동 매칭
+		var sec_key = cur_sec.get("key", "semiconductor")
+		var arch = _get_archetype_for_sector(sec_key)
+		var sec_stocks = cur_sec.get("stocks", [])
 		
 		for i in range(wave_count):
-			var type_to_spawn = _pick_enemy_type(t)
-			var angle = randf() * TAU
-			var spawn_dist = randf_range(520.0, 700.0)
-			var spawn_pos = p_pos + Vector2(cos(angle), sin(angle)) * spawn_dist
-			
 			var enemy = enemy_scene.instantiate()
-			enemy.type = type_to_spawn
-			enemy.polarity = Enemy.Polarity.BULL if randf() < bull_chance else Enemy.Polarity.BEAR
-			enemy.stock_name = cur_sec.get("name", "지수 캔들")
-			enemy.global_position = spawn_pos
+			var picked_stock = sec_stocks.pick_random() if not sec_stocks.is_empty() else null
+			
+			if picked_stock:
+				enemy.archetype = arch
+				enemy.stock_name = picked_stock["name"]
+				enemy.stock_rate = picked_stock.get("rate", 0.0)
+				enemy.polarity = Enemy.Polarity.BULL if enemy.stock_rate >= 0.0 else Enemy.Polarity.BEAR
+			else:
+				enemy.type = _pick_enemy_type(t)
+				enemy.stock_name = cur_sec.get("name", "지수 캔들")
+				enemy.stock_rate = cur_sec.get("change_rate", 0.0)
+				enemy.polarity = Enemy.Polarity.BULL if enemy.stock_rate >= 0.0 else Enemy.Polarity.BEAR
+				
+			var angle = randf() * TAU
+			var spawn_dist = randf_range(500.0, 680.0)
+			enemy.global_position = p_pos + Vector2(cos(angle), sin(angle)) * spawn_dist
 			enemy_container.add_child(enemy)
 
 func _pick_enemy_type(t: float) -> Enemy.EnemyType:
