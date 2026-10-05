@@ -1,0 +1,245 @@
+[gd_scene load_steps=3 format=3 uid="uid://bmain_screen_001"]
+
+[ext_resource type="Script" path="res://scenes/ui/main_screen.gd" id="1_main"]
+[ext_resource type="PackedScene" uid="uid://bbattle_field_001" path="res://scenes/battle/battle_field.tscn" id="2_field"]
+
+[node name="MainScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_main")
+
+[node name="BattleViewportContainer" type="SubViewportContainer" parent="."]
+layout_mode = 0
+offset_right = 1080.0
+offset_bottom = 1080.0
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="BattleViewportContainer"]
+handle_input_locally = false
+size = Vector2i(1080, 1080)
+render_target_update_mode = 4
+
+[node name="BattleField" parent="BattleViewportContainer/SubViewport" instance=ExtResource("2_field")]
+
+[node name="TopSafeContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 120.0
+grow_horizontal = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 48
+theme_override_constants/margin_right = 32
+
+[node name="VBox" type="VBoxContainer" parent="TopSafeContainer"]
+layout_mode = 2
+
+[node name="HeaderBar" type="HBoxContainer" parent="TopSafeContainer/VBox"]
+layout_mode = 2
+
+[node name="MarketLabel" type="Label" parent="TopSafeContainer/VBox/HeaderBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 28
+text = "🇰🇷 KOSPI 2,750 ▲1.4%"
+
+[node name="BalanceLabel" type="Label" parent="TopSafeContainer/VBox/HeaderBar"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.4, 0.4, 1)
+theme_override_font_sizes/font_size = 28
+text = "자산: 1,000,000 ₩ (▲+0.0%)"
+horizontal_alignment = 2
+
+[node name="MiddleBar" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 1080.0
+offset_bottom = 1260.0
+grow_horizontal = 2
+
+[node name="TickerBox" type="PanelContainer" parent="MiddleBar"]
+custom_minimum_size = Vector2(0, 70)
+layout_mode = 2
+
+[node name="TickerLabel" type="Label" parent="MiddleBar/TickerBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.4, 1)
+theme_override_font_sizes/font_size = 24
+text = "📢 [속보] 반도체 수급 폭발! 한미반도체 상한가 랠리!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DividendBox" type="HBoxContainer" parent="MiddleBar"]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MiddleBar/DividendBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = " 🎁 누적 배당금: "
+
+[node name="DividendValLabel" type="Label" parent="MiddleBar/DividendBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 28
+text = "0 ₩"
+vertical_alignment = 1
+
+[node name="DividendClaimBtn" type="Button" parent="MiddleBar/DividendBox"]
+custom_minimum_size = Vector2(220, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "원클릭 수령"
+
+[node name="BottomDashboard" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -1120.0
+offset_bottom = -160.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="TabStats" type="MarginContainer" parent="BottomDashboard"]
+layout_mode = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 30
+
+[node name="VBox" type="VBoxContainer" parent="BottomDashboard/TabStats"]
+layout_mode = 2
+theme_override_constants/separation = 30
+
+[node name="Title" type="Label" parent="BottomDashboard/TabStats/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "🐜 개미 투자자 스펙업"
+
+[node name="AtkRow" type="HBoxContainer" parent="BottomDashboard/TabStats/VBox"]
+layout_mode = 2
+
+[node name="LvlLabel" type="Label" parent="BottomDashboard/TabStats/VBox/AtkRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 26
+text = "공격력 Lv.1 (비용: 50,000 ₩)"
+
+[node name="UpgradeBtn" type="Button" parent="BottomDashboard/TabStats/VBox/AtkRow"]
+custom_minimum_size = Vector2(180, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "강화 (+8)"
+
+[node name="HpRow" type="HBoxContainer" parent="BottomDashboard/TabStats/VBox"]
+layout_mode = 2
+
+[node name="LvlLabel" type="Label" parent="BottomDashboard/TabStats/VBox/HpRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 26
+text = "최대체력 Lv.1 (비용: 40,000 ₩)"
+
+[node name="UpgradeBtn" type="Button" parent="BottomDashboard/TabStats/VBox/HpRow"]
+custom_minimum_size = Vector2(180, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "강화 (+80)"
+
+[node name="CritRow" type="HBoxContainer" parent="BottomDashboard/TabStats/VBox"]
+layout_mode = 2
+
+[node name="LvlLabel" type="Label" parent="BottomDashboard/TabStats/VBox/CritRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 26
+text = "치명타율 Lv.1 (비용: 100,000 ₩)"
+
+[node name="UpgradeBtn" type="Button" parent="BottomDashboard/TabStats/VBox/CritRow"]
+custom_minimum_size = Vector2(180, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "강화 (+1%)"
+
+[node name="TabPortfolio" type="MarginContainer" parent="BottomDashboard"]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 20
+
+[node name="Scroll" type="ScrollContainer" parent="BottomDashboard/TabPortfolio"]
+layout_mode = 2
+
+[node name="StockVBox" type="VBoxContainer" parent="BottomDashboard/TabPortfolio/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+
+[node name="TabMarket" type="MarginContainer" parent="BottomDashboard"]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 30
+
+[node name="VBox" type="VBoxContainer" parent="BottomDashboard/TabMarket"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="BottomDashboard/TabMarket/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "🗺️ 8대 메가 섹터 시황 현황"
+
+[node name="BottomSafeContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -140.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 30
+
+[node name="NavBar" type="HBoxContainer" parent="BottomSafeContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="TabBtn0" type="Button" parent="BottomSafeContainer/NavBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 26
+text = "🐜 개미 스펙업"
+
+[node name="TabBtn1" type="Button" parent="BottomSafeContainer/NavBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 26
+text = "📈 종목 매수"
+
+[node name="TabBtn2" type="Button" parent="BottomSafeContainer/NavBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 26
+text = "🌐 8대 섹터"
+
+[connection signal="pressed" from="MiddleBar/DividendBox/DividendClaimBtn" to="." method="_on_dividend_claim_btn_pressed"]
+[connection signal="pressed" from="BottomDashboard/TabStats/VBox/AtkRow/UpgradeBtn" to="." method="_on_atk_upgrade_pressed"]
+[connection signal="pressed" from="BottomDashboard/TabStats/VBox/HpRow/UpgradeBtn" to="." method="_on_hp_upgrade_pressed"]
+[connection signal="pressed" from="BottomDashboard/TabStats/VBox/CritRow/UpgradeBtn" to="." method="_on_crit_upgrade_pressed"]
+[connection signal="pressed" from="BottomSafeContainer/NavBar/TabBtn0" to="." method="_on_tab_btn_pressed" binds= [0]]
+[connection signal="pressed" from="BottomSafeContainer/NavBar/TabBtn1" to="." method="_on_tab_btn_pressed" binds= [1]]
+[connection signal="pressed" from="BottomSafeContainer/NavBar/TabBtn2" to="." method="_on_tab_btn_pressed" binds= [2]]

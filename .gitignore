@@ -1,0 +1,8 @@
+# Godot-specific ignores
+.godot/
+build/
+*.translation
+
+# OS / Editor ignores
+.DS_Store
+Thumbs.db
