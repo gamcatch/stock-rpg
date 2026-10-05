@@ -332,11 +332,14 @@ func _draw_sectors_and_stocks(cam_pos: Vector2, view_rect: Rect2, font: Font, t:
 				if is_halted:
 					# Pulsing Caution VI Barrier
 					var caution_pulse = sin(t * 8.0) * 8.0
+					var cd_m = int(cd_left) / 60
+					var cd_s = int(cd_left) % 60
+					var cd_str = "%02d:%02d" % [cd_m, cd_s] if cd_m > 0 else "%ds" % cd_s
 					draw_circle(st_pos, 54.0, Color(1.0, 0.4, 0.1, 0.28))
 					draw_arc(st_pos, 72.0 + caution_pulse, 0, TAU, 32, Color(1.0, 0.8, 0.2, 0.95), 3.5)
 					draw_arc(st_pos, 52.0, 0, TAU, 24, Color(1.0, 0.3, 0.2, 0.8), 2.5)
 					draw_string(font, st_pos + Vector2(-60, 6), "🚨 VI 발동", HORIZONTAL_ALIGNMENT_CENTER, 120, 18, Color(1.0, 0.9, 0.3))
-					draw_string(font, st_pos + Vector2(-70, 26), "거래정지 (%ds)" % int(ceil(cd_left)), HORIZONTAL_ALIGNMENT_CENTER, 140, 15, Color(1.0, 1.0, 1.0))
+					draw_string(font, st_pos + Vector2(-70, 26), "거래정지 (%s)" % cd_str, HORIZONTAL_ALIGNMENT_CENTER, 140, 15, Color(1.0, 1.0, 1.0))
 				else:
 					var diamond_size = 46.0
 					var rot_angle = t * 1.5
@@ -363,7 +366,10 @@ func _draw_sectors_and_stocks(cam_pos: Vector2, view_rect: Rect2, font: Font, t:
 				var left_badge = "%s%s" % [badge_icon, stock["name"]]
 				var left_col = Color(1.0, 0.9, 0.2) if is_super_bull else (Color(0.4, 0.8, 1.0) if is_deep_bear else Color(1, 1, 1))
 				if is_halted:
-					left_badge = "🚨 [VI %ds] %s" % [int(ceil(cd_left)), stock["name"]]
+					var cd_m = int(cd_left) / 60
+					var cd_s = int(cd_left) % 60
+					var cd_str = "%02d:%02d" % [cd_m, cd_s] if cd_m > 0 else "%ds" % cd_s
+					left_badge = "🚨 [VI %s] %s" % [cd_str, stock["name"]]
 					left_col = Color(1.0, 0.8, 0.2)
 				
 				# Top Left: Stock Name & Status

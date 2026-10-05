@@ -1480,7 +1480,7 @@ func init_market_data():
 		if sec.has("stocks"):
 			for stock in sec["stocks"]:
 				stock["spawn_count"] = 0
-				stock["spawn_quota"] = 28
+				stock["spawn_quota"] = 70
 				stock["cooldown_timer"] = 0.0
 				stock["is_halted"] = false
 				stock["price"] = get_stock_price(stock)
@@ -1513,7 +1513,7 @@ func reset_match_data():
 		if sec.has("stocks"):
 			for stock in sec["stocks"]:
 				stock["spawn_count"] = 0
-				stock["spawn_quota"] = 28
+				stock["spawn_quota"] = 70
 				stock["cooldown_timer"] = 0.0
 				stock["is_halted"] = false
 
@@ -1663,6 +1663,19 @@ func get_retrospective_data() -> Dictionary:
 # ==============================================================================
 # Stock VI (Volatility Interruption) & Cooldown Methods
 # ==============================================================================
+const VI_DURATION: float = 600.0 # 10분(600초) 단일가 냉각 거래 정지
+const DEFAULT_SPAWN_QUOTA: int = 70 # VI 발동까지 필요한 스폰 수량 (체류 및 사냥 시간 대폭 연장)
+
+func is_stock_halted(stock_name: String) -> bool:
+	for sec_key in sectors.keys():
+		var sec = sectors[sec_key]
+		if not sec.has("stocks"):
+			continue
+		for stock in sec["stocks"]:
+			if stock.get("name", "") == stock_name:
+				return stock.get("is_halted", false)
+	return false
+
 func record_stock_spawn(stock_name: String, amount: int = 1) -> bool:
 	for sec_key in sectors.keys():
 		var sec = sectors[sec_key]
@@ -1673,18 +1686,18 @@ func record_stock_spawn(stock_name: String, amount: int = 1) -> bool:
 				if stock.get("is_halted", false):
 					return false
 				stock["spawn_count"] = stock.get("spawn_count", 0) + amount
-				if stock["spawn_count"] >= stock.get("spawn_quota", 28):
+				if stock["spawn_count"] >= stock.get("spawn_quota", DEFAULT_SPAWN_QUOTA):
 					trigger_stock_vi(stock)
 					return true
 	return false
 
 func trigger_stock_vi(stock: Dictionary):
 	stock["is_halted"] = true
-	stock["cooldown_timer"] = 20.0 # 20 seconds VI cooling halt
-	emit_signal("stock_vi_triggered", stock["name"], 20.0)
+	stock["cooldown_timer"] = VI_DURATION # 10 minutes (600s) VI cooling halt
+	emit_signal("stock_vi_triggered", stock["name"], VI_DURATION)
 	Global.market_event_triggered.emit(
 		"🚨 [VI 발동] %s 과열 지정!" % stock["name"],
-		"20초간 거래 일시 정지(단일가 냉각)! 다른 급등 종목으로 이동하세요!"
+		"10분간 거래 일시 정지(단일가 냉각)! 다른 급등 종목으로 이동하세요!"
 	)
 	SoundManager.play_boss_alert()
 

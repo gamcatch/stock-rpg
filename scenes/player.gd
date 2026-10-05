@@ -77,8 +77,8 @@ func _rotate_to_next_sector():
 		var st_rate = current_target_stock.get("rate", 0.0)
 		say_monologue("🚀 다음 목표는 [%s %s (+%.1f%%)]! 전력 질주!" % [sec_name, st_name, st_rate], 3.8, true)
 
-func _on_stock_vi_triggered(stock_name: String, _duration: float):
-	visited_stock_cooldowns[stock_name] = 600.0 # VI 발동 종목 10분(600초) 쿨타임
+func _on_stock_vi_triggered(stock_name: String, duration: float):
+	visited_stock_cooldowns[stock_name] = duration # VI 발동 종목 10분(600초) 쿨타임
 	if not current_target_stock.is_empty() and current_target_stock.get("name", "") == stock_name:
 		stay_at_target_timer = 0.0
 		_rotate_to_next_sector()
@@ -327,7 +327,8 @@ func _calculate_auto_play_direction(delta: float) -> Vector2:
 			visited_sector_cooldowns.erase(k)
 
 	# 2. 현재 타겟 종목 확인 (없거나 거래 정지/VI 상태면 새로운 상승 종목 선택)
-	if current_target_stock.is_empty() or current_target_stock.get("is_halted", false):
+	var is_target_halted = current_target_stock.get("is_halted", false) or MarketDataManager.is_stock_halted(current_target_stock.get("name", ""))
+	if current_target_stock.is_empty() or is_target_halted:
 		_rotate_to_next_sector()
 		if current_target_stock.is_empty():
 			# 폴백: 대기
