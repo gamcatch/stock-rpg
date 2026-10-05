@@ -65,9 +65,11 @@ func _setup_stats():
 	var hurt_shape = $HurtArea/CollisionShape2D if has_node("HurtArea/CollisionShape2D") else null
 	var r = 24.0
 
-	# ⏱️ 기본: 게임 시간 기반 점진적 강화 (1분당 HP +15%, 공격력 +8%)
-	var time_hp_scale = 1.0 + (Global.game_time / 60.0) * 0.15
-	var time_dmg_scale = 1.0 + (Global.game_time / 60.0) * 0.08
+	# ⏱️ 시간 강화도 계단식: 마지막 트럼프 격파 시점의 게임 시간으로 동결 (1분당 HP +15%, 공격력 +8%)
+	#    첫 격파 전에는 0분 기준 = 시간 강화 없음
+	var frozen_minutes = Global.game_time_at_last_trump_kill / 60.0
+	var time_hp_scale = 1.0 + frozen_minutes * 0.15
+	var time_dmg_scale = 1.0 + frozen_minutes * 0.08
 
 	# 🏆 계단식 강화: 트럼프를 격파할 때만 적 능력치가 한 단계 상승
 	#    - 격파 사이에는 개미가 레벨업해도 적 레벨 강화는 동결
@@ -742,6 +744,7 @@ func _die():
 			if Global.trump_defeated_count == 0:
 				Global.level_at_first_trump_kill = Global.player_level
 			Global.level_at_last_trump_kill = Global.player_level
+			Global.game_time_at_last_trump_kill = Global.game_time
 			Global.trump_defeated_count += 1
 			Global.market_event_triggered.emit("🏆 [보스 격파!] 관세맨 TRUMP 격파!", "관세 장벽 돌파! 이제 시장이 개미의 성장에 맞춰 더 강해집니다! (심화 %d단계)" % Global.trump_defeated_count)
 			SoundManager.play_level_up()

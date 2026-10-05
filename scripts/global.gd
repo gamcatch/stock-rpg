@@ -46,6 +46,7 @@ var bonus_speed_multiplier: float = 1.0
 var trump_defeated_count: int = 0
 var level_at_first_trump_kill: int = 0
 var level_at_last_trump_kill: int = 0
+var game_time_at_last_trump_kill: float = 0.0
 
 # 방치형 생존 & 무적/회복 시스템
 var player_iframe_timer: float = 0.0
@@ -130,6 +131,7 @@ func reset_game():
 	trump_defeated_count = 0
 	level_at_first_trump_kill = 0
 	level_at_last_trump_kill = 0
+	game_time_at_last_trump_kill = 0.0
 	
 	skills["green_beam"]["level"] = 1
 	skills["dca_shield"]["level"] = 0
