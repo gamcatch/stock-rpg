@@ -346,7 +346,7 @@ var next_news_interval: float = 25.0 # Every 25~40s
 
 var fetcher: Node = null
 var live_sync_timer: float = 0.0
-const LIVE_SYNC_INTERVAL: float = 45.0 # 45초마다 실제 시장 정보 실시간 동기화
+const LIVE_SYNC_INTERVAL: float = 180.0 # 3분(180초)마다 실제 시장 정보 실시간 동기화
 
 func _ready():
 	detect_and_set_current_market()
