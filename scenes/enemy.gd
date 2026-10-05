@@ -137,14 +137,14 @@ func _setup_stats():
 				exp_reward = 36
 				r = 34.0
 			EnemyType.BEAR_BOSS:
-				max_hp = 650.0
+				max_hp = 2800.0 # 기존 650 -> 2800 (약 4.3배 상향)
 				move_speed = 95.0
 				contact_damage = 22.0
 				exp_reward = 160
 				is_boss = true
 				r = 60.0
 			EnemyType.TRUMP_BOSS:
-				max_hp = 2500.0
+				max_hp = 9500.0 # 기존 2500 -> 9500 (약 3.8배 상향)
 				move_speed = 80.0
 				contact_damage = 32.0
 				exp_reward = 1000
@@ -637,19 +637,26 @@ static var last_popup_time_msec: int = 0
 func take_damage(amount: float, kb_dir: Vector2 = Vector2.ZERO):
 	if is_dead:
 		return
-	hp -= amount
+	var final_dmg = amount
+	if is_boss:
+		# 보스는 단단한 방어력(데미지 45% 경감) 및 넉백 저항(70% 경감)을 가짐
+		final_dmg = amount * 0.55
+		knockback = kb_dir * 55.0
+	else:
+		knockback = kb_dir * 180.0
+		
+	hp -= final_dmg
 	flash_timer = 0.08
 	queue_redraw()
-	knockback = kb_dir * 180.0
-	Global.total_damage_dealt += amount
+	Global.total_damage_dealt += final_dmg
 	
 	SoundManager.play_hit()
 	
 	if hp <= 0:
 		_die()
 	else:
-		if is_boss or (randf() < 0.40 and amount > 15.0):
-			_spawn_damage_text(amount)
+		if is_boss or (randf() < 0.40 and final_dmg > 15.0):
+			_spawn_damage_text(final_dmg)
 
 func _spawn_damage_text(amount: float):
 	var now = Time.get_ticks_msec()
