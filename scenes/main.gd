@@ -233,31 +233,38 @@ func _draw_central_plaza(cam_pos: Vector2, font: Font, center: Vector2, t: float
 	draw_arc(center, 800.0, 0, TAU, 56, Color(0.4, 0.8, 1.0, 0.35), 2.0)
 	draw_arc(center, 400.0, 0, TAU, 40, Color(1.0, 0.85, 0.3, 0.5), 2.5)
 	
-	# 8-Way Radial Compass Axes
-	draw_line(center - Vector2(1200, 0), center + Vector2(1200, 0), Color(0.4, 0.7, 1.0, 0.35), 2.0)
-	draw_line(center - Vector2(0, 1200), center + Vector2(0, 1200), Color(0.4, 0.7, 1.0, 0.35), 2.0)
-	var diag_v = Vector2(850, 850)
-	draw_line(center - diag_v, center + diag_v, Color(0.4, 0.7, 1.0, 0.22), 1.5)
-	draw_line(center - Vector2(-850, 850), center + Vector2(-850, 850), Color(0.4, 0.7, 1.0, 0.22), 1.5)
+	# 12-Hour Clock Radial Spokes and Markers
+	for h in range(12):
+		var rad = deg_to_rad(h * 30.0)
+		var dir_v = Vector2(sin(rad), -cos(rad))
+		var is_cardinal = (h % 3 == 0)
+		var spoke_col = Color(0.4, 0.75, 1.0, 0.38) if is_cardinal else Color(0.4, 0.7, 1.0, 0.18)
+		var spoke_w = 2.5 if is_cardinal else 1.5
+		draw_line(center, center + dir_v * 1200.0, spoke_col, spoke_w)
+		
+		# Dial hour text at edge of plaza
+		var tick_pos = center + dir_v * 1140.0
+		var h_num = 12 if h == 0 else h
+		draw_string(font, tick_pos - Vector2(30, -8), "%d시" % h_num, HORIZONTAL_ALIGNMENT_CENTER, 60, 20, Color(0.9, 0.95, 1.0, 0.85))
 	
 	# Central Monument Hologram Pillar
-	var center_box = Rect2(center - Vector2(400, 130), Vector2(800, 260))
+	var center_box = Rect2(center - Vector2(440, 150), Vector2(880, 300))
 	draw_rect(center_box, Color(0.03, 0.07, 0.14, 0.94), true)
 	draw_rect(center_box, Color(0.4, 0.85, 1.0, 0.9), false, 3.5)
 	
-	draw_string(font, center + Vector2(-380, -82), "🏛️ [중앙 증시 대교차로 (EXCHANGE PLAZA)]", HORIZONTAL_ALIGNMENT_CENTER, 760, 36, Color(1.0, 0.95, 0.6))
-	draw_string(font, center + Vector2(-380, -46), "8방위 고속도로를 선택하여 원하는 섹터로 진입하세요!", HORIZONTAL_ALIGNMENT_CENTER, 760, 26, Color(0.85, 0.92, 1.0, 0.9))
+	draw_string(font, center + Vector2(-420, -104), "🏛️ [중앙 증시 대교차로 (EXCHANGE PLAZA)]", HORIZONTAL_ALIGNMENT_CENTER, 840, 36, Color(1.0, 0.95, 0.6))
+	draw_string(font, center + Vector2(-420, -68), "12시계 다이얼 고속도로를 선택하여 원하는 섹터로 진입하세요!", HORIZONTAL_ALIGNMENT_CENTER, 840, 24, Color(0.85, 0.92, 1.0, 0.9))
 	
 	if MarketDataManager.current_market_type == MarketDataManager.MarketType.KOREA:
-		draw_string(font, center + Vector2(-380, -12), "⬆️[북] 반도체밸리  |  ↗️[북동] 전력망·원전  |  ➡️[동] 로봇&AI", HORIZONTAL_ALIGNMENT_CENTER, 760, 25, Color(0.8, 0.95, 1.0))
-		draw_string(font, center + Vector2(-380, 20), "↘️[남동] 조선·해운  |  ⬇️[남] 2차전지  |  ↙️[남서] 금융·밸류업", HORIZONTAL_ALIGNMENT_CENTER, 760, 25, Color(0.8, 0.95, 1.0))
-		draw_string(font, center + Vector2(-380, 52), "⬅️[서] 바이오랩  |  ↖️[북서] K-방산·우주항공", HORIZONTAL_ALIGNMENT_CENTER, 760, 25, Color(0.8, 0.95, 1.0))
-		draw_string(font, center + Vector2(-380, 84), "⚠️ 빨간색(상승) 제단 레벨업!  파란색(하락) 공매도 위험!", HORIZONTAL_ALIGNMENT_CENTER, 760, 23, Color(1.0, 0.85, 0.4))
+		draw_string(font, center + Vector2(-420, -32), "🕛12시: 반도체밸리  |  🕐1시: 전력망·원전  |  🕑2시: 미래차·모빌리티  |  🕒3시: 로봇·AI", HORIZONTAL_ALIGNMENT_CENTER, 840, 22, Color(0.85, 0.95, 1.0))
+		draw_string(font, center + Vector2(-420, -4), "🕓4시: 게임·플랫폼  |  🕔5시: K-엔터  |  🕕6시: 2차전지  |  🕖7시: K-푸드·소비재", HORIZONTAL_ALIGNMENT_CENTER, 840, 22, Color(0.85, 0.95, 1.0))
+		draw_string(font, center + Vector2(-420, 24), "🕗8시: 금융·밸류업  |  🕘9시: 바이오랩  |  🕙10시: 조선·해운  |  🕚11시: K-방산·우주", HORIZONTAL_ALIGNMENT_CENTER, 840, 22, Color(0.85, 0.95, 1.0))
+		draw_string(font, center + Vector2(-420, 56), "⚠️ 빨간색(상승) 제단 레벨업!  파란색(하락) 공매도 위험!", HORIZONTAL_ALIGNMENT_CENTER, 840, 21, Color(1.0, 0.85, 0.4))
 	else:
-		draw_string(font, center + Vector2(-380, -12), "⬆️[북] AI반도체  |  ↗️[북동] 전력망·SMR  |  ➡️[동] 빅테크 M7", HORIZONTAL_ALIGNMENT_CENTER, 760, 25, Color(0.8, 0.95, 1.0))
-		draw_string(font, center + Vector2(-380, 20), "↘️[남동] 국방AI·방산  |  ⬇️[남] EV캐즘  |  ↙️[남서] 월가 메가뱅크", HORIZONTAL_ALIGNMENT_CENTER, 760, 25, Color(0.8, 0.95, 1.0))
-		draw_string(font, center + Vector2(-380, 52), "⬅️[서] 글로벌헬스케어  |  ↖️[북서] 리테일·소비재", HORIZONTAL_ALIGNMENT_CENTER, 760, 25, Color(0.8, 0.95, 1.0))
-		draw_string(font, center + Vector2(-380, 84), "⚠️ 빨간색(상승) 제단 레벨업!  파란색(하락) 공매도 위험!", HORIZONTAL_ALIGNMENT_CENTER, 760, 23, Color(1.0, 0.85, 0.4))
+		draw_string(font, center + Vector2(-420, -32), "🕛12시: AI반도체  |  🕐1시: 전력·SMR  |  🕑2시: 국방AI·방산  |  🕒3시: 빅테크 M7", HORIZONTAL_ALIGNMENT_CENTER, 840, 22, Color(0.85, 0.95, 1.0))
+		draw_string(font, center + Vector2(-420, -4), "🕓4시: 사이버SaaS  |  🕔5시: 미디어  |  🕕6시: EV·청정에너지  |  🕖7시: 전통에너지", HORIZONTAL_ALIGNMENT_CENTER, 840, 22, Color(0.85, 0.95, 1.0))
+		draw_string(font, center + Vector2(-420, 24), "🕗8시: 월가메가뱅크  |  🕘9시: 글로벌헬스  |  🕙10시: 리테일·소비  |  🕚11시: 산업재·인프라", HORIZONTAL_ALIGNMENT_CENTER, 840, 22, Color(0.85, 0.95, 1.0))
+		draw_string(font, center + Vector2(-420, 56), "⚠️ 초록색(상승) 제단 레벨업!  빨간색(하락) 공매도 위험!", HORIZONTAL_ALIGNMENT_CENTER, 840, 21, Color(1.0, 0.85, 0.4))
 
 func _draw_sectors_and_stocks(cam_pos: Vector2, view_rect: Rect2, font: Font, t: float):
 	for sec_key in MarketDataManager.sectors.keys():

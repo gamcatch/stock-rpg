@@ -22,7 +22,7 @@ var market_name: String = "대한민국 KOSPI/KOSDAQ"
 var sectors = {}
 
 const DEFAULT_PRICES: Dictionary = {
-	# Korea Stocks
+	# Korea 12 Sectors Stocks
 	"한미반도체": "142,500", "042700": "142,500",
 	"SK하이닉스": "189,200", "000660": "189,200",
 	"삼성전자": "78,400", "005930": "78,400",
@@ -39,22 +39,38 @@ const DEFAULT_PRICES: Dictionary = {
 	"일진전기": "28,200", "103590": "28,200",
 	"우진엔텍": "18,400", "457550": "18,400",
 	"제룡전기": "48,000", "033100": "48,000",
+	"현대차": "242,000", "005380": "242,000",
+	"기아": "104,500", "000270": "104,500",
+	"현대모비스": "238,000", "012330": "238,000",
+	"한온시스템": "4,120", "018880": "4,120",
+	"HL만도": "41,800", "204320": "41,800",
+	"현대오토에버": "148,000", "307950": "148,000",
+	"한국타이어": "48,500", "161390": "48,500",
+	"삼기이브": "2,150", "419050": "2,150",
 	"두산로보틱스": "73,500", "454910": "73,500",
 	"레인보우로보": "148,000", "277810": "148,000",
-	"NAVER": "194,500", "035420": "194,500",
-	"카카오": "42,300", "035720": "42,300",
-	"루닛": "53,800", "328130": "53,800",
 	"로보티즈": "19,800", "108490": "19,800",
 	"엔젤로보틱스": "24,500", "455900": "24,500",
-	"폴라리스AI": "2,420", "039980": "2,420",
-	"HD한국조선해양": "198,000", "009540": "198,000",
-	"삼성중공업": "11,250", "010140": "11,250",
-	"한화오션": "38,400", "042660": "38,400",
-	"HD현대마린엔진": "34,200", "071970": "34,200",
-	"HMM": "18,200", "011200": "18,200",
-	"팬오션": "3,850", "028670": "3,850",
-	"HJ중공업": "3,450", "097230": "3,450",
-	"현대힘스": "16,200", "460930": "16,200",
+	"루닛": "53,800", "328130": "53,800",
+	"유진로봇": "7,150", "056080": "7,150",
+	"에스피지": "29,800", "058610": "29,800",
+	"에스비비테크": "18,400", "389500": "18,400",
+	"NAVER": "194,500", "035420": "194,500",
+	"카카오": "42,300", "035720": "42,300",
+	"크래프톤": "335,000", "259960": "335,000",
+	"넷마블": "58,200", "251270": "58,200",
+	"엔씨소프트": "198,000", "036570": "198,000",
+	"펄어비스": "36,500", "263750": "36,500",
+	"위메이드": "39,400", "112040": "39,400",
+	"카카오게임즈": "17,200", "293490": "17,200",
+	"하이브": "192,000", "352820": "192,000",
+	"JYP Ent.": "52,400", "035900": "52,400",
+	"에스엠": "72,500", "041510": "72,500",
+	"와이지엔터": "38,600", "122870": "38,600",
+	"CJ ENM": "71,200", "035760": "71,200",
+	"스튜디오드래곤": "39,800", "253450": "39,800",
+	"디어유": "28,500", "376300": "28,500",
+	"콘텐트리중앙": "10,400", "036420": "10,400",
 	"에코프로비엠": "168,000", "247540": "168,000",
 	"에코프로": "79,500", "086520": "79,500",
 	"LG에너지솔루션": "385,000", "373220": "385,000",
@@ -63,6 +79,14 @@ const DEFAULT_PRICES: Dictionary = {
 	"엔켐": "185,000", "348370": "185,000",
 	"대주전자재료": "98,000", "078600": "98,000",
 	"금양": "42,000", "001570": "42,000",
+	"삼양식품": "548,000", "003230": "548,000",
+	"농심": "398,000", "004370": "398,000",
+	"오리온": "98,500", "271560": "98,500",
+	"CJ제일제당": "312,000", "097950": "312,000",
+	"아모레퍼시픽": "138,000", "090430": "138,000",
+	"코스맥스": "145,000", "192820": "145,000",
+	"한국콜마": "69,500", "161890": "69,500",
+	"빙그레": "78,200", "005180": "78,200",
 	"KB금융": "84,200", "105560": "84,200",
 	"신한지주": "54,600", "055550": "54,600",
 	"메리츠금융지주": "89,500", "138040": "89,500",
@@ -79,6 +103,14 @@ const DEFAULT_PRICES: Dictionary = {
 	"리가켐바이오": "118,000", "141080": "118,000",
 	"삼천당제약": "135,000", "000250": "135,000",
 	"에이비엘바이오": "32,400", "298380": "32,400",
+	"HD한국조선해양": "198,000", "009540": "198,000",
+	"삼성중공업": "11,250", "010140": "11,250",
+	"한화오션": "38,400", "042660": "38,400",
+	"HD현대마린엔진": "34,200", "071970": "34,200",
+	"HMM": "18,200", "011200": "18,200",
+	"팬오션": "3,850", "028670": "3,850",
+	"HJ중공업": "3,450", "097230": "3,450",
+	"현대힘스": "16,200", "460930": "16,200",
 	"한화에어로": "324,000", "012450": "324,000",
 	"현대로템": "52,800", "064350": "52,800",
 	"LIG넥스원": "218,000", "079550": "218,000",
@@ -87,48 +119,104 @@ const DEFAULT_PRICES: Dictionary = {
 	"쎄트렉아이": "46,800", "099320": "46,800",
 	"한화시스템": "19,200", "272210": "19,200",
 	"현대위아": "58,500", "011210": "58,500",
-	"현대차": "242,000", "005380": "242,000",
-	"기아": "104,500", "000270": "104,500",
-	"현대모비스": "238,000", "012330": "238,000",
-	"한온시스템": "4,120", "018880": "4,120",
-	"HL만도": "41,800", "204320": "41,800",
 
-	# US Stocks
+	# US 12 Sectors Stocks
 	"NVIDIA": "$128.50", "NVDA": "$128.50",
 	"Broadcom": "$165.20", "AVGO": "$165.20",
 	"AMD": "$148.00",
 	"TSMC": "$184.50", "TSM": "$184.50",
 	"Micron": "$112.00", "MU": "$112.00",
+	"Qualcomm": "$168.00", "QCOM": "$168.00",
+	"Arm": "$142.00", "ARM": "$142.00",
+	"Intel": "$22.50", "INTC": "$22.50",
+	"Constellation": "$265.00", "CEG": "$265.00",
+	"Vistra": "$128.00", "VST": "$128.00",
+	"Oklo": "$18.50", "OKLO": "$18.50",
+	"GE Vernova": "$260.00", "GEV": "$260.00",
+	"NextEra": "$82.00", "NEE": "$82.00",
+	"Cameco": "$52.50", "CCJ": "$52.50",
+	"NuScale": "$19.50", "SMR": "$19.50",
+	"NRG": "$88.00",
+	"Palantir": "$42.50", "PLTR": "$42.50",
+	"Lockheed": "$582.00", "LMT": "$582.00",
+	"RTX": "$122.00",
+	"Northrop": "$520.00", "NOC": "$520.00",
+	"GeneralDynamics": "$295.00", "GD": "$295.00",
+	"Boeing": "$154.00", "BA": "$154.00",
+	"Kratos": "$22.50", "KTOS": "$22.50",
+	"RocketLab": "$10.50", "RKLB": "$10.50",
 	"Microsoft": "$428.00", "MSFT": "$428.00",
 	"Apple": "$228.50", "AAPL": "$228.50",
 	"Alphabet": "$168.00", "GOOGL": "$168.00",
 	"Meta": "$578.00", "META": "$578.00",
 	"Amazon": "$188.00", "AMZN": "$188.00",
-	"Eli Lilly": "$885.00", "LLY": "$885.00",
-	"Novo Nordisk": "$124.00", "NVO": "$124.00",
-	"AbbVie": "$188.00", "ABBV": "$188.00",
-	"Pfizer": "$28.50", "PFE": "$28.50",
-	"Merck": "$114.00", "MRK": "$114.00",
+	"Oracle": "$172.00", "ORCL": "$172.00",
+	"IBM": "$222.00",
+	"Salesforce": "$285.00", "CRM": "$285.00",
+	"CrowdStrike": "$295.00", "CRWD": "$295.00",
+	"PaloAlto": "$355.00", "PANW": "$355.00",
+	"ServiceNow": "$875.00", "NOW": "$875.00",
+	"Snowflake": "$122.00", "SNOW": "$122.00",
+	"Datadog": "$118.00", "DDOG": "$118.00",
+	"MongoDB": "$275.00", "MDB": "$275.00",
+	"Cloudflare": "$88.50", "NET": "$88.50",
+	"Zscaler": "$185.00", "ZS": "$185.00",
+	"Netflix": "$720.00", "NFLX": "$720.00",
+	"Disney": "$94.50", "DIS": "$94.50",
+	"Spotify": "$365.00", "SPOT": "$365.00",
+	"WarnerBros": "$7.80", "WBD": "$7.80",
+	"EA": "$142.00",
+	"TakeTwo": "$152.00", "TTWO": "$152.00",
+	"Roblox": "$42.50", "RBLX": "$42.50",
+	"AppLovin": "$165.00", "APP": "$165.00",
 	"Tesla": "$258.00", "TSLA": "$258.00",
 	"Rivian": "$11.40", "RIVN": "$11.40",
 	"Lucid": "$3.25", "LCID": "$3.25",
+	"Enphase": "$92.00", "ENPH": "$92.00",
+	"Albemarle": "$94.00", "ALB": "$94.00",
+	"Ford": "$11.20", "F": "$11.20",
+	"GeneralMotors": "$46.50", "GM": "$46.50",
+	"QuantumScape": "$6.20", "QS": "$6.20",
 	"ExxonMobil": "$118.00", "XOM": "$118.00",
 	"Chevron": "$152.00", "CVX": "$152.00",
+	"ConocoPhillips": "$106.00", "COP": "$106.00",
+	"Schlumberger": "$44.50", "SLB": "$44.50",
+	"EOG": "$124.00",
+	"Occidental": "$52.00", "OXY": "$52.00",
+	"Marathon": "$168.00", "MPC": "$168.00",
+	"Valero": "$138.00", "VLO": "$138.00",
 	"JPMorgan": "$218.00", "JPM": "$218.00",
-	"Bank of America": "$41.50", "BAC": "$41.50",
+	"GoldmanSachs": "$495.00", "GS": "$495.00",
+	"Berkshire": "$455.00", "BRK.B": "$455.00",
 	"Visa": "$282.00", "V": "$282.00",
 	"Mastercard": "$488.00", "MA": "$488.00",
-	"Goldman Sachs": "$495.00", "GS": "$495.00",
-	"Lockheed Martin": "$582.00", "LMT": "$582.00",
-	"RTX": "$122.00",
-	"Boeing": "$154.00", "BA": "$154.00",
-	"Northrop": "$520.00", "NOC": "$520.00",
-	"General Dynamics": "$295.00", "GD": "$295.00",
+	"BlackRock": "$985.00", "BLK": "$985.00",
+	"Coinbase": "$195.00", "COIN": "$195.00",
+	"MicroStrategy": "$185.00", "MSTR": "$185.00",
+	"EliLilly": "$885.00", "LLY": "$885.00",
+	"NovoNordisk": "$124.00", "NVO": "$124.00",
+	"AbbVie": "$188.00", "ABBV": "$188.00",
+	"Pfizer": "$28.50", "PFE": "$28.50",
+	"Merck": "$114.00", "MRK": "$114.00",
+	"Amgen": "$318.00", "AMGN": "$318.00",
+	"Vertex": "$465.00", "VRTX": "$465.00",
+	"Gilead": "$82.00", "GILD": "$82.00",
 	"Walmart": "$82.00", "WMT": "$82.00",
 	"Costco": "$890.00", "COST": "$890.00",
-	"Netflix": "$720.00", "NFLX": "$720.00",
+	"Target": "$152.00", "TGT": "$152.00",
+	"HomeDepot": "$395.00", "HD": "$395.00",
 	"McDonalds": "$298.00", "MCD": "$298.00",
-	"HomeDepot": "$395.00", "HD": "$395.00"
+	"Starbucks": "$96.00", "SBUX": "$96.00",
+	"Nike": "$84.00", "NKE": "$84.00",
+	"CocaCola": "$68.00", "KO": "$68.00",
+	"Caterpillar": "$395.00", "CAT": "$395.00",
+	"Deere": "$398.00", "DE": "$398.00",
+	"UnionPacific": "$242.00", "UNP": "$242.00",
+	"UPS": "$132.00",
+	"Honeywell": "$208.00", "HON": "$208.00",
+	"GEAerospace": "$186.00", "GE": "$186.00",
+	"Emerson": "$108.00", "EMR": "$108.00",
+	"Eaton": "$345.00", "ETN": "$345.00"
 }
 
 func get_stock_price(stock: Dictionary) -> String:
@@ -405,25 +493,33 @@ func _on_live_news_updated(news_list: Array):
 	print("[MarketDataManager] Live news received (%d items)!" % news_list.size())
 	
 	var sector_keywords = {
-		# Korea 8 Sectors
+		# Korea 12 Sectors
 		"semiconductor": ["반도체", "하이닉스", "삼성전자", "한미반도체", "hbm", "파운드리", "소부장", "웨이퍼", "hpsp", "리노공업", "이수페타시스", "제주반도체", "가온칩스"],
 		"power_grid": ["전력", "변압기", "원전", "원자력", "현대일렉", "두산에너빌", "ls일렉", "ls electric", "효성중공업", "한전kps", "그리드", "배전반", "smr", "일진전기", "우진엔텍", "제룡전기"],
-		"robot_ai": ["로봇", "ai", "인공지능", "두산로보", "레인보우", "네이버", "naver", "카카오", "루닛", "의료ai", "협동로봇", "로보티즈", "엔젤로보틱스", "폴라리스ai"],
-		"shipbuilding": ["조선", "해운", "선박", "조선해양", "삼성중공업", "한화오션", "현대마린", "hmm", "lng선", "도크", "수주잔고", "flng", "팬오션", "hj중공업", "현대힘스"],
-		"battery": ["2차전지", "배터리", "에코프로", "lg에너지", "lg엔솔", "포스코", "리튬", "양극재", "음극재", "전기차", "캐즘", "엔켐", "대주전자재료", "금양"],
+		"automotive": ["현대차", "기아", "모비스", "현대모비스", "자동차", "완성차", "전기차", "자율주행", "hl만도", "한온시스템", "현대오토에버", "한국타이어", "삼기이브"],
+		"robot_ai": ["로봇", "협동로봇", "두산로보", "레인보우", "로보티즈", "엔젤로보틱스", "루닛", "유진로봇", "에스피지", "에스비비테크", "감속기", "액추에이터"],
+		"gaming_platform": ["게임", "플랫폼", "네이버", "naver", "카카오", "크래프톤", "넷마블", "엔씨소프트", "펄어비스", "위메이드", "카카오게임즈", "신작", "mmorpg"],
+		"entertainment": ["엔터", "k-pop", "하이브", "jyp", "에스엠", "sm", "와이지", "yg", "cj enm", "스튜디오드래곤", "디어유", "음반", "음원", "콘서트", "드라마"],
+		"battery": ["2차전지", "배터리", "에코프로", "lg에너지", "lg엔솔", "포스코", "리튬", "양극재", "음극재", "캐즘", "엔켐", "대주전자재료", "금양"],
+		"food_consumer": ["k-푸드", "라면", "불닭", "삼양식품", "농심", "오리온", "cj제일제당", "아모레", "화장품", "코스맥스", "한국콜마", "빙그레", "수출"],
 		"finance": ["금융", "은행", "지주", "밸류업", "kb금융", "신한지주", "메리츠", "하나금융", "삼성물산", "배당", "자사주", "주주환원", "삼성생명", "미래에셋", "우리금융"],
 		"bio": ["바이오", "제약", "신약", "임상", "fda", "알테오젠", "삼성바이오", "셀트리온", "유한양행", "hlb", "sc제형", "adc", "리가켐바이오", "삼천당제약", "에이비엘바이오"],
+		"shipbuilding": ["조선", "해운", "선박", "조선해양", "삼성중공업", "한화오션", "현대마린", "hmm", "lng선", "도크", "수주잔고", "flng", "팬오션", "hj중공업", "현대힘스"],
 		"defense": ["방산", "우주", "항공", "k-방산", "한화에어로", "현대로템", "lig넥스원", "한국항공우주", "kai", "풍산", "자주포", "전차", "미사일", "수출", "쎄트렉아이", "한화시스템", "현대위아"],
 
-		# US 8 Sectors
-		"ai_chips": ["nvidia", "엔비디아", "broadcom", "브로드컴", "amd", "tsmc", "micron", "마이크론", "gpu", "chip", "semiconductor", "ai chip"],
-		"ai_power": ["constellation", "vistra", "oklo", "vernova", "nextera", "smr", "nuclear", "grid", "power", "utility", "전력", "원전"],
-		"big_tech": ["microsoft", "마이크로소프트", "apple", "애플", "google", "구글", "alphabet", "meta", "메타", "amazon", "아마존", "cloud"],
-		"defense_tech": ["lockheed", "palantir", "팔란티어", "rtx", "northrop", "general dynamics", "defense", "military", "방산", "미사일"],
-		"ev_auto": ["tesla", "테슬라", "rivian", "리비안", "lucid", "루시드", "enphase", "albemarle", "ev", "electric vehicle"],
-		"wall_street": ["jpmorgan", "goldman", "berkshire", "visa", "blackrock", "bank", "finance", "월가", "버핏", "비트코인 etf"],
-		"pharma": ["lilly", "일라이릴리", "novo", "노보노디스크", "abbvie", "애브비", "pfizer", "화이자", "merck", "glp-1", "obesity", "fda"],
-		"retail": ["walmart", "costco", "netflix", "mcdonald", "home depot", "retail", "consumer", "월마트", "코스트코", "넷플릭스"]
+		# US 12 Sectors
+		"ai_chips": ["nvidia", "엔비디아", "broadcom", "브로드컴", "amd", "tsmc", "micron", "마이크론", "gpu", "chip", "qualcomm", "arm", "intel", "semiconductor"],
+		"ai_power": ["constellation", "vistra", "oklo", "vernova", "nextera", "smr", "nuclear", "grid", "cameco", "nuscale", "nrg", "power", "utility", "전력", "원전"],
+		"defense_tech": ["palantir", "팔란티어", "lockheed", "록히드", "rtx", "northrop", "general dynamics", "boeing", "보잉", "kratos", "rocket lab", "defense", "military"],
+		"big_tech": ["microsoft", "마이크로소프트", "apple", "애플", "google", "구글", "alphabet", "meta", "메타", "amazon", "아마존", "oracle", "ibm", "salesforce", "cloud"],
+		"cyber_saas": ["crowdstrike", "palo alto", "servicenow", "snowflake", "datadog", "mongodb", "cloudflare", "zscaler", "보안", "saas", "cybersecurity"],
+		"media_entertain": ["netflix", "넷플릭스", "disney", "디즈니", "spotify", "스포티파이", "warner", "ea", "take-two", "roblox", "로블록스", "applovin"],
+		"ev_auto": ["tesla", "테슬라", "rivian", "리비안", "lucid", "루시드", "enphase", "albemarle", "ford", "gm", "quantumscape", "ev", "electric vehicle"],
+		"traditional_energy": ["exxon", "엑손모빌", "chevron", "셰브론", "conocophillips", "schlumberger", "eog", "oxy", "옥시덴탈", "marathon", "valero", "oil", "정유"],
+		"wall_street": ["jpmorgan", "제이피모건", "goldman", "골드만", "berkshire", "버크셔", "visa", "비자", "mastercard", "blackrock", "블랙록", "coinbase", "microstrategy", "비트코인"],
+		"pharma": ["lilly", "일라이릴리", "novo", "노보노디스크", "abbvie", "애브비", "pfizer", "화이자", "merck", "머크", "amgen", "vertex", "gilead", "glp-1", "fda"],
+		"retail": ["walmart", "월마트", "costco", "코스트코", "target", "home depot", "mcdonald", "맥도날드", "starbucks", "스타벅스", "nike", "나이키", "coca-cola", "코카콜라"],
+		"industrial_infra": ["caterpillar", "캐터필러", "deere", "디어", "union pacific", "ups", "honeywell", "하니웰", "ge aerospace", "emerson", "eaton", "infra", "인프라"]
 	}
 	
 	for item in news_list:
@@ -471,201 +567,295 @@ func init_market_data():
 	stock_news_dict.clear()
 	
 	if current_market_type == MarketType.KOREA:
-		# Korean Market 8 Radial Compass Mega Sectors (Distance ~4800)
-		
-		# 1. NORTH (0, -4800): AI & Semiconductor Valley
+		# Korean Market 12 Radial Clock Mega Sectors (Distance ~4800)
+		# 12시 (0, -4800): 반도체 밸리
 		sectors["semiconductor"] = {
 			"key": "semiconductor",
 			"name": "반도체 밸리",
 			"sub_title": "AI 반도체 & HBM 대장 붉은 숲",
-			"direction_hint": "⬆️ 북쪽",
+			"direction_hint": "🕛 12시",
 			"position": Vector2(0, -4800),
-			"radius": 2400.0,
+			"radius": 1250.0,
 			"change_rate": 6.8,
 			"lead_stock": "한미반도체 (+14.8%)",
 			"stocks": [
-				{"name": "한미반도체", "code": "042700", "rate": 14.8, "world_pos": Vector2(0, -7200), "desc": "🔥 [상한가 제단] TC본더 독점 수주!"},
-				{"name": "SK하이닉스", "code": "000660", "rate": 9.2, "world_pos": Vector2(1300, -6200), "desc": "🚀 [HBM 1위 성역] 5세대 HBM3E 공급"},
-				{"name": "삼성전자", "code": "005930", "rate": 4.5, "world_pos": Vector2(-1300, -6200), "desc": "🟢 [국민주 쉼터] 체력 회복 샘물"},
-				{"name": "HPSP", "code": "403870", "rate": 8.1, "world_pos": Vector2(700, -4200), "desc": "⚡ 고압수소열처리 독점 공급"},
-				{"name": "리노공업", "code": "058470", "rate": 5.4, "world_pos": Vector2(-700, -4200), "desc": "💎 글로벌 테스트 소켓 최강자"},
-				{"name": "이수페타시스", "code": "007660", "rate": 11.2, "world_pos": Vector2(1500, -5000), "desc": "🌐 AI 가속기용 다층MLB 기판"},
-				{"name": "제주반도체", "code": "080220", "rate": 7.8, "world_pos": Vector2(-1500, -5000), "desc": "📱 온디바이스 AI 저전력 LPDDR 메모리"},
-				{"name": "가온칩스", "code": "399720", "rate": 6.2, "world_pos": Vector2(0, -3800), "desc": "📐 AI ASIC 디자인하우스 글로벌 파트너"}
+				{"name": "한미반도체", "code": "042700", "rate": 14.8, "world_pos": Vector2(0, -5450), "desc": "🔥 [상한가 제단] TC본더 독점 수주!"},
+				{"name": "SK하이닉스", "code": "000660", "rate": 9.2, "world_pos": Vector2(460, -5260), "desc": "🚀 [HBM 1위 성역] 5세대 HBM3E 공급"},
+				{"name": "삼성전자", "code": "005930", "rate": 4.5, "world_pos": Vector2(650, -4800), "desc": "🟢 [국민주 쉼터] 체력 회복 샘물"},
+				{"name": "HPSP", "code": "403870", "rate": 8.1, "world_pos": Vector2(460, -4340), "desc": "⚡ 고압수소열처리 독점 공급"},
+				{"name": "리노공업", "code": "058470", "rate": 5.4, "world_pos": Vector2(0, -4150), "desc": "💎 글로벌 테스트 소켓 최강자"},
+				{"name": "이수페타시스", "code": "007660", "rate": 11.2, "world_pos": Vector2(-460, -4340), "desc": "🌐 AI 가속기용 다층MLB 기판"},
+				{"name": "제주반도체", "code": "080220", "rate": 7.8, "world_pos": Vector2(-650, -4800), "desc": "📱 온디바이스 AI 저전력 LPDDR 메모리"},
+				{"name": "가온칩스", "code": "399720", "rate": 6.2, "world_pos": Vector2(-460, -5260), "desc": "📐 AI ASIC 디자인하우스 글로벌 파트너"}
 			],
 			"theme_color": Color(1.0, 0.2, 0.2, 0.25),
 			"is_top_bull": true
 		}
 
-		# 2. NORTH-EAST (3400, -3400): Power Grid & Nuclear Energy
+		# 1시 (2400, -4157): 전력망 & 원전
 		sectors["power_grid"] = {
 			"key": "power_grid",
 			"name": "전력망 & 원전",
 			"sub_title": "AI 전력 쇼티지 & 체코 원전 르네상스",
-			"direction_hint": "↗️ 북동",
-			"position": Vector2(3400, -3400),
-			"radius": 2400.0,
+			"direction_hint": "🕐 %s",
+			"position": Vector2(2400, -4157),
+			"radius": 1250.0,
 			"change_rate": 9.2,
 			"lead_stock": "HD현대일렉트릭 (+13.5%)",
 			"stocks": [
-				{"name": "HD현대일렉트릭", "code": "026720", "rate": 13.5, "world_pos": Vector2(3400, -4900), "desc": "⚡ [변압기 제왕] 북미 초고압 변압기 품귀"},
-				{"name": "두산에너빌리티", "code": "034020", "rate": 8.8, "world_pos": Vector2(4400, -3400), "desc": "☢️ 체코 원전 주기기 & 차세대 SMR"},
-				{"name": "LS ELECTRIC", "code": "010120", "rate": 7.6, "world_pos": Vector2(3400, -2200), "desc": "🔌 AI 데이터센터 배전 시스템 수주"},
-				{"name": "효성중공업", "code": "298040", "rate": 11.2, "world_pos": Vector2(2400, -3400), "desc": "🏭 미국 초고압 변압기 팩토리 풀가동"},
-				{"name": "한전KPS", "code": "051600", "rate": 4.2, "world_pos": Vector2(4200, -4200), "desc": "🛠️ 원자력 및 화력 발전 정비 독점"},
-				{"name": "일진전기", "code": "103590", "rate": 8.5, "world_pos": Vector2(2400, -4400), "desc": "⚡ 초고압 변압기 & 송전선로 북미 대량 수주"},
-				{"name": "우진엔텍", "code": "457550", "rate": 5.9, "world_pos": Vector2(4400, -2400), "desc": "☢️ 원자력 계측제어 설비 정비 원천기술"},
-				{"name": "제룡전기", "code": "033100", "rate": 9.1, "world_pos": Vector2(2600, -2400), "desc": "🔌 미국 배전 변압기 100% 수출 잭팟"}
+				{"name": "HD현대일렉트릭", "code": "026720", "rate": 13.5, "world_pos": Vector2(2400, -4807), "desc": "⚡ [변압기 제왕] 북미 초고압 변압기 품귀"},
+				{"name": "두산에너빌리티", "code": "034020", "rate": 8.8, "world_pos": Vector2(2860, -4617), "desc": "☢️ 체코 원전 주기기 & 차세대 SMR"},
+				{"name": "LS ELECTRIC", "code": "010120", "rate": 7.6, "world_pos": Vector2(3050, -4157), "desc": "🔌 AI 데이터센터 배전 시스템 수주"},
+				{"name": "효성중공업", "code": "298040", "rate": 11.2, "world_pos": Vector2(2860, -3697), "desc": "🏭 미국 초고압 변압기 팩토리 풀가동"},
+				{"name": "한전KPS", "code": "051600", "rate": 4.2, "world_pos": Vector2(2400, -3507), "desc": "🛠️ 원자력 및 화력 발전 정비 독점"},
+				{"name": "일진전기", "code": "103590", "rate": 8.5, "world_pos": Vector2(1940, -3697), "desc": "⚡ 초고압 변압기 & 송전선로 북미 대량 수주"},
+				{"name": "우진엔텍", "code": "457550", "rate": 5.9, "world_pos": Vector2(1750, -4157), "desc": "☢️ 원자력 계측제어 설비 정비 원천기술"},
+				{"name": "제룡전기", "code": "033100", "rate": 9.1, "world_pos": Vector2(1940, -4617), "desc": "🔌 미국 배전 변압기 100% 수출 잭팟"}
 			],
 			"theme_color": Color(1.0, 0.45, 0.15, 0.25),
 			"is_top_bull": false
 		}
-		
-		# 3. EAST (4800, 0): Robot & AI Tech Park
+
+		# 2시 (4157, -2400): 미래차 & 모빌리티
+		sectors["automotive"] = {
+			"key": "automotive",
+			"name": "미래차 & 모빌리티",
+			"sub_title": "글로벌 완성차 & SDV 전장 자율주행",
+			"direction_hint": "🕑 %s",
+			"position": Vector2(4157, -2400),
+			"radius": 1250.0,
+			"change_rate": 5.2,
+			"lead_stock": "현대차 (+7.2%)",
+			"stocks": [
+				{"name": "현대차", "code": "005380", "rate": 7.2, "world_pos": Vector2(4157, -3050), "desc": "🚗 [글로벌 Top3] 역대급 영업이익 & 인도 IPO"},
+				{"name": "기아", "code": "000270", "rate": 6.5, "world_pos": Vector2(4617, -2860), "desc": "🚙 두 자릿수 영업이익률 & 주주환원 랠리"},
+				{"name": "현대모비스", "code": "012330", "rate": 4.8, "world_pos": Vector2(4807, -2400), "desc": "⚙️ SDV 소프트웨어 전장 플랫폼 공급"},
+				{"name": "HL만도", "code": "204320", "rate": 5.1, "world_pos": Vector2(4617, -1940), "desc": "🛰️ 북미 테슬라향 전자식 조향장치 독점"},
+				{"name": "한온시스템", "code": "018880", "rate": 3.2, "world_pos": Vector2(4157, -1750), "desc": "❄️ 전기차 통합 열관리 시스템 공급"},
+				{"name": "현대오토에버", "code": "307950", "rate": 6.8, "world_pos": Vector2(3697, -1940), "desc": "💻 현대차그룹 차량용 SW 모빌진 독점"},
+				{"name": "한국타이어", "code": "161390", "rate": 4.2, "world_pos": Vector2(3507, -2400), "desc": "🛞 고수익 전기차(EV) 전용 타이어 1위"},
+				{"name": "삼기이브", "code": "419050", "rate": 5.8, "world_pos": Vector2(3697, -2860), "desc": "🔋 배터리 팩 엔드플레이트 경량화 부품"}
+			],
+			"theme_color": Color(0.2, 0.8, 0.9, 0.25),
+			"is_top_bull": false
+		}
+
+		# 3시 (4800, 0): 로봇 & AI 파크
 		sectors["robot_ai"] = {
 			"key": "robot_ai",
 			"name": "로봇 & AI 파크",
-			"sub_title": "지능형 로봇 협동 성장 지대",
-			"direction_hint": "➡️ 동쪽",
+			"sub_title": "지능형 피지컬 AI & 감속기 협동 지대",
+			"direction_hint": "🕒 %s",
 			"position": Vector2(4800, 0),
-			"radius": 2400.0,
-			"change_rate": 3.4,
+			"radius": 1250.0,
+			"change_rate": 4.8,
 			"lead_stock": "두산로보틱스 (+7.5%)",
 			"stocks": [
-				{"name": "두산로보틱스", "code": "454910", "rate": 7.5, "world_pos": Vector2(7200, -700), "desc": "🤖 협동로봇 글로벌 점유율"},
-				{"name": "레인보우로보", "code": "277810", "rate": 4.1, "world_pos": Vector2(7200, 700), "desc": "🦾 휴머노이드 보행 플랫폼"},
-				{"name": "NAVER", "code": "035420", "rate": 3.2, "world_pos": Vector2(5800, -1400), "desc": "🧠 생성형 AI 하이퍼클로바X"},
-				{"name": "카카오", "code": "035720", "rate": 1.5, "world_pos": Vector2(5800, 1400), "desc": "💬 국민 메신저 & AI 에이전트"},
-				{"name": "루닛", "code": "328130", "rate": 6.8, "world_pos": Vector2(4000, -900), "desc": "🩺 의료 AI 암 조기진단"},
-				{"name": "로보티즈", "code": "108490", "rate": 6.7, "world_pos": Vector2(4000, 900), "desc": "🦾 실외 자율주행 배달로봇 & 액추에이터 독점"},
-				{"name": "엔젤로보틱스", "code": "455900", "rate": 5.2, "world_pos": Vector2(5000, -1800), "desc": "🦿 웨어러블 재활 보행로봇 의료 상용화"},
-				{"name": "폴라리스AI", "code": "039980", "rate": 4.8, "world_pos": Vector2(5000, 1800), "desc": "🧠 생성형 AI 엔터프라이즈 솔루션 공급"}
+				{"name": "두산로보틱스", "code": "454910", "rate": 7.5, "world_pos": Vector2(4800, -650), "desc": "🤖 협동로봇 글로벌 점유율 확대"},
+				{"name": "레인보우로보", "code": "277810", "rate": 5.8, "world_pos": Vector2(5260, -460), "desc": "🦾 휴머노이드 보행 플랫폼 국책과제"},
+				{"name": "로보티즈", "code": "108490", "rate": 6.7, "world_pos": Vector2(5450, 0), "desc": "🦾 실외 자율주행 배달로봇 & 액추에이터"},
+				{"name": "엔젤로보틱스", "code": "455900", "rate": 5.2, "world_pos": Vector2(5260, 460), "desc": "🦿 웨어러블 재활 보행로봇 의료 상용화"},
+				{"name": "루닛", "code": "328130", "rate": 6.8, "world_pos": Vector2(4800, 650), "desc": "🩺 의료 AI 암 조기진단 글로벌 공급"},
+				{"name": "유진로봇", "code": "056080", "rate": 4.5, "world_pos": Vector2(4340, 460), "desc": "🧹 자율주행 물류 로봇(AMR) 솔루션"},
+				{"name": "에스피지", "code": "058610", "rate": 5.9, "world_pos": Vector2(4150, 0), "desc": "⚙️ 정밀 감속기 SH/SR 로봇 부품 국산화"},
+				{"name": "에스비비테크", "code": "389500", "rate": 6.1, "world_pos": Vector2(4340, -460), "desc": "🦾 초정밀 하모닉 감속기 양산 독점"}
 			],
 			"theme_color": Color(1.0, 0.55, 0.2, 0.22),
 			"is_top_bull": false
 		}
 
-		# 4. SOUTH-EAST (3400, 3400): K-Shipbuilding & Marine Supercycle
-		sectors["shipbuilding"] = {
-			"key": "shipbuilding",
-			"name": "K-조선 & 해운",
-			"sub_title": "LNG선 3년 만선 & 슈퍼사이클 파도",
-			"direction_hint": "↘️ 남동",
-			"position": Vector2(3400, 3400),
-			"radius": 2400.0,
-			"change_rate": 8.1,
-			"lead_stock": "HD현대마린엔진 (+12.3%)",
+		# 4시 (4157, 2400): 게임 & 플랫폼
+		sectors["gaming_platform"] = {
+			"key": "gaming_platform",
+			"name": "게임 & 플랫폼",
+			"sub_title": "글로벌 IP & 생성형 AI 디지털 제국",
+			"direction_hint": "🕓 %s",
+			"position": Vector2(4157, 2400),
+			"radius": 1250.0,
+			"change_rate": 4.1,
+			"lead_stock": "크래프톤 (+8.2%)",
 			"stocks": [
-				{"name": "HD한국조선해양", "code": "009540", "rate": 9.6, "world_pos": Vector2(3400, 4900), "desc": "⚓ [글로벌 1위] 친환경 고부가가치 LNG선 도크 만선"},
-				{"name": "삼성중공업", "code": "010140", "rate": 6.4, "world_pos": Vector2(4400, 3400), "desc": "🌊 해양 FLNG 독점 수주 릴레이"},
-				{"name": "한화오션", "code": "042660", "rate": 8.1, "world_pos": Vector2(3400, 2200), "desc": "🚢 미 해군 MRO 군함 정비 독점 진출"},
-				{"name": "HD현대마린엔진", "code": "071970", "rate": 12.3, "world_pos": Vector2(2400, 3400), "desc": "⚙️ 친환경 선박 엔진 공급망 장악"},
-				{"name": "HMM", "code": "011200", "rate": 3.5, "world_pos": Vector2(4200, 4200), "desc": "📦 글로벌 해운 운임 지수 반등 수혜"},
-				{"name": "팬오션", "code": "028670", "rate": 4.1, "world_pos": Vector2(2400, 4400), "desc": "🚢 글로벌 벌크선 운임 BDI 상승 최대 수혜"},
-				{"name": "HJ중공업", "code": "097230", "rate": 5.8, "world_pos": Vector2(4400, 2400), "desc": "⚓ 해군 특수선 및 친환경 컨테이너선 건조"},
-				{"name": "현대힘스", "code": "460930", "rate": 7.2, "world_pos": Vector2(2600, 2400), "desc": "🛠️ 선박 곡블록 및 조선 기자재 독점 생산"}
+				{"name": "크래프톤", "code": "259960", "rate": 8.2, "world_pos": Vector2(4157, 1750), "desc": "🔫 [배그 신화] 글로벌 배틀그라운드 트래픽 급증"},
+				{"name": "NAVER", "code": "035420", "rate": 3.2, "world_pos": Vector2(4617, 1940), "desc": "🧠 생성형 AI 하이퍼클로바X 검색 서비스"},
+				{"name": "카카오", "code": "035720", "rate": 2.1, "world_pos": Vector2(4807, 2400), "desc": "💬 국민 메신저 카나나 AI 에이전트 도입"},
+				{"name": "넷마블", "code": "251270", "rate": 5.5, "world_pos": Vector2(4617, 2860), "desc": "⚔️ 나 혼자만 레벨업 글로벌 흥행 잭팟"},
+				{"name": "엔씨소프트", "code": "036570", "rate": 3.8, "world_pos": Vector2(4157, 3050), "desc": "🏰 TL 글로벌 서비스 및 신작 IP 전환"},
+				{"name": "펄어비스", "code": "263750", "rate": 6.4, "world_pos": Vector2(3697, 2860), "desc": "🏹 붉은사막 게임스컴 최고 기대작 출격"},
+				{"name": "위메이드", "code": "112040", "rate": 4.9, "world_pos": Vector2(3507, 2400), "desc": "🪙 미르의 전설 블록체인 글로벌 게임"},
+				{"name": "카카오게임즈", "code": "293490", "rate": 3.5, "world_pos": Vector2(3697, 1940), "desc": "🛡️ 오딘 및 크로노 오디세이 대작 라인업"}
 			],
-			"theme_color": Color(0.2, 0.7, 0.9, 0.25),
+			"theme_color": Color(0.65, 0.35, 1.0, 0.25),
 			"is_top_bull": false
 		}
-		
-		# 5. SOUTH (0, 4800): Secondary Battery Mines
+
+		# 5시 (2400, 4157): K-컬처 & 엔터
+		sectors["entertainment"] = {
+			"key": "entertainment",
+			"name": "K-컬처 & 엔터",
+			"sub_title": "글로벌 팬덤 & 빌보드 K-POP 콘서트",
+			"direction_hint": "🕔 %s",
+			"position": Vector2(2400, 4157),
+			"radius": 1250.0,
+			"change_rate": 5.8,
+			"lead_stock": "하이브 (+7.4%)",
+			"stocks": [
+				{"name": "하이브", "code": "352820", "rate": 7.4, "world_pos": Vector2(2400, 3507), "desc": "👑 BTS 완전체 컴백 기대감 & 위버스 플랫폼"},
+				{"name": "JYP Ent.", "code": "035900", "rate": 5.2, "world_pos": Vector2(2860, 3697), "desc": "🎤 스트레이키즈 글로벌 스타디움 투어"},
+				{"name": "에스엠", "code": "041510", "rate": 6.1, "world_pos": Vector2(3050, 4157), "desc": "✨ 에스파·라이즈 음원 차트 싹쓸이"},
+				{"name": "와이지엔터", "code": "122870", "rate": 4.8, "world_pos": Vector2(2860, 4617), "desc": "🖤 베이비몬스터 & 블랙핑크 월드투어"},
+				{"name": "CJ ENM", "code": "035760", "rate": 4.1, "world_pos": Vector2(2400, 4807), "desc": "🎬 K-콘텐츠 티빙 OTT 흑자 전환"},
+				{"name": "스튜디오드래곤", "code": "253450", "rate": 5.6, "world_pos": Vector2(1940, 4617), "desc": "📺 넷플릭스 텐트폴 드라마 제작 공급"},
+				{"name": "디어유", "code": "376300", "rate": 6.5, "world_pos": Vector2(1750, 4157), "desc": "💌 글로벌 K-POP 프라이빗 메시지 구독"},
+				{"name": "콘텐트리중앙", "code": "036420", "rate": 3.9, "world_pos": Vector2(1940, 3697), "desc": "🍿 메가박스 극장 및 흥행 영화 배급"}
+			],
+			"theme_color": Color(1.0, 0.3, 0.7, 0.24),
+			"is_top_bull": false
+		}
+
+		# 6시 (0, 4800): 2차전지 광산
 		sectors["battery"] = {
 			"key": "battery",
 			"name": "2차전지 광산",
 			"sub_title": "전기차 캐즘 푸른 공매도 빙벽",
-			"direction_hint": "⬇️ 남쪽",
+			"direction_hint": "🕕 %s",
 			"position": Vector2(0, 4800),
-			"radius": 2400.0,
+			"radius": 1250.0,
 			"change_rate": -5.6,
 			"lead_stock": "에코프로비엠 (-7.1%)",
 			"stocks": [
-				{"name": "에코프로비엠", "code": "247540", "rate": -7.1, "world_pos": Vector2(0, 7200), "desc": "⚠️ [공매도 총본산] 하이니켈 양극재"},
-				{"name": "에코프로", "code": "086520", "rate": -6.5, "world_pos": Vector2(-1300, 6200), "desc": "📉 배터리 소재 수직계열화"},
-				{"name": "LG에너지솔루션", "code": "373220", "rate": -3.2, "world_pos": Vector2(1300, 6200), "desc": "🧊 글로벌 배터리 셀 제조"},
-				{"name": "POSCO홀딩스", "code": "005490", "rate": -4.2, "world_pos": Vector2(-800, 4400), "desc": "⛏️ 염호 리튬 생산 밸류체인"},
-				{"name": "포스코퓨처엠", "code": "003670", "rate": -5.8, "world_pos": Vector2(800, 4400), "desc": "📉 양극재/음극재 원가 하락"},
-				{"name": "엔켐", "code": "348370", "rate": -4.5, "world_pos": Vector2(-1500, 5000), "desc": "🧪 북미 시장 점유율 1위 전해액 공급망"},
-				{"name": "대주전자재료", "code": "078600", "rate": -3.8, "world_pos": Vector2(1500, 5000), "desc": "🔋 고용량 실리콘 음극재 독점 양산"},
-				{"name": "금양", "code": "001570", "rate": -6.2, "world_pos": Vector2(0, 3800), "desc": "⛏️ 원통형 4695 배터리 및 리튬 광산 개발"}
+				{"name": "에코프로비엠", "code": "247540", "rate": -7.1, "world_pos": Vector2(0, 4150), "desc": "⚠️ [공매도 총본산] 하이니켈 양극재"},
+				{"name": "에코프로", "code": "086520", "rate": -6.5, "world_pos": Vector2(460, 4340), "desc": "📉 배터리 소재 수직계열화 지주사"},
+				{"name": "LG에너지솔루션", "code": "373220", "rate": -3.2, "world_pos": Vector2(650, 4800), "desc": "🧊 글로벌 배터리 셀 제조 1위"},
+				{"name": "POSCO홀딩스", "code": "005490", "rate": -4.2, "world_pos": Vector2(460, 5260), "desc": "⛏️ 염호 리튬 생산 밸류체인"},
+				{"name": "포스코퓨처엠", "code": "003670", "rate": -5.8, "world_pos": Vector2(0, 5450), "desc": "📉 양극재/음극재 원가 하락"},
+				{"name": "엔켐", "code": "348370", "rate": -4.5, "world_pos": Vector2(-460, 5260), "desc": "🧪 북미 시장 점유율 1위 전해액 공급망"},
+				{"name": "대주전자재료", "code": "078600", "rate": -3.8, "world_pos": Vector2(-650, 4800), "desc": "🔋 고용량 실리콘 음극재 독점 양산"},
+				{"name": "금양", "code": "001570", "rate": -6.2, "world_pos": Vector2(-460, 4340), "desc": "⛏️ 원통형 4695 배터리 및 리튬 광산 개발"}
 			],
 			"theme_color": Color(0.2, 0.5, 1.0, 0.28),
 			"is_top_bull": false
 		}
 
-		# 6. SOUTH-WEST (-3400, 3400): Finance & Value-Up Holdings
+		# 7시 (-2400, 4157): K-푸드 & 소비재
+		sectors["food_consumer"] = {
+			"key": "food_consumer",
+			"name": "K-푸드 & 소비재",
+			"sub_title": "불닭 열풍 & K-뷰티 글로벌 전성기",
+			"direction_hint": "🕖 %s",
+			"position": Vector2(-2400, 4157),
+			"radius": 1250.0,
+			"change_rate": 7.5,
+			"lead_stock": "삼양식품 (+11.8%)",
+			"stocks": [
+				{"name": "삼양식품", "code": "003230", "rate": 11.8, "world_pos": Vector2(-2400, 3507), "desc": "🌶️ [불닭 신화] 미국 월마트 입점 완판 랠리"},
+				{"name": "농심", "code": "004370", "rate": 5.2, "world_pos": Vector2(-1940, 3697), "desc": "🍜 신라면 해외 매출 비중 60% 돌파"},
+				{"name": "오리온", "code": "271560", "rate": 4.6, "world_pos": Vector2(-1750, 4157), "desc": " 초코파이 글로벌 3조 클럽 및 탄탄한 마진"},
+				{"name": "CJ제일제당", "code": "097950", "rate": 3.8, "world_pos": Vector2(-1940, 4617), "desc": "🥟 비비고 만두 북미 시장 점유율 1위"},
+				{"name": "아모레퍼시픽", "code": "090430", "rate": 6.8, "world_pos": Vector2(-2400, 4807), "desc": "💄 코스알엑스 북미·유럽 K-뷰티 폭풍 성장"},
+				{"name": "코스맥스", "code": "192820", "rate": 7.9, "world_pos": Vector2(-2860, 4617), "desc": "🧴 글로벌 화장품 ODM 독보적 1위 수주"},
+				{"name": "한국콜마", "code": "161890", "rate": 6.2, "world_pos": Vector2(-3050, 4157), "desc": "☀️ 선크림 글로벌 독점 생산 캐시카우"},
+				{"name": "빙그레", "code": "005180", "rate": 5.4, "world_pos": Vector2(-2860, 3697), "desc": "🍦 바나나맛우유 & 메로나 미국 수출 호조"}
+			],
+			"theme_color": Color(1.0, 0.7, 0.2, 0.25),
+			"is_top_bull": false
+		}
+
+		# 8시 (-4157, 2400): 금융 & 밸류업
 		sectors["finance"] = {
 			"key": "finance",
 			"name": "금융 & 밸류업",
 			"sub_title": "자사주 소각 & 고배당 황금 요새",
-			"direction_hint": "↙️ 남서",
-			"position": Vector2(-3400, 3400),
-			"radius": 2400.0,
+			"direction_hint": "🕗 %s",
+			"position": Vector2(-4157, 2400),
+			"radius": 1250.0,
 			"change_rate": 4.5,
 			"lead_stock": "메리츠금융지주 (+6.2%)",
 			"stocks": [
-				{"name": "KB금융", "code": "105560", "rate": 4.8, "world_pos": Vector2(-3400, 4900), "desc": "🏦 [밸류업 대장] 1조원 자사주 매입 소각"},
-				{"name": "신한지주", "code": "055550", "rate": 3.9, "world_pos": Vector2(-4400, 3400), "desc": "💰 분기 균등 배당 & 자본 효율 극대화"},
-				{"name": "메리츠금융지주", "code": "138040", "rate": 6.2, "world_pos": Vector2(-3400, 2200), "desc": "👑 주주환원율 50% 배당의 제왕"},
-				{"name": "하나금융지주", "code": "086790", "rate": 3.5, "world_pos": Vector2(-2400, 3400), "desc": "📈 저PBR 해소 & 글로벌 순이익 증대"},
-				{"name": "삼성물산", "code": "028260", "rate": 4.1, "world_pos": Vector2(-4200, 4200), "desc": "🏛️ 지주사 가치 제고 & 자사주 전량 소각"},
-				{"name": "삼성생명", "code": "032830", "rate": 5.1, "world_pos": Vector2(-2400, 4400), "desc": "🏛️ 저PBR 0.5배 극저평가 밸류업 보험 대장"},
-				{"name": "미래에셋증권", "code": "006800", "rate": 4.3, "world_pos": Vector2(-4400, 2400), "desc": "📈 적극적 자사주 매입 소각 글로벌 금융투자"},
-				{"name": "우리금융지주", "code": "316140", "rate": 3.8, "world_pos": Vector2(-2600, 2400), "desc": "💰 분기 배당 확대 및 비은행 포트폴리오 강화"}
+				{"name": "KB금융", "code": "105560", "rate": 4.8, "world_pos": Vector2(-4157, 1750), "desc": "🏦 [밸류업 대장] 1조원 자사주 매입 소각"},
+				{"name": "신한지주", "code": "055550", "rate": 3.9, "world_pos": Vector2(-3697, 1940), "desc": "💰 분기 균등 배당 & 자본 효율 극대화"},
+				{"name": "메리츠금융지주", "code": "138040", "rate": 6.2, "world_pos": Vector2(-3507, 2400), "desc": "👑 주주환원율 50% 배당의 제왕"},
+				{"name": "하나금융지주", "code": "086790", "rate": 3.5, "world_pos": Vector2(-3697, 2860), "desc": "📈 저PBR 해소 & 글로벌 순이익 증대"},
+				{"name": "삼성물산", "code": "028260", "rate": 4.1, "world_pos": Vector2(-4157, 3050), "desc": "🏛️ 지주사 가치 제고 & 자사주 전량 소각"},
+				{"name": "삼성생명", "code": "032830", "rate": 5.1, "world_pos": Vector2(-4617, 2860), "desc": "🏛️ 저PBR 0.5배 극저평가 밸류업 보험 대장"},
+				{"name": "미래에셋증권", "code": "006800", "rate": 4.3, "world_pos": Vector2(-4807, 2400), "desc": "📈 적극적 자사주 매입 소각 글로벌 금융투자"},
+				{"name": "우리금융지주", "code": "316140", "rate": 3.8, "world_pos": Vector2(-4617, 1940), "desc": "💰 분기 배당 확대 및 비은행 포트폴리오 강화"}
 			],
 			"theme_color": Color(1.0, 0.8, 0.2, 0.25),
 			"is_top_bull": false
 		}
-		
-		# 7. WEST (-4800, 0): Bio & Healthcare Lab
+
+		# 9시 (-4800, 0): 바이오 랩
 		sectors["bio"] = {
 			"key": "bio",
 			"name": "바이오 랩",
 			"sub_title": "신약 임상 완만한 서쪽 숲",
-			"direction_hint": "⬅️ 서쪽",
+			"direction_hint": "🕘 %s",
 			"position": Vector2(-4800, 0),
-			"radius": 2400.0,
-			"change_rate": 0.5,
+			"radius": 1250.0,
+			"change_rate": 3.8,
 			"lead_stock": "알테오젠 (+8.6%)",
 			"stocks": [
-				{"name": "알테오젠", "code": "196170", "rate": 8.6, "world_pos": Vector2(-7200, -700), "desc": "💉 피하주사(SC) 플랫폼 독점"},
-				{"name": "삼성바이오로직스", "code": "207940", "rate": 1.2, "world_pos": Vector2(-7200, 700), "desc": "🧪 CDMO 글로벌 1위 생산능력"},
-				{"name": "셀트리온", "code": "068270", "rate": -0.8, "world_pos": Vector2(-5800, -1400), "desc": "💊 짐펜트라 미국 처방 확대"},
-				{"name": "유한양행", "code": "000100", "rate": 4.8, "world_pos": Vector2(-5800, 1400), "desc": "🏆 렉라자 국산 항암신약 FDA 승인"},
-				{"name": "HLB", "code": "028300", "rate": -2.1, "world_pos": Vector2(-4000, -900), "desc": "🔬 리보세라닙 간암신약 승인 재도전"},
-				{"name": "리가켐바이오", "code": "141080", "rate": 7.4, "world_pos": Vector2(-4000, 900), "desc": "🎯 차세대 ADC 플랫폼 글로벌 빅파마 기술수출"},
-				{"name": "삼천당제약", "code": "000250", "rate": 6.8, "world_pos": Vector2(-5000, -1800), "desc": "💊 경구용 GLP-1 비만치료제 글로벌 계약 체결"},
-				{"name": "에이비엘바이오", "code": "298380", "rate": 5.5, "world_pos": Vector2(-5000, 1800), "desc": "🧬 뇌혈관장벽(BBB) 셔틀 이중항체 신약 파이프라인"}
+				{"name": "알테오젠", "code": "196170", "rate": 8.6, "world_pos": Vector2(-4800, -650), "desc": "💉 피하주사(SC) 플랫폼 독점 라이선스"},
+				{"name": "삼성바이오로직스", "code": "207940", "rate": 1.2, "world_pos": Vector2(-4340, -460), "desc": "🧪 CDMO 글로벌 1위 대규모 생산능력"},
+				{"name": "셀트리온", "code": "068270", "rate": 2.1, "world_pos": Vector2(-4150, 0), "desc": "💊 짐펜트라 미국 PBM 처방집 80% 등재"},
+				{"name": "유한양행", "code": "000100", "rate": 4.8, "world_pos": Vector2(-4340, 460), "desc": "🏆 렉라자 국산 항암신약 FDA 승인"},
+				{"name": "HLB", "code": "028300", "rate": 3.5, "world_pos": Vector2(-4800, 650), "desc": "🔬 리보세라닙 간암신약 승인 재도전"},
+				{"name": "리가켐바이오", "code": "141080", "rate": 7.4, "world_pos": Vector2(-5260, 460), "desc": "🎯 차세대 ADC 플랫폼 글로벌 기술수출"},
+				{"name": "삼천당제약", "code": "000250", "rate": 6.8, "world_pos": Vector2(-5450, 0), "desc": "💊 경구용 GLP-1 비만치료제 글로벌 계약"},
+				{"name": "에이비엘바이오", "code": "298380", "rate": 5.5, "world_pos": Vector2(-5260, -460), "desc": "🧬 뇌혈관장벽(BBB) 셔틀 이중항체 파이프라인"}
 			],
 			"theme_color": Color(0.25, 0.85, 0.5, 0.2),
 			"is_top_bull": false
 		}
 
-		# 8. NORTH-WEST (-3400, -3400): K-Defense & Aerospace
+		# 10시 (-4157, -2400): K-조선 & 해운
+		sectors["shipbuilding"] = {
+			"key": "shipbuilding",
+			"name": "K-조선 & 해운",
+			"sub_title": "LNG선 3년 만선 & 슈퍼사이클 파도",
+			"direction_hint": "🕙 %s",
+			"position": Vector2(-4157, -2400),
+			"radius": 1250.0,
+			"change_rate": 8.1,
+			"lead_stock": "HD현대마린엔진 (+12.3%)",
+			"stocks": [
+				{"name": "HD한국조선해양", "code": "009540", "rate": 9.6, "world_pos": Vector2(-4157, -3050), "desc": "⚓ [글로벌 1위] 친환경 고부가가치 LNG선"},
+				{"name": "삼성중공업", "code": "010140", "rate": 6.4, "world_pos": Vector2(-3697, -2860), "desc": "🌊 해양 FLNG 독점 수주 릴레이"},
+				{"name": "한화오션", "code": "042660", "rate": 8.1, "world_pos": Vector2(-3507, -2400), "desc": "🚢 미 해군 MRO 군함 정비 독점 진출"},
+				{"name": "HD현대마린엔진", "code": "071970", "rate": 12.3, "world_pos": Vector2(-3697, -1940), "desc": "⚙️ 친환경 선박 엔진 공급망 장악"},
+				{"name": "HMM", "code": "011200", "rate": 3.5, "world_pos": Vector2(-4157, -1750), "desc": "📦 글로벌 해운 운임 지수 반등 수혜"},
+				{"name": "팬오션", "code": "028670", "rate": 4.1, "world_pos": Vector2(-4617, -1940), "desc": "🚢 글로벌 벌크선 운임 BDI 상승 최대 수혜"},
+				{"name": "HJ중공업", "code": "097230", "rate": 5.8, "world_pos": Vector2(-4807, -2400), "desc": "⚓ 해군 특수선 및 친환경 컨테이너선 건조"},
+				{"name": "현대힘스", "code": "460930", "rate": 7.2, "world_pos": Vector2(-4617, -2860), "desc": "🛠️ 선박 곡블록 및 조선 기자재 독점 생산"}
+			],
+			"theme_color": Color(0.2, 0.7, 0.9, 0.25),
+			"is_top_bull": false
+		}
+
+		# 11시 (-2400, -4157): K-방산 & 우주
 		sectors["defense"] = {
 			"key": "defense",
 			"name": "K-방산 & 우주",
 			"sub_title": "자주포·전차·유도무기 글로벌 수출 철옹성",
-			"direction_hint": "↖️ 북서",
-			"position": Vector2(-3400, -3400),
-			"radius": 2400.0,
+			"direction_hint": "🕚 %s",
+			"position": Vector2(-2400, -4157),
+			"radius": 1250.0,
 			"change_rate": 9.0,
 			"lead_stock": "한화에어로스페이스 (+12.8%)",
 			"stocks": [
-				{"name": "한화에어로", "code": "012450", "rate": 12.8, "world_pos": Vector2(-3400, -4900), "desc": "🚀 [수출 대장] K9 자주포 & 천무 다연장 글로벌 싹쓸이"},
-				{"name": "현대로템", "code": "064350", "rate": 10.5, "world_pos": Vector2(-4400, -3400), "desc": "🛡️ K2 흑표 전차 폴란드 수주 잭팟"},
-				{"name": "LIG넥스원", "code": "079550", "rate": 8.9, "world_pos": Vector2(-3400, -2200), "desc": "🎯 천궁-II 요격 미사일 중동 수출"},
-				{"name": "한국항공우주", "code": "047810", "rate": 5.2, "world_pos": Vector2(-2400, -3400), "desc": "✈️ KF-21 양산 돌입 & FA-50 경공격기"},
-				{"name": "풍산", "code": "103140", "rate": 7.4, "world_pos": Vector2(-4200, -4200), "desc": "💣 전 세계 탄약 품귀 구리 방산 수혜"},
-				{"name": "쎄트렉아이", "code": "099320", "rate": 6.9, "world_pos": Vector2(-2400, -4400), "desc": "🛰️ 초고해상도 지구관측 인공위성 본체·탑재체 독점"},
-				{"name": "한화시스템", "code": "272210", "rate": 7.8, "world_pos": Vector2(-4400, -2400), "desc": "📡 AESA 능동위상배열 레이더 & 국방 지휘통제"},
-				{"name": "현대위아", "code": "011210", "rate": 4.9, "world_pos": Vector2(-2600, -2400), "desc": "🛡️ 함포·곡사포 전술 화포 체계 및 무인 포탑"}
+				{"name": "한화에어로", "code": "012450", "rate": 12.8, "world_pos": Vector2(-2400, -4807), "desc": "🚀 [수출 대장] K9 자주포 & 천무 다연장"},
+				{"name": "현대로템", "code": "064350", "rate": 10.5, "world_pos": Vector2(-1940, -4617), "desc": "🛡️ K2 흑표 전차 폴란드 수주 잭팟"},
+				{"name": "LIG넥스원", "code": "079550", "rate": 8.9, "world_pos": Vector2(-1750, -4157), "desc": "🎯 천궁-II 요격 미사일 중동 수출"},
+				{"name": "한국항공우주", "code": "047810", "rate": 5.2, "world_pos": Vector2(-1940, -3697), "desc": "✈️ KF-21 양산 돌입 & FA-50 경공격기"},
+				{"name": "풍산", "code": "103140", "rate": 7.4, "world_pos": Vector2(-2400, -3507), "desc": "💣 전 세계 탄약 품귀 구리 방산 수혜"},
+				{"name": "쎄트렉아이", "code": "099320", "rate": 6.9, "world_pos": Vector2(-2860, -3697), "desc": "🛰️ 초고해상도 지구관측 인공위성 탑재체"},
+				{"name": "한화시스템", "code": "272210", "rate": 7.8, "world_pos": Vector2(-3050, -4157), "desc": "📡 AESA 능동위상배열 레이더 국방 지휘통제"},
+				{"name": "현대위아", "code": "011210", "rate": 4.9, "world_pos": Vector2(-2860, -4617), "desc": "🛡️ 함포·곡사포 전술 화포 체계 및 무인 포탑"}
 			],
 			"theme_color": Color(0.9, 0.3, 0.5, 0.25),
 			"is_top_bull": false
 		}
-		
-		# Sector-specific Curated Live Market News
+
 		sector_news_dict = {
 			"semiconductor": [
 				"HBM4 및 3nm 초미세 공정 주문 폭증으로 글로벌 팹 가동률 95% 돌파",
@@ -674,702 +864,592 @@ func init_market_data():
 			],
 			"power_grid": [
 				"미국 노후 전력망 교체 및 AI 데이터센터 전력 소비 10배 폭증... 변압기 수주 3년 밀려",
-				"체코 24조 원전 수주 본계약 임박... SMR(소형 모듈 원자로) 파이프라인 가속",
-				"구글·MS 등 빅테크, 차세대 원전 및 초고압 전력 인프라와 20년 전력 독점 계약"
+				"체코 신규 원전 24조원 본계약 체결 임박... K-원전 주기기 수출 르네상스",
+				"초고압 직류송전(HVDC) 및 차세대 SMR 고속로 국가 전략 프로젝트 가동"
+			],
+			"automotive": [
+				"현대차그룹 글로벌 판매 3위 굳히기... 북미 하이브리드 & SUV 판매 사상 최대",
+				"현대차 인도 법인 IPO 사상 최대 청약 증거금 몰리며 글로벌 가치 재평가",
+				"SDV 소프트웨어 중심 자동차 전환 가속... 자율주행 전장 부품 수주 10조 돌파"
 			],
 			"robot_ai": [
-				"국제로봇연맹(IFR): 차세대 산업용 협동로봇 연평균 32% 고성장 전망",
-				"국가 AI 전략위원회 출범... 초거대 AI 컴퓨팅 인프라 2조원 전격 투입",
-				"피지컬 AI(휴머노이드) 시대 개막... 국내외 완성차 조립 라인 실전 투입"
+				"피지컬 AI 협동로봇 공장 자동화 수요 급증... 로봇 부품 국산화율 80% 달성",
+				"실외 자율주행 배달로봇 상용화 규제 해소... 도심 물류 라스트마일 투입",
+				"의료 및 보행 재활 웨어러블 로봇 글로벌 병원 처방 및 미국 FDA 승인"
 			],
-			"shipbuilding": [
-				"글로벌 친환경 LNG선 도크 2028년까지 완전 포화... 신조선가 사상 최고치 경신",
-				"미국 해군성 장관 방한, K-조선소 방문 후 함정 MRO 정비 사업 전격 발주",
-				"해양 FLNG 초대형 가스선 프로젝트 수주 랠리... 조선 3사 영업익 서프라이즈"
+			"gaming_platform": [
+				"크래프톤 배틀그라운드 글로벌 트래픽 역주행... 인도 및 서구권 매출 랠리",
+				"네이버-카카오 생성형 AI 검색 및 비즈니스 에이전트 서비스 전면 상용화",
+				"게임스컴 호평 글로벌 콘솔 대작 신작 릴리즈 임박... K-게임 수출 확대"
+			],
+			"entertainment": [
+				"BTS 완전체 컴백 기대 및 K-POP 스타디움 월드투어 릴레이 티켓 매진",
+				"글로벌 음원 스트리밍 차트 싹쓸이... K-콘텐츠 플랫폼 위버스 유료 가입자 폭증",
+				"글로벌 OTT K-드라마 텐트폴 라인업 방영 및 해외 판권 계약 사상 최고가"
 			],
 			"battery": [
-				"리튬·니켈 원자재 가격 바닥 확인... 양극재 수익성 턴어라운드 분기점",
-				"북미·유럽 대규모 ESS(에너지저장장치) 배터리 공급 계약 연쇄 체결",
-				"차세대 전고체 배터리 파일럿 라인 가동 및 4680 폼팩터 양산 가속"
+				"전기차 캐즘 장기화 우려에 양극재 판가 하락... 공매도 집중 공격",
+				"글로벌 완성차 배터리 투자 속도 조절... 리튬 및 메탈 원가 변동성 확대",
+				"북미 IRA 현지화 전해액 및 실리콘 음극재 공급사 중심 차별화 시도"
+			],
+			"food_consumer": [
+				"불닭볶음면 글로벌 메가히트로 삼양식품 해외 매출 80% 돌파... 수출 신기록",
+				"K-뷰티 인디 브랜드 미국·유럽 올리브영 완판 랠리... 화장품 ODM 풀가동",
+				"신라면 및 K-과자 글로벌 대형마트 입점 확대로 K-푸드 세계적 위상 강화"
 			],
 			"finance": [
-				"정부 밸류업 가이드라인 본격화... 4대 금융지주 자사주 매입 소각 3조원 돌파",
-				"배당소득 분리과세 추진 기대감... 은행·증권주 외국인 지분율 70% 근접",
-				"사상 최대 분기 순이익 행진 및 주주환원율 40%대 안착으로 배당 매력 폭발"
+				"금융위 밸류업 프로그램 가동... 조 단위 자사주 전격 소각 및 배당 확대",
+				"저PBR 은행·지주사 주주환원율 40~50% 상향 로드맵 발표",
+				"외국인 순매수 지속... 금융 섹터 시가총액 사상 최고치 경신"
 			],
 			"bio": [
-				"FDA 글로벌 신약 허가 사상 최다치... K-바이오 플랫폼 기술수출 릴레이",
-				"GLP-1 비만/대사질환 치료제 시장 2030년 130조원 규모 초고속 팽창",
-				"ADC(항체-약물 접합체) 및 피하주사(SC) 플랫폼 라이선스 계약 쇄도"
+				"알테오젠 피하주사(SC) 제형 변경 플랫폼 글로벌 빅파마 독점 계약 체결",
+				"국산 신약 렉라자 미국 FDA 승인 후 처방 본격 확대... 마일스톤 유입",
+				"차세대 ADC 항암 플랫폼 및 비만치료제 신약 후보물질 조 단위 기술이전"
+			],
+			"shipbuilding": [
+				"LNG 운반선 3년 치 도크 만선... 선가 사상 최고치 슈퍼사이클 도래",
+				"미 해군 군함 MRO 유지보수 정비 사업 독점 계약 체결",
+				"친환경 암모니아·메탄올 추진선 신규 발주 폭증으로 영업이익률 두 자릿수"
 			],
 			"defense": [
-				"K-방산 올해 수출액 200억 달러 돌파... NATO 회원국 수주잔고 100조원 돌파",
-				"러시아-우크라이나 및 중동 분쟁 장기화로 K9 자주포·천무 조기 납기 호평",
-				"한국형 차세대 전투기 KF-21 최초 양산 계약 체결 및 우주 발사체 민간 이양"
+				"K9 자주포 및 천무 다연장 유럽·중동 30조원 수주잔고 확보",
+				"K2 흑표 전차 2차 본계약 체결 임박... K-방산 방호력 세계적 입증",
+				"천궁-II 중동 방공망 수출 릴레이 및 초고해상도 감시위성 우주 발사 성공"
 			]
 		}
 		
-		# Stock-specific Financial Headlines & Analyst Commentaries
 		stock_news_dict = {
-			"한미반도체": [
-				"글로벌 1위 HBM 듀얼 TC본더 장비 독점 수주 러시... 공급 부족 심화",
-				"AI 가속기 서버 증설로 장비 리드타임 10개월 확대, 분기 최대 영업익",
-				"외국인/기관 쌍끌이 순매수 유입... 목표주가 20만원 상향 리포트"
-			],
-			"SK하이닉스": [
-				"5세대 HBM3E 엔비디아 공급 주도권 공고화... 영업이익 사상 최대치",
-				"차세대 HBM4 16단 2025년 조기 양산 체제 돌입 발표",
-				"서버용 고성능 eSSD 수요 폭발로 낸드 부문 흑자 전환 가속"
-			],
-			"삼성전자": [
-				"HBM3E 12단 퀄 테스트 최종 검증 진입... 하반기 납품 가시화",
-				"3나노 2세대 게이트올어라운드(GAA) 공정 수율 안정화 구간 안착",
-				"차세대 CXL 및 온디바이스 메모리 시장 선점 속도"
-			],
-			"HPSP": [
-				"고압 수소 어닐링 장비 독점력 유지... 초미세 공정 필수재 입지",
-				"글로벌 톱10 파운드리 중 8곳에 양산 장비 공급 완료"
-			],
-			"리노공업": [
-				"온디바이스 AI 칩 다변화로 리노핀 및 테스트소켓 주문 급증",
-				"영업이익률 40%대 초고수익성 반도체 소부장 대장주 굳건"
-			],
-			"이수페타시스": [
-				"AI 가속기용 초고다층 MLB(인쇄회로기판) 제4공장 풀가동",
-				"북미 빅테크향 고다층 기판 독점 공급으로 분기 최대 실적"
-			],
-			"HD현대일렉트릭": [
-				"북미 초고압 변압기 수주잔고 5조원 돌파... 공장 3년치 일감 완판",
-				"영업이익률 20%대 초고수익 달성... 글로벌 전력망 대장주 위상"
-			],
-			"두산에너빌리티": [
-				"체코 24조 원전 수주 주기기 제작 착수... SMR 파운드리 본격화",
-				"가스터빈 국산화 1호기 상업운전 돌입 및 수소혼소 개발 순항"
-			],
-			"LS ELECTRIC": [
-				"북미 AI 데이터센터 배전 솔루션 공급 계약 1조원 돌파",
-				"초고압 직류송전(HVDC) 변환용 변압기 글로벌 수주 가속"
-			],
-			"효성중공업": [
-				"미국 테네시 변압기 공장 풀가동... 북미 시장점유율 급상승",
-				"유럽 초고압 전력망 프로젝트 연쇄 수주로 실적 턴어라운드"
-			],
-			"한전KPS": [
-				"국내외 원자력 발전소 정비 단독 수행으로 독점적 현금흐름 창출",
-				"해외 원전 수출 프로젝트 가동 시 경상정비 매출 대폭 성장"
-			],
-			"두산로보틱스": [
-				"북미 식음료 및 물류 자동화 협동로봇 솔루션 대규모 공급 계약",
-				"소프트웨어 플랫폼 '다트스위트' 결합으로 로봇 생태계 확장"
-			],
-			"레인보우로보": [
-				"양팔형 이동 매니퓰레이터 및 휴머노이드 상용화 박차",
-				"삼성전자 제조공장 협동로봇 자동화 라인 실전 투입 확대"
-			],
-			"NAVER": [
-				"생성형 AI 하이퍼클로바X B2B 엔터프라이즈 솔루션 수주 가속",
-				"검색 및 커머스 AI 타겟팅 고도화로 광고 클릭률 30% 개선"
-			],
-			"카카오": [
-				"카카오톡 신규 AI 에이전트 서비스 '카나나' 생태계 론칭",
-				"모빌리티 및 페이 흑자 기조 안착 및 주주환원 확대 발표"
-			],
-			"루닛": [
-				"루닛 인사이트 AI 암 진단 솔루션 글로벌 3000개 병원 도입 돌파",
-				"미국 캔서X 프로젝트 핵심 파트너사로 AI 바이오마커 공동 개발"
-			],
-			"HD한국조선해양": [
-				"올해 수주 목표 140% 조기 초과 달성... 고가 LNG선 선별 수주",
-				"암모니아·메탄올 친환경 이중연료 추진선 시장 70% 장악"
-			],
-			"삼성중공업": [
-				"해양 FLNG(부유식 LNG 생산설비) 글로벌 시장 사실상 독점 체제",
-				"연간 영업이익 4000억원 돌파... 10년 만의 최대 흑자 사이클"
-			],
-			"한화오션": [
-				"미 해군 군수지원함 창정비(MRO) 국내 최초 수주 성공",
-				"잠수함 및 수상함 특수선 방산 라인업 글로벌 수출 추진"
-			],
-			"HD현대마린엔진": [
-				"친환경 선박 엔진 공급망 일원화로 마진율 두 자릿수 도약",
-				"선박 애프터마켓(AM) 부품 매출 확대로 안정적 수익 확보"
-			],
-			"HMM": [
-				"상하이컨테이너운임지수(SCFI) 고공행진에 분기 1조 흑자",
-				"초대형 친환경 컨테이너선단 확충 및 물류 다변화"
-			],
-			"에코프로비엠": [
-				"하이니켈 양극재 고객사 재고 소진 후 출하량 반등 모색",
-				"현대차·기아 및 북미 완성차향 중저가 LFP 양극재 라인 증설"
-			],
-			"에코프로": [
-				"포항 블루밸리 캠퍼스 리튬·전구체 수직 계열화 효율화 달성",
-				"폐배터리 리사이클링 핵심 원자재 추출 원가 경쟁력 우위"
-			],
-			"LG에너지솔루션": [
-				"차세대 4680 원통형 배터리 3분기 양산 본격화",
-				"글로벌 완성차 합작공장(JV) 가동률 회복 및 대규모 ESS 수주"
-			],
-			"POSCO홀딩스": [
-				"아르헨티나 옴브레 무에르토 염호 1단계 수산화리튬 준공 가동",
-				"친환경 미래소재 풀 밸류체인 구축으로 원자재 사이클 턴어라운드"
-			],
-			"포스코퓨처엠": [
-				"고성능 단결정 양극재 공급 확대 및 음극재 국산화 선도",
-				"GM 합작 얼티엄캠 캐나다 양극재 공장 시운전 성공"
-			],
-			"KB금융": [
-				"총주주환원율 40% 공식 선언... 자사주 1조원 매입 소각",
-				"비이자이익 포트폴리오 다변화로 사상 최대 5조원 순익 전망"
-			],
-			"신한지주": [
-				"분기 균등 배당 도입으로 주주 가치 극대화",
-				"글로벌 사업 부문 순이익 1조원 돌파... 자본적정성 최상위"
-			],
-			"메리츠금융지주": [
-				"당기순이익 50% 주주환원 원칙 철저 이행... 한국판 버크셔",
-				"화재·증권 통합 원메리츠 시너지로 ROE 25% 업계 최고"
-			],
-			"하나금융지주": [
-				"주가순자산비율(PBR) 0.4배 극심한 저평가 해소 밸류업 계획 발표",
-				"중간배당 및 자사주 소각 규모 대폭 확대"
-			],
-			"삼성물산": [
-				"보유 자사주 전량 소각 발표... 주주가치 제고 리더십",
-				"건설·바이오·상사 삼각편대 호실적으로 배당 재원 확대"
-			],
-			"알테오젠": [
-				"MSD 키트루다 피하주사(SC) 독점 라이선스 변경 계약 마일스톤 유입",
-				"글로벌 빅파마 5곳과 피하주사 제형 변경 플랫폼 기술수출 협상"
-			],
-			"삼성바이오로직스": [
-				"송도 제5공장 조기 가동 추진... 글로벌 1위 78.4만 리터 생산력",
-				"글로벌 빅파마 20곳 중 16곳 고객사 확보, 수주잔고 16조원 돌파"
-			],
-			"셀트리온": [
-				"미국 출시 피하주사제 '짐펜트라' 대형 PBM 처방집 80% 이상 등재",
-				"유플라이마·베그젤마 등 후속 바이오시밀러 유럽 점유율 1위"
-			],
-			"유한양행": [
-				"국산 항암신약 최초 '렉라자' 미국 FDA 1차 치료제 최종 승인",
-				"글로벌 얀센과 리브리반트 병용요법으로 마일스톤 800억원 수령"
-			],
-			"HLB": [
-				"간암 신약 리보세라닙+캄렐리주맙 병용요법 FDA 재승인 서류 제출 완료",
-				"글로벌 임상 3상 데이터 미국 종합암네트워크(NCCN) 가이드라인 권고"
-			],
-			"한화에어로": [
-				"폴란드·루마니아 K9 자주포 및 천무 30조원 수주잔고 확보",
-				"누리호 4호기 고도화 총괄 주관 및 차세대 발사체 사업자 선정"
-			],
-			"현대로템": [
-				"폴란드 K2 흑표 전차 2차 계약 8조원 체결 임박",
-				"루마니아 및 중동 전차 수출 협상 가속화... 방산 매출 비중 70%"
-			],
-			"LIG넥스원": [
-				"사우디·이라크 천궁-II 7조원 중동 방공망 수출 독점",
-				"미국 고스트로보틱스 인수로 사족보행 로봇 국방 솔루션 진출"
-			],
-			"한국항공우주": [
-				"KF-21 보라매 공군 1차 양산 계약 2조원 전격 체결",
-				"FA-50 경공격기 폴란드·말레이시아 수출 물량 순차 인도"
-			],
-			"풍산": [
-				"글로벌 155mm 포탄 재고 고갈로 탄약 수출 판가 급등",
-				"구리 가격 상승과 방산 부문 최대 마진으로 역대급 실적"
-			],
-			"제주반도체": [
-				"글로벌 팹리스 온디바이스 AI 저전력 LPDDR 메모리 독점 공급",
-				"퀄컴·미디어텍 5G IoT 칩셋 공식 인증 및 매출 급성장"
-			],
-			"가온칩스": [
-				"일본·미국 빅테크향 첨단 AI ASIC 디자인하우스 프로젝트 잇단 수주",
-				"삼성 파운드리 및 ARM 토탈 디자인 핵심 파트너십 강화"
-			],
-			"일진전기": [
-				"미국 대형 유틸리티향 500kV 초고압 변압기 4000억 수주",
-				"HVDC 초고압 해저케이블 및 지중 송전선로 공장 풀가동"
-			],
-			"우진엔텍": [
-				"체코·폴란드 한국형 원전 수출 정비 및 계측제어 공급 계약",
-				"원전 해체 핵심 기술 확보 및 국가 전략과제 총괄"
-			],
-			"제룡전기": [
-				"북미 지상 변압기 PAD 쇼티지로 수출 비중 85% 역대 최대 마진",
-				"미국 배전망 노후화 교체 사이클로 2년치 일감 확보"
-			],
-			"로보티즈": [
-				"실외 이동로봇 규제 완화 수혜... 자율주행 배달로봇 지능형 양산",
-				"로봇 전용 다이나믹셀 액추에이터 글로벌 로봇 기업 80% 탑재"
-			],
-			"엔젤로보틱스": [
-				"웨어러블 보행 재활 로봇 엔젤메디 상급종합병원 처방 확대",
-				"산업용 근력보조 슈트 엔젤기어 현대차·CJ 등 대기업 공급"
-			],
-			"폴라리스AI": [
-				"공공·금융 엔터프라이즈 생성형 AI 거대언어모델(LLM) 공급",
-				"자체 AI 오피스 문서 솔루션 구독자 100만 돌파"
-			],
-			"팬오션": [
-				"글로벌 원자재 물동량 회복... 발틱건화물지수(BDI) 급반등 호재",
-				"친환경 LNG 벙커링선 및 초대형 벌크선 장기 대선 계약 체결"
-			],
-			"HJ중공업": [
-				"해군 차기고속정 및 해경 경비함 등 특수선 방산 수주 독점",
-				"친환경 메탄올 추진 컨테이너선 연속 건조 도크 확보"
-			],
-			"현대힘스": [
-				"조선 빅3 선박 블록 물량 쏟아지며 도크 풀가동 및 단가 인상",
-				"선박 독립형 곡블록 생산능력 국내 1위... 영업이익률 20% 돌파"
-			],
-			"엔켐": [
-				"북미 조지아·테네시 배터리 공장향 전해액 단독 공급망 선점",
-				"미국 IRA 해외우려기관(FEOC) 규제 최대 수혜로 시장점유율 1위"
-			],
-			"대주전자재료": [
-				"글로벌 완성차 포르쉐·현대차 탑재 실리콘 음극재 독점 납품",
-				"실리콘 함량 15% 차세대 배터리 소재 대량 양산 가동"
-			],
-			"금양": [
-				"부산 기장 4695 원통형 배터리 드림팩토리 2공장 준공 임박",
-				"몽골 몬라 리튬 광산 채굴 및 정제 가공 밸류체인 가시화"
-			],
-			"삼성생명": [
-				"기업 밸류업 프로그램 최대 수혜... PBR 0.5배 저평가 매력",
-				"삼성전자 등 보유 지분 가치 대비 역대급 자사주 소각 기대감"
-			],
-			"미래에셋증권": [
-				"주주환원율 35% 달성... 보통주 1000만주 이상 소각 지속",
-				"해외 주식 예탁자산 30조 돌파 및 글로벌 브로커리지 수익 1위"
-			],
-			"우리금융지주": [
-				"동양생명·ABL생명 인수로 비은행 포트폴리오 완성 및 배당 매력",
-				"보통주 자본비율(CET1) 12% 조기 달성 및 분기 배당 확대"
-			],
-			"리가켐바이오": [
-				"얀센 대상 2.2조원 ADC 후보물질 기술수출 계약금 수령",
-				"차세대 항체-약물접합체(ADC) 링커 플랫폼 글로벌 독점 공급"
-			],
-			"삼천당제약": [
-				"경구용 GLP-1 비만치료제 서구권 5개국 독점 판매 계약",
-				"아일리아 바이오시밀러 유럽 공급 승인 및 캐시카우 확보"
-			],
-			"에이비엘바이오": [
-				"그랩바디-B 플랫폼 기반 뇌혈관장벽(BBB) 통과 파킨슨병 신약 임상",
-				"사노피 대상 추가 마일스톤 달성 및 다국적 제약사 기술이전 협상"
-			],
-			"쎄트렉아이": [
-				"초고해상도 지구관측 위성 스페이스아이-T 발사 및 상용화",
-				"한화에어로스페이스와 우주 밸류체인 구축 및 국방 감시위성 독점"
-			],
-			"한화시스템": [
-				"한국형 차세대 전투기 KF-21 AESA 능동위상배열 레이더 양산",
-				"우주 저궤도 위성통신망 및 다기능 레이다 해외 수출 잭팟"
-			],
-			"현대위아": [
-				"K2 전차 주포 및 K9 자주포 무장 체계 독점 제작 납품",
-				"모빌리티 로봇 및 전기차 열관리 시스템 방산-민수 융합 시너지"
-			]
+			"한미반도체": ["HBM Dual TC 본더 공급 독점 계약", "글로벌 패키징 팹라인 증설 수혜"],
+			"SK하이닉스": ["5세대 HBM3E 세계 최초 대량 양산 납품", "D램 영업이익률 40% 돌파 흑자"],
+			"삼성전자": ["3nm 파운드리 차세대 수율 안정화", "CXL 및 차세대 HBM4 개발 가속"],
+			"HPSP": ["고압수소열처리 독점 공급망 견고", "파운드리 선단공정 필수 장비 선정"],
+			"리노공업": ["글로벌 빅테크 신규 칩 테스트 소켓 독점", "영업이익률 45% 돌파 캐시카우"],
+			"이수페타시스": ["AI 가속기용 초다층 MLB 기판 수주 폭증", "글로벌 빅테크향 직납 확대"],
+			"제주반도체": ["온디바이스 AI 저전력 메모리 독점", "글로벌 IoT 칩셋 탑재 급증"],
+			"가온칩스": ["일본 빅테크 AI ASIC 디자인하우스 수주", "삼성 파운드리 최우수 파트너"],
+			"HD현대일렉트릭": ["북미 500kV 초고압 변압기 3년 수주잔고", "사상 최대 영업이익률 20% 경신"],
+			"두산에너빌리티": ["체코 원전 주기기 제작 독점권 확보", "가스터빈 및 차세대 SMR 수주"],
+			"LS ELECTRIC": ["북미 AI 데이터센터 배전 시스템 잭팟", "초고압 변압기 전용 공장 증설"],
+			"효성중공업": ["미국 테네시 변압기 팩토리 풀가동", "유럽 해상풍력 전력망 공급"],
+			"한전KPS": ["체코 원전 유지보수 및 정비 독점 계약", "국내외 화력·원자력 정비 캐시카우"],
+			"일진전기": ["미국 유틸리티향 500kV 초고압 변압기 수주", "HVDC 해저케이블 생산 본격화"],
+			"우진엔텍": ["원전 계측제어 설비 정비 원천기술 독점", "체코 원전 수출 참여 확정"],
+			"제룡전기": ["미국 배전 PAD 변압기 수출 비중 85%", "역대 최고 영업이익률 기록"],
+			"현대차": ["글로벌 하이브리드 판매 40% 급증", "인도 법인 사상 최대 규모 상장 성공"],
+			"기아": ["영업이익률 13% 글로벌 완성차 1위", "EV3 전기차 유럽 판매 호조"],
+			"현대모비스": ["차세대 전동화 부품 및 전장 수주 12조", "글로벌 완성차 수주 비중 확대"],
+			"HL만도": ["북미 선도 EV 조향 및 제동 시스템 공급", "자율주행 주행보조 시스템 확대"],
+			"한온시스템": ["글로벌 히트펌프 열관리 시스템 1위", "하이브리드·전기차 동시 수혜"],
+			"현대오토에버": ["현대차그룹 차량용 SW 모빌진 표준화", "스마트팩토리 및 클라우드 매출 급증"],
+			"한국타이어": ["고수익 EV 전용 아이온(iON) 타이어 1위", "글로벌 완성차 신차용 타이어 공급"],
+			"삼기이브": ["고안전성 배터리 팩 엔드플레이트 독점", "북미 현지 공장 본격 가동"],
+			"두산로보틱스": ["협동로봇 라인업 글로벌 점유율 확대", "스마트 팩토리 자동화 솔루션 공급"],
+			"레인보우로보": ["삼성전자와 휴머노이드 로봇 협력", "사족보행 로봇 국방 솔루션 개발"],
+			"로보티즈": ["실외 자율주행 배달로봇 도심 운행", "로봇 전용 액추에이터 글로벌 80% 탑재"],
+			"엔젤로보틱스": ["웨어러블 재활 보행로봇 상급종합병원 공급", "산업용 근력보조 슈트 대기업 납품"],
+			"루닛": ["AI 암 진단 솔루션 미국 보험 수가 등재", "글로벌 의료기기 기업과 파트너십"],
+			"유진로봇": ["자율주행 물류 로봇(AMR) 유럽 수출", "스마트 물류창고 자동화 공급"],
+			"에스피지": ["로봇용 초정밀 감속기 국산화 성공", "협동로봇 기업 대상 납품 확대"],
+			"에스비비테크": ["하모닉 타입 초정밀 감속기 양산", "국방 및 로봇 부품 공급 가속"],
+			"크래프톤": ["배틀그라운드 인도 및 글로벌 역대급 트래픽", "다크앤다커 모바일 신작 기대감"],
+			"NAVER": ["생성형 AI 하이퍼클로바X 검색 적용", "클라우드 및 웹툰 글로벌 매출 성장"],
+			"카카오": ["새로운 AI 에이전트 카나나 서비스 런칭", "톡비즈 광고 및 커머스 견조"],
+			"넷마블": ["나 혼자만 레벨업 글로벌 매출 1위", "하반기 기대작 신작 라인업 가동"],
+			"엔씨소프트": ["TL 글로벌 스팀 동접자 흥행 돌풍", "신작 슈팅 및 전략 게임 출시 예고"],
+			"펄어비스": ["붉은사막 게임스컴 시연 폭발적 반응", "글로벌 콘솔 대작 퍼블리싱 가속"],
+			"위메이드": ["레전드 오브 이미르 출시 기대감", "미르 IP 라이선스 및 블록체인 매출"],
+			"카카오게임즈": ["오딘 및 신작 크로노 오디세이 개발", "글로벌 멀티플랫폼 퍼블리싱 강화"],
+			"하이브": ["BTS 2025 완전체 컴백 플랜 본격화", "위버스 멤버십 유료 구독 모델 안착"],
+			"JYP Ent.": ["스트레이키즈 빌보드 5연속 1위", "신인 걸그룹 글로벌 데뷔 프로젝트"],
+			"에스엠": ["에스파 슈퍼노바 글로벌 음원 롱런", "라이즈·NCT 위시 팬덤 급성장"],
+			"와이지엔터": ["베이비몬스터 글로벌 차트 진입 돌풍", "블랙핑크 완전체 활동 재개 기대"],
+			"CJ ENM": ["티빙 유료 가입자 500만 돌파 흑자", "글로벌 K-콘텐츠 유통 및 스튜디오"],
+			"스튜디오드래곤": ["글로벌 OTT 동시 방영 텐트폴 라인업", "해외 리메이크 판권 판매 호조"],
+			"디어유": ["버블 팬덤 플랫폼 글로벌 아티스트 영입", "미국 및 일본 시장 진출 본격화"],
+			"콘텐트리중앙": ["메가박스 흥행작 배급 및 관객 회복", "드라마 제작 스튜디오 실적 턴어라운드"],
+			"에코프로비엠": ["하이니켈 양극재 북미 현지화 전략", "단결정 양극재 차세대 라인 가동"],
+			"에코프로": ["리튬·전구체 소재 수직계열화 완성", "폐배터리 리사이클링 밸류체인"],
+			"LG에너지솔루션": ["북미 합작 팩토리 가동률 순차 정상화", "LFP 배터리 및 대규모 ESS 공급"],
+			"POSCO홀딩스": ["아르헨티나 리튬 염호 1단계 상업 생산", "철강 본원 경쟁력 및 밸류업"],
+			"포스코퓨처엠": ["실리콘 음극재 및 고전압 미드니켈 양극재", "포스코그룹 소재 시너지 가속"],
+			"엔켐": ["북미 전해액 시장 점유율 1위 선점", "미국 현지 공장 3배 증설"],
+			"대주전자재료": ["글로벌 완성차향 실리콘 음극재 공급", "차세대 배터리 용량 극대화"],
+			"금양": ["4695 원통형 배터리 드림팩토리 준공", "몽골 리튬 광산 채굴 추진"],
+			"삼양식품": ["불닭볶음면 미국 월마트 완판 행진", "밀양 2공장 증설로 수출 물량 확대"],
+			"농심": ["신라면 해외 매출 비중 60% 돌파", "미국 3공장 설립 및 글로벌 물류 확장"],
+			"오리온": ["초코파이 베트남·러시아·인도 맹활약", "영업이익률 17% 글로벌 제과 1위"],
+			"CJ제일제당": ["비비고 만두 북미 시장 1위 독주", "K-스트리트 푸드 글로벌 유통망 입점"],
+			"아모레퍼시픽": ["코스알엑스 편입으로 서구권 매출 폭증", "라네즈 립마스크 글로벌 1위"],
+			"코스맥스": ["글로벌 1위 화장품 ODM 주문 폭주", "국내외 인디 뷰티 고객사 1000곳"],
+			"한국콜마": ["글로벌 선케어 자외선차단제 독점", "미국 및 캐나다 공장 현지화 생산"],
+			"빙그레": ["메로나·바나나맛우유 미국 코스트코 입점", "해외 수출 실적 사상 최대 달성"],
+			"KB금융": ["1조원 규모 자사주 매입 및 소각", "분기 배당 균등화 및 ROE 개선"],
+			"신한지주": ["주주환원율 40% 조기 달성 로드맵", "비은행 부문 견조한 이익 체력"],
+			"메리츠금융지주": ["주주환원율 50% 약속 3년 연속 이행", "자기자본이익률(ROE) 업계 최고"],
+			"하나금융지주": ["저PBR 해소 및 해외 거점 순익 증대", "분기 배당 확대 및 밸류업"],
+			"삼성물산": ["보유 자사주 전량 소각 계획 발표", "바이오·건설·친환경 에너지 신사업"],
+			"삼성생명": ["PBR 0.5배 극저평가 해소 밸류업 수혜", "삼성전자 지분 가치 대비 매력"],
+			"미래에셋증권": ["주주환원율 35% 이상 보통주 매입 소각", "해외 주식 예탁자산 사상 최대"],
+			"우리금융지주": ["동양생명·ABL생명 인수로 포트폴리오 완성", "CET1 비율 개선 및 분기 배당"],
+			"알테오젠": ["키트루다 피하주사(SC) 독점 라이선스", "글로벌 빅파마 5곳과 플랫폼 기술수출"],
+			"삼성바이오로직스": ["송도 5공장 가동 및 글로벌 CDMO 1위", "수주잔고 16조원 돌파"],
+			"셀트리온": ["짐펜트라 미국 PBM 처방집 80% 이상 등재", "유플라이마 유럽 점유율 1위"],
+			"유한양행": ["렉라자 미국 FDA 승인 및 마일스톤 유입", "글로벌 얀센과 병용요법 1차 치료제"],
+			"HLB": ["리보세라닙 간암신약 FDA 서류 보완 완료", "NCCN 가이드라인 등재 권고"],
+			"리가켐바이오": ["얀센향 2.2조원 기술수출 계약금 수령", "차세대 ADC 링커 플랫폼 독점 공급"],
+			"삼천당제약": ["경구용 GLP-1 비만치료제 글로벌 계약", "아일리아 바이오시밀러 유럽 공급 승인"],
+			"에이비엘바이오": ["그랩바디 BBB 이중항체 임상 순항", "다국적 제약사 기술이전 협상"],
+			"HD한국조선해양": ["LNG선 3년 치 도크 만선 및 선가 상승", "친환경 고부가가치 선박 수주 독점"],
+			"삼성중공업": ["해양 FLNG 2기 연속 수주 잭팟", "연간 영업이익 4000억 흑자 전환"],
+			"한화오션": ["미 해군 MRO 군함 정비 독점 사업자", "특수선 잠수함 글로벌 수출"],
+			"HD현대마린엔진": ["선박 엔진 부품 및 친환경 엔진 풀가동", "영업이익률 두 자릿수 호실적"],
+			"HMM": ["글로벌 해운 운임지수(SCFI) 반등", "친환경 컨테이너선 선대 확장"],
+			"팬오션": ["벌크선 발틱운임지수(BDI) 급등 수혜", "LNG 벙커링선 장기 용선 계약"],
+			"HJ중공업": ["해군 고속정 및 특수선 연속 수주", "친환경 컨테이너선 건조 도크 확보"],
+			"현대힘스": ["선박 곡블록 생산능력 국내 1위", "도크 풀가동 및 조선 기자재 단가 인상"],
+			"한화에어로": ["K9 자주포 및 천무 30조원 수주잔고", "누리호 고도화 사업 총괄 주관"],
+			"현대로템": ["폴란드 K2 흑표 전차 2차 계약 8조원", "루마니아 전차 수출 협상 가속"],
+			"LIG넥스원": ["사우디·이라크 천궁-II 7조원 수출", "미국 고스트로보틱스 인수로 사족보행 로봇"],
+			"한국항공우주": ["KF-21 보라매 공군 1차 양산 계약 2조원", "FA-50 경공격기 글로벌 수출"],
+			"풍산": ["155mm 포탄 글로벌 재고 고갈로 수출 급증", "구리 가격 상승과 방산 마진 극대화"],
+			"쎄트렉아이": ["초고해상도 지구관측 위성 스페이스아이-T", "한화 우주 밸류체인 핵심 감시위성"],
+			"한화시스템": ["KF-21 AESA 능동위상배열 레이더 양산", "우주 저궤도 위성통신망 해외 수출"],
+			"현대위아": ["K2 전차 주포 및 K9 자주포 무장 독점", "모빌리티 및 방산 부품 동시 성장"]
 		}
 		
 		news_pool = [
-			{"headline": "📢 [속보] 북쪽 반도체 밸리로 전진하세요! 엔비디아 대량 수주 체결!", "sector": "semiconductor", "type": "buff", "duration": 15.0},
-			{"headline": "⚡ [속보] 북동쪽 전력망·원전에 미 빅테크 러브콜! 변압기 완판 폭등!", "sector": "power_grid", "type": "buff", "duration": 15.0},
-			{"headline": "🚢 [속보] 남동쪽 K-조선 도크 만선! 미 해군 MRO 수주 잭팟!", "sector": "shipbuilding", "type": "buff", "duration": 15.0},
-			{"headline": "🚀 [속보] 북서쪽 K-방산 유럽·중동 무기 수출 릴레이! 주가 사상 최고치!", "sector": "defense", "type": "buff", "duration": 15.0},
-			{"headline": "💰 [속보] 남서쪽 금융·밸류업 조 단위 자사주 전격 소각! 고배당 랠리!", "sector": "finance", "type": "buff", "duration": 15.0},
-			{"headline": "⚠️ [경고] 남쪽 2차전지 광산에 공매도 세력 대규모 급습! 진입 주의!", "sector": "battery", "type": "debuff", "duration": 15.0},
-			{"headline": "💉 [속보] 서쪽 바이오 랩 알테오젠 SC 제형 독점 수주 랠리!", "sector": "bio", "type": "buff", "duration": 12.0},
-			{"headline": "🤖 [속보] 동쪽 로봇 파크 협동로봇 국책 과제 선정! 성장 가속!", "sector": "robot_ai", "type": "buff", "duration": 12.0}
+			{"headline": "📢 [속보] 12시 반도체 밸리로 전진하세요! 엔비디아 대량 수주 체결!", "sector": "semiconductor", "type": "buff", "duration": 15.0},
+			{"headline": "⚡ [속보] 1시 전력망·원전에 미 빅테크 러브콜! 변압기 완판 폭등!", "sector": "power_grid", "type": "buff", "duration": 15.0},
+			{"headline": "🚗 [속보] 2시 미래차 현대차·기아 글로벌 판매 신기록! 전장 부품 잭팟!", "sector": "automotive", "type": "buff", "duration": 15.0},
+			{"headline": "🤖 [속보] 3시 로봇 파크 협동로봇 국책 과제 선정! 상용화 가속!", "sector": "robot_ai", "type": "buff", "duration": 15.0},
+			{"headline": "🎮 [속보] 4시 게임·플랫폼 크래프톤 배그 인도 역대급 트래픽 폭발!", "sector": "gaming_platform", "type": "buff", "duration": 15.0},
+			{"headline": "🎵 [속보] 5시 K-엔터 하이브 BTS 컴백 기대감! 글로벌 투어 완판!", "sector": "entertainment", "type": "buff", "duration": 15.0},
+			{"headline": "⚠️ [경고] 6시 2차전지 광산에 공매도 세력 대규모 급습! 진입 주의!", "sector": "battery", "type": "debuff", "duration": 15.0},
+			{"headline": "🍜 [속보] 7시 K-푸드 삼양 불닭볶음면 글로벌 품귀! 수출 신기록 랠리!", "sector": "food_consumer", "type": "buff", "duration": 15.0},
+			{"headline": "💰 [속보] 8시 금융·밸류업 조 단위 자사주 전격 소각! 고배당 랠리!", "sector": "finance", "type": "buff", "duration": 15.0},
+			{"headline": "💉 [속보] 9시 바이오 랩 알테오젠 SC 제형 독점 수주 랠리!", "sector": "bio", "type": "buff", "duration": 15.0},
+			{"headline": "🚢 [속보] 10시 K-조선 도크 만선! 미 해군 MRO 수주 잭팟!", "sector": "shipbuilding", "type": "buff", "duration": 15.0},
+			{"headline": "🚀 [속보] 11시 K-방산 유럽·중동 무기 수출 릴레이! 주가 사상 최고치!", "sector": "defense", "type": "buff", "duration": 15.0}
 		]
 		
 	else:
-		# US Market 8 Radial Compass Mega Sectors (Distance ~4800)
-		
-		# 1. NORTH (0, -4800): Silicon Valley AI Chip Giants
+		# US Market 12 Radial Clock Mega Sectors (Distance ~4800)
+		# 12시 (0, -4800): 실리콘밸리 AI 칩
 		sectors["ai_chips"] = {
 			"key": "ai_chips",
 			"name": "실리콘밸리 AI 칩",
-			"sub_title": "GPU 가속 컴퓨팅 황금 본류",
-			"direction_hint": "⬆️ 북쪽",
+			"sub_title": "GPU 가속 컴퓨팅 & 최첨단 파운드리 본류",
+			"direction_hint": "🕛 12시",
 			"position": Vector2(0, -4800),
-			"radius": 2400.0,
+			"radius": 1250.0,
 			"change_rate": 11.4,
 			"lead_stock": "NVIDIA (+14.2%)",
 			"stocks": [
-				{"name": "NVIDIA", "code": "NVDA", "rate": 14.2, "world_pos": Vector2(0, -7200), "desc": "🔥 [NVDA 떡상 정상] 블랙웰 주문 폭주!"},
-				{"name": "Broadcom", "code": "AVGO", "rate": 8.5, "world_pos": Vector2(1300, -6200), "desc": "🚀 커스텀 ASIC 칩 호실적"},
-				{"name": "AMD", "code": "AMD", "rate": 5.8, "world_pos": Vector2(-1300, -6200), "desc": "MI300X 가속기 공급 확대"},
-				{"name": "TSMC", "code": "TSM", "rate": 7.2, "world_pos": Vector2(700, -4200), "desc": "3나노 파운드리 풀가동"},
-				{"name": "Micron", "code": "MU", "rate": 9.0, "world_pos": Vector2(-700, -4200), "desc": "HBM 메모리 품귀 공급"}
+				{"name": "NVIDIA", "code": "NVDA", "rate": 14.2, "world_pos": Vector2(0, -5450), "desc": "🔥 [NVDA 떡상 정상] 블랙웰 주문 폭주!"},
+				{"name": "Broadcom", "code": "AVGO", "rate": 8.5, "world_pos": Vector2(460, -5260), "desc": "🚀 커스텀 ASIC 칩 & 이더넷 스위치"},
+				{"name": "AMD", "code": "AMD", "rate": 5.8, "world_pos": Vector2(650, -4800), "desc": "MI300X AI 가속기 빅테크 공급 확대"},
+				{"name": "TSMC", "code": "TSM", "rate": 7.2, "world_pos": Vector2(460, -4340), "desc": "3나노 파운드리 및 CoWoS 풀가동"},
+				{"name": "Micron", "code": "MU", "rate": 9.0, "world_pos": Vector2(0, -4150), "desc": "HBM3E 메모리 2025 완판 공급"},
+				{"name": "Qualcomm", "code": "QCOM", "rate": 4.8, "world_pos": Vector2(-460, -4340), "desc": "스냅드래곤 온디바이스 AI 칩셋 1위"},
+				{"name": "Arm", "code": "ARM", "rate": 6.5, "world_pos": Vector2(-650, -4800), "desc": "v9 아키텍처 로열티 라이선스 급성장"},
+				{"name": "Intel", "code": "INTC", "rate": 2.1, "world_pos": Vector2(-460, -5260), "desc": "18A 차세대 파운드리 국책 보조금 수혜"}
 			],
 			"theme_color": Color(0.2, 1.0, 0.4, 0.28),
 			"is_top_bull": true
 		}
 
-		# 2. NORTH-EAST (3400, -3400): AI Power Grid & SMR Nuclear
+		# 1시 (2400, -4157): AI 전력망 & SMR
 		sectors["ai_power"] = {
 			"key": "ai_power",
 			"name": "AI 전력망 & SMR",
-			"sub_title": "빅테크 데이터센터 전력 품귀 랠리",
-			"direction_hint": "↗️ 북동",
-			"position": Vector2(3400, -3400),
-			"radius": 2400.0,
+			"sub_title": "빅테크 데이터센터 전력 품귀 & 원전 르네상스",
+			"direction_hint": "🕐 %s",
+			"position": Vector2(2400, -4157),
+			"radius": 1250.0,
 			"change_rate": 13.8,
 			"lead_stock": "Oklo (+18.6%)",
 			"stocks": [
-				{"name": "Constellation", "code": "CEG", "rate": 15.2, "world_pos": Vector2(3400, -4900), "desc": "☢️ [MS 20년 PPA] 스리마일 원전 재가동"},
-				{"name": "Vistra", "code": "VST", "rate": 12.4, "world_pos": Vector2(4400, -3400), "desc": "⚡ AI 데이터센터 전력 공급 연초대비 250% 폭등"},
-				{"name": "Oklo", "code": "OKLO", "rate": 18.6, "world_pos": Vector2(3400, -2200), "desc": "🔥 샘 올트먼의 차세대 SMR 고속로 핵분열"},
-				{"name": "GE Vernova", "code": "GEV", "rate": 9.1, "world_pos": Vector2(2400, -3400), "desc": "🏭 가스터빈 및 전력 그리드 장비 독점"},
-				{"name": "NextEra", "code": "NEE", "rate": 4.5, "world_pos": Vector2(4200, -4200), "desc": "🔋 대규모 신재생 및 ESS 유틸리티 1위"}
+				{"name": "Constellation", "code": "CEG", "rate": 15.2, "world_pos": Vector2(2400, -4807), "desc": "☢️ [MS 20년 PPA] 스리마일 원전 재가동"},
+				{"name": "Vistra", "code": "VST", "rate": 12.4, "world_pos": Vector2(2860, -4617), "desc": "⚡ AI 데이터센터 전력 공급 연초대비 250% 폭등"},
+				{"name": "Oklo", "code": "OKLO", "rate": 18.6, "world_pos": Vector2(3050, -4157), "desc": "🔥 샘 올트먼의 차세대 SMR 고속로 핵분열"},
+				{"name": "GE Vernova", "code": "GEV", "rate": 9.1, "world_pos": Vector2(2860, -3697), "desc": "🏭 가스터빈 및 전력 그리드 장비 독점"},
+				{"name": "NextEra", "code": "NEE", "rate": 4.5, "world_pos": Vector2(2400, -3507), "desc": "🔋 대규모 신재생 및 ESS 유틸리티 1위"},
+				{"name": "Cameco", "code": "CCJ", "rate": 8.2, "world_pos": Vector2(1940, -3697), "desc": "⛏️ 글로벌 1위 우라늄 채굴 쇼티지 수혜"},
+				{"name": "NuScale", "code": "SMR", "rate": 11.4, "world_pos": Vector2(1750, -4157), "desc": "☢️ 미국 NRC 설계 인증 유일 SMR 개발사"},
+				{"name": "NRG", "code": "NRG", "rate": 6.8, "world_pos": Vector2(1940, -4617), "desc": "🔌 텍사스 전력 시장 현물 판가 급등 호재"}
 			],
 			"theme_color": Color(1.0, 0.65, 0.1, 0.26),
 			"is_top_bull": false
 		}
-		
-		# 3. EAST (4800, 0): Big Tech Magnificent 7
+
+		# 2시 (4157, -2400): 국방 AI & 방산
+		sectors["defense_tech"] = {
+			"key": "defense_tech",
+			"name": "국방 AI & 방산",
+			"sub_title": "전장 AI 지휘소 & 스텔스 군수 우주 복합체",
+			"direction_hint": "🕑 %s",
+			"position": Vector2(4157, -2400),
+			"radius": 1250.0,
+			"change_rate": 6.2,
+			"lead_stock": "Palantir (+14.6%)",
+			"stocks": [
+				{"name": "Palantir", "code": "PLTR", "rate": 14.6, "world_pos": Vector2(4157, -3050), "desc": "🧠 [AIP 랠리] 미 국방부 전장 AI 플랫폼 독점"},
+				{"name": "Lockheed", "code": "LMT", "rate": 4.2, "world_pos": Vector2(4617, -2860), "desc": "🛩️ F-35 스텔스 전투기 & 국방 예산 최대 수혜"},
+				{"name": "RTX", "code": "RTX", "rate": 3.8, "world_pos": Vector2(4807, -2400), "desc": "🛡️ 패트리어트 미사일 & 항공기 제트엔진"},
+				{"name": "Northrop", "code": "NOC", "rate": 4.9, "world_pos": Vector2(4617, -1940), "desc": "🦅 B-21 차세대 스텔스 전략 폭격기"},
+				{"name": "GeneralDynamics", "code": "GD", "rate": 3.1, "world_pos": Vector2(4157, -1750), "desc": "🚢 버지니아급 원자력 잠수함 제조"},
+				{"name": "Boeing", "code": "BA", "rate": 2.5, "world_pos": Vector2(3697, -1940), "desc": "✈️ 상업용 민항기 인도 재개 & 방산 우주"},
+				{"name": "Kratos", "code": "KTOS", "rate": 6.2, "world_pos": Vector2(3507, -2400), "desc": "🎯 발키리 스텔스 무인 전투 드론 양산"},
+				{"name": "RocketLab", "code": "RKLB", "rate": 8.4, "world_pos": Vector2(3697, -2860), "desc": "🚀 일렉트론 로켓 발사 및 중대형 뉴트론"}
+			],
+			"theme_color": Color(0.3, 0.75, 0.7, 0.25),
+			"is_top_bull": false
+		}
+
+		# 3시 (4800, 0): 매그니피센트 테크
 		sectors["big_tech"] = {
 			"key": "big_tech",
 			"name": "매그니피센트 테크",
 			"sub_title": "클라우드 & 스마트 디바이스 대로",
-			"direction_hint": "➡️ 동쪽",
+			"direction_hint": "🕒 %s",
 			"position": Vector2(4800, 0),
-			"radius": 2400.0,
-			"change_rate": 2.6,
+			"radius": 1250.0,
+			"change_rate": 3.2,
 			"lead_stock": "Microsoft (+3.1%)",
 			"stocks": [
-				{"name": "Microsoft", "code": "MSFT", "rate": 3.1, "world_pos": Vector2(7200, -700), "desc": "Copilot 기업용 라이선스 증가"},
-				{"name": "Apple", "code": "AAPL", "rate": 1.8, "world_pos": Vector2(7200, 700), "desc": "Apple Intelligence 기기 교체"},
-				{"name": "Alphabet", "code": "GOOGL", "rate": 2.5, "world_pos": Vector2(5800, -1400), "desc": "Gemini AI 모델 검색 탑재"},
-				{"name": "Meta", "code": "META", "rate": 4.2, "world_pos": Vector2(5800, 1400), "desc": "Llama 3 AI 오픈소스 생태계"},
-				{"name": "Amazon", "code": "AMZN", "rate": 2.9, "world_pos": Vector2(4000, 0), "desc": "AWS 클라우드 인프라 매출 가속"}
+				{"name": "Microsoft", "code": "MSFT", "rate": 3.1, "world_pos": Vector2(4800, -650), "desc": "Copilot 기업용 라이선스 증가"},
+				{"name": "Apple", "code": "AAPL", "rate": 1.8, "world_pos": Vector2(5260, -460), "desc": "Apple Intelligence 기기 교체 슈퍼사이클"},
+				{"name": "Alphabet", "code": "GOOGL", "rate": 2.5, "world_pos": Vector2(5450, 0), "desc": "Gemini AI 모델 검색 탑재"},
+				{"name": "Meta", "code": "META", "rate": 4.2, "world_pos": Vector2(5260, 460), "desc": "Llama 3 AI 오픈소스 생태계"},
+				{"name": "Amazon", "code": "AMZN", "rate": 2.9, "world_pos": Vector2(4800, 650), "desc": "AWS 클라우드 인프라 매출 가속"},
+				{"name": "Oracle", "code": "ORCL", "rate": 5.8, "world_pos": Vector2(4340, 460), "desc": "OCI 멀티클라우드 수주잔고 사상 최대"},
+				{"name": "IBM", "code": "IBM", "rate": 3.5, "world_pos": Vector2(4150, 0), "desc": "왓슨x 생성형 AI 컨설팅 및 하이브리드 클라우드"},
+				{"name": "Salesforce", "code": "CRM", "rate": 2.8, "world_pos": Vector2(4340, -460), "desc": "Agentforce 자율형 비즈니스 AI 에이전트"}
 			],
 			"theme_color": Color(0.4, 0.8, 1.0, 0.22),
 			"is_top_bull": false
 		}
 
-		# 4. SOUTH-EAST (3400, 3400): Defense Tech & Military AI
-		sectors["defense_tech"] = {
-			"key": "defense_tech",
-			"name": "국방 AI & 방산",
-			"sub_title": "전장 AI 지휘소 & 스텔스 군수 복합체",
-			"direction_hint": "↘️ 남동",
-			"position": Vector2(3400, 3400),
-			"radius": 2400.0,
-			"change_rate": 6.2,
-			"lead_stock": "Palantir (+14.6%)",
+		# 4시 (4157, 2400): 사이버 보안 & SaaS
+		sectors["cyber_saas"] = {
+			"key": "cyber_saas",
+			"name": "사이버 보안 & SaaS",
+			"sub_title": "클라우드 제로 트러스트 & 엔터프라이즈 소프트웨어",
+			"direction_hint": "🕓 %s",
+			"position": Vector2(4157, 2400),
+			"radius": 1250.0,
+			"change_rate": 5.4,
+			"lead_stock": "CrowdStrike (+8.1%)",
 			"stocks": [
-				{"name": "Palantir", "code": "PLTR", "rate": 14.6, "world_pos": Vector2(3400, 4900), "desc": "🧠 [AIP 랠리] 미 국방부 전장 AI 플랫폼 독점"},
-				{"name": "Lockheed", "code": "LMT", "rate": 4.2, "world_pos": Vector2(4400, 3400), "desc": "🛩️ F-35 스텔스 전투기 & 국방 예산 최대 수혜"},
-				{"name": "RTX", "code": "RTX", "rate": 3.8, "world_pos": Vector2(3400, 2200), "desc": "🛡️ 패트리어트 미사일 & 항공기 엔진"},
-				{"name": "Northrop", "code": "NOC", "rate": 4.9, "world_pos": Vector2(2400, 3400), "desc": "🦅 B-21 차세대 스텔스 전략 폭격기"},
-				{"name": "GeneralDynamics", "code": "GD", "rate": 3.1, "world_pos": Vector2(4200, 4200), "desc": "🚢 버지니아급 원자력 잠수함 제조"}
+				{"name": "CrowdStrike", "code": "CRWD", "rate": 8.1, "world_pos": Vector2(4157, 1750), "desc": "🛡️ 팔콘 플랫폼 엔드포인트 보안 1위"},
+				{"name": "PaloAlto", "code": "PANW", "rate": 5.2, "world_pos": Vector2(4617, 1940), "desc": "🔒 프리시전 AI 기반 네트워크 방화벽 통합"},
+				{"name": "ServiceNow", "code": "NOW", "rate": 4.8, "world_pos": Vector2(4807, 2400), "desc": "💼 워크플로우 자동화 AI 플랫폼 고마진"},
+				{"name": "Snowflake", "code": "SNOW", "rate": 6.2, "world_pos": Vector2(4617, 2860), "desc": "❄️ 데이터 클라우드 분석 AI 모델 서빙"},
+				{"name": "Datadog", "code": "DDOG", "rate": 5.9, "world_pos": Vector2(4157, 3050), "desc": "📊 클라우드 인프라 모니터링 구독 성장"},
+				{"name": "MongoDB", "code": "MDB", "rate": 4.1, "world_pos": Vector2(3697, 2860), "desc": "🍃 최신 NoSQL 도큐먼트 데이터베이스"},
+				{"name": "Cloudflare", "code": "NET", "rate": 6.8, "world_pos": Vector2(3507, 2400), "desc": "🌐 글로벌 엣지 CDN 및 DDoS 분산 방어"},
+				{"name": "Zscaler", "code": "ZS", "rate": 5.0, "world_pos": Vector2(3697, 1940), "desc": "☁️ 클라우드 제로트러스트 보안 교환소"}
 			],
-			"theme_color": Color(0.3, 0.75, 0.7, 0.25),
+			"theme_color": Color(0.2, 0.9, 0.7, 0.24),
 			"is_top_bull": false
 		}
-		
-		# 5. SOUTH (0, 4800): EV Price War Bear Crash
+
+		# 5시 (2400, 4157): 미디어 & 엔터테인먼트
+		sectors["media_entertain"] = {
+			"key": "media_entertain",
+			"name": "미디어 & 엔터테인먼트",
+			"sub_title": "글로벌 스트리밍 & 블록버스터 게이밍 제국",
+			"direction_hint": "🕔 %s",
+			"position": Vector2(2400, 4157),
+			"radius": 1250.0,
+			"change_rate": 4.6,
+			"lead_stock": "Netflix (+6.8%)",
+			"stocks": [
+				{"name": "Netflix", "code": "NFLX", "rate": 6.8, "world_pos": Vector2(2400, 3507), "desc": "🍿 글로벌 OTT 독점 & 광고형 요금제 흑자"},
+				{"name": "Disney", "code": "DIS", "rate": 3.5, "world_pos": Vector2(2860, 3697), "desc": "🏰 디즈니+ 스트리밍 흑자 & 테마파크 수익"},
+				{"name": "Spotify", "code": "SPOT", "rate": 7.2, "world_pos": Vector2(3050, 4157), "desc": "🎵 글로벌 6억 음원 스트리밍 유료 구독 1위"},
+				{"name": "WarnerBros", "code": "WBD", "rate": 2.8, "world_pos": Vector2(2860, 4617), "desc": "🎬 맥스(MAX) 스트리밍 글로벌 진출"},
+				{"name": "EA", "code": "EA", "rate": 3.9, "world_pos": Vector2(2400, 4807), "desc": "⚽ EA 스포츠 FC 및 글로벌 스포츠 라이선스"},
+				{"name": "TakeTwo", "code": "TTWO", "rate": 5.8, "world_pos": Vector2(1940, 4617), "desc": "🎮 GTA 6 전 세계 최고 기대작 릴리즈 예고"},
+				{"name": "Roblox", "code": "RBLX", "rate": 6.4, "world_pos": Vector2(1750, 4157), "desc": "🕹️ 일간 활성 이용자 8000만 메타버스 플랫폼"},
+				{"name": "AppLovin", "code": "APP", "rate": 9.2, "world_pos": Vector2(1940, 3697), "desc": "📱 AI 모바일 광고 엔진 액손 2.0 폭풍 성장"}
+			],
+			"theme_color": Color(0.85, 0.35, 0.8, 0.24),
+			"is_top_bull": false
+		}
+
+		# 6시 (0, 4800): 전기차 & 청정에너지
 		sectors["ev_auto"] = {
 			"key": "ev_auto",
-			"name": "전기차 & 기가팩토리",
-			"sub_title": "가격 인하 치킨게임 푸른 폭락 지대",
-			"direction_hint": "⬇️ 남쪽",
+			"name": "전기차 & 청정에너지",
+			"sub_title": "가격 인하 치킨게임 & 차세대 청정 모빌리티",
+			"direction_hint": "🕕 %s",
 			"position": Vector2(0, 4800),
-			"radius": 2400.0,
+			"radius": 1250.0,
 			"change_rate": -6.4,
 			"lead_stock": "Tesla (-7.8%)",
 			"stocks": [
-				{"name": "Tesla", "code": "TSLA", "rate": -7.8, "world_pos": Vector2(0, 7200), "desc": "⚠️ 마진 쇼크 음봉 투하"},
-				{"name": "Rivian", "code": "RIVN", "rate": -8.5, "world_pos": Vector2(1200, 6200), "desc": "인도량 부진 현금 소진"},
-				{"name": "Lucid", "code": "LCID", "rate": -9.2, "world_pos": Vector2(-1200, 6200), "desc": "고가 전기차 수요 둔화"},
-				{"name": "Enphase", "code": "ENPH", "rate": -5.4, "world_pos": Vector2(800, 4400), "desc": "태양광 인버터 수요 위축"},
-				{"name": "Albemarle", "code": "ALB", "rate": -6.1, "world_pos": Vector2(-800, 4400), "desc": "글로벌 리튬 판가 급락"}
+				{"name": "Tesla", "code": "TSLA", "rate": -7.8, "world_pos": Vector2(0, 4150), "desc": "⚠️ [변동성 제왕] FSD 로보택시 및 옵티머스"},
+				{"name": "Rivian", "code": "RIVN", "rate": -8.5, "world_pos": Vector2(460, 4340), "desc": "폭스바겐 50억달러 합작 투자 파트너십"},
+				{"name": "Lucid", "code": "LCID", "rate": -9.2, "world_pos": Vector2(650, 4800), "desc": "사우디 PIF 투자 기반 럭셔리 EV 그래비티"},
+				{"name": "Enphase", "code": "ENPH", "rate": -5.4, "world_pos": Vector2(460, 5260), "desc": "태양광 마이크로 인버터 수요 바닥 통과"},
+				{"name": "Albemarle", "code": "ALB", "rate": -6.1, "world_pos": Vector2(0, 5450), "desc": "글로벌 전기차 배터리용 수산화리튬 공급"},
+				{"name": "Ford", "code": "F", "rate": -2.8, "world_pos": Vector2(-460, 5260), "desc": "하이브리드 F-150 트럭 및 내연기관 캐시카우"},
+				{"name": "GeneralMotors", "code": "GM", "rate": -1.9, "world_pos": Vector2(-650, 4800), "desc": "자사주 매입 100억달러 및 얼티엄 EV"},
+				{"name": "QuantumScape", "code": "QS", "rate": -4.5, "world_pos": Vector2(-460, 4340), "desc": "차세대 전고체 배터리 상용화 프로토타입"}
 			],
 			"theme_color": Color(0.2, 0.5, 1.0, 0.28),
 			"is_top_bull": false
 		}
 
-		# 6. SOUTH-WEST (-3400, 3400): Wall Street Mega Banks & Fintech
+		# 7시 (-2400, 4157): 오일 & 천연가스
+		sectors["traditional_energy"] = {
+			"key": "traditional_energy",
+			"name": "오일 & 천연가스",
+			"sub_title": "글로벌 에너지 메이저 & 정유 배당 황금 요새",
+			"direction_hint": "🕖 %s",
+			"position": Vector2(-2400, 4157),
+			"radius": 1250.0,
+			"change_rate": 4.2,
+			"lead_stock": "ExxonMobil (+4.8%)",
+			"stocks": [
+				{"name": "ExxonMobil", "code": "XOM", "rate": 4.8, "world_pos": Vector2(-2400, 3507), "desc": "🛢️ [에너지 제왕] 파이오니어 합병 셰일오일 1위"},
+				{"name": "Chevron", "code": "CVX", "rate": 3.9, "world_pos": Vector2(-1940, 3697), "desc": "⛽ 헤스 인수 및 가이아나 유전 생산량 급증"},
+				{"name": "ConocoPhillips", "code": "COP", "rate": 4.2, "world_pos": Vector2(-1750, 4157), "desc": "🌍 저원가 셰일 오일 & LNG 장기 공급 계약"},
+				{"name": "Schlumberger", "code": "SLB", "rate": 3.5, "world_pos": Vector2(-1940, 4617), "desc": "🛠️ 글로벌 유전 시추 디지털 소프트웨어"},
+				{"name": "EOG", "code": "EOG", "rate": 3.8, "world_pos": Vector2(-2400, 4807), "desc": "⛏️ 미국 퍼미안 분지 최고 효율 셰일 기업"},
+				{"name": "Occidental", "code": "OXY", "rate": 4.5, "world_pos": Vector2(-2860, 4617), "desc": "🪙 워런 버핏 최대 보유 지분 & 탄소 포집"},
+				{"name": "Marathon", "code": "MPC", "rate": 5.1, "world_pos": Vector2(-3050, 4157), "desc": "🏭 미국 정제마진 회복 & 대규모 자사주 소각"},
+				{"name": "Valero", "code": "VLO", "rate": 4.6, "world_pos": Vector2(-2860, 3697), "desc": "🚚 북미 정유 및 바이오디젤 저원가 정제소"}
+			],
+			"theme_color": Color(0.9, 0.55, 0.1, 0.25),
+			"is_top_bull": false
+		}
+
+		# 8시 (-4157, 2400): 월가 메가뱅크 & 핀테크
 		sectors["wall_street"] = {
 			"key": "wall_street",
-			"name": "월가 메가뱅크",
+			"name": "월가 메가뱅크 & 핀테크",
 			"sub_title": "금리 피벗 & 사상 최대 자산운용 수수료",
-			"direction_hint": "↙️ 남서",
-			"position": Vector2(-3400, 3400),
-			"radius": 2400.0,
+			"direction_hint": "🕗 %s",
+			"position": Vector2(-4157, 2400),
+			"radius": 1250.0,
 			"change_rate": 3.8,
 			"lead_stock": "Goldman Sachs (+4.8%)",
 			"stocks": [
-				{"name": "JPMorgan", "code": "JPM", "rate": 3.6, "world_pos": Vector2(-3400, 4900), "desc": "🏛️ [월가 제왕] 제이미 다이먼의 사상 최대 순익"},
-				{"name": "Goldman Sachs", "code": "GS", "rate": 4.8, "world_pos": Vector2(-4400, 3400), "desc": "💼 글로벌 IB 인수합병 M&A 딜 회복"},
-				{"name": "Berkshire", "code": "BRK.B", "rate": 2.4, "world_pos": Vector2(-3400, 2200), "desc": "📈 버핏의 3000억 달러 현금성 자산 요새"},
-				{"name": "Visa", "code": "V", "rate": 2.8, "world_pos": Vector2(-2400, 3400), "desc": "💳 글로벌 디지털 결제 수수료 독점 캐시카우"},
-				{"name": "BlackRock", "code": "BLK", "rate": 5.1, "world_pos": Vector2(-4200, 4200), "desc": "🪙 비트코인 현물 ETF 1위 & 10조달러 운용"}
+				{"name": "JPMorgan", "code": "JPM", "rate": 3.6, "world_pos": Vector2(-4157, 1750), "desc": "🏛️ [월가 제왕] 제이미 다이먼의 사상 최대 순익"},
+				{"name": "GoldmanSachs", "code": "GS", "rate": 4.8, "world_pos": Vector2(-3697, 1940), "desc": "💼 글로벌 IB 인수합병 M&A 딜 회복"},
+				{"name": "Berkshire", "code": "BRK.B", "rate": 2.4, "world_pos": Vector2(-3507, 2400), "desc": "📈 버핏의 3000억 달러 현금성 자산 요새"},
+				{"name": "Visa", "code": "V", "rate": 2.8, "world_pos": Vector2(-3697, 2860), "desc": "💳 글로벌 디지털 결제 수수료 독점 캐시카우"},
+				{"name": "Mastercard", "code": "MA", "rate": 3.1, "world_pos": Vector2(-4157, 3050), "desc": "💳 전 세계 30억 장 카드 해외 결제 수수료"},
+				{"name": "BlackRock", "code": "BLK", "rate": 5.1, "world_pos": Vector2(-4617, 2860), "desc": "🪙 비트코인 현물 ETF 1위 & 10조달러 운용"},
+				{"name": "Coinbase", "code": "COIN", "rate": 7.8, "world_pos": Vector2(-4807, 2400), "desc": "🚀 가상자산 제도권 편입 기관 거래소 1위"},
+				{"name": "MicroStrategy", "code": "MSTR", "rate": 9.5, "world_pos": Vector2(-4617, 1940), "desc": "🪙 비트코인 25만 개 보유 나스닥 프록시 랠리"}
 			],
 			"theme_color": Color(0.9, 0.75, 0.2, 0.24),
 			"is_top_bull": false
 		}
-		
-		# 7. WEST (-4800, 0): Healthcare & GLP-1
+
+		# 9시 (-4800, 0): 글로벌 헬스케어
 		sectors["pharma"] = {
 			"key": "pharma",
 			"name": "글로벌 헬스케어",
-			"sub_title": "GLP-1 비만치료제 서쪽 숲",
-			"direction_hint": "⬅️ 서쪽",
+			"sub_title": "GLP-1 비만치료제 서쪽 숲 & 차세대 신약",
+			"direction_hint": "🕘 %s",
 			"position": Vector2(-4800, 0),
-			"radius": 2400.0,
+			"radius": 1250.0,
 			"change_rate": 3.8,
 			"lead_stock": "Eli Lilly (+5.4%)",
 			"stocks": [
-				{"name": "Eli Lilly", "code": "LLY", "rate": 5.4, "world_pos": Vector2(-7200, -700), "desc": "마운자로 공급 품귀 지속"},
-				{"name": "Novo Nordisk", "code": "NVO", "rate": 4.2, "world_pos": Vector2(-7200, 700), "desc": "위고비 글로벌 처방 확대"},
-				{"name": "AbbVie", "code": "ABBV", "rate": 2.1, "world_pos": Vector2(-5800, -1400), "desc": "면역학 치료제 특허 방어"},
-				{"name": "Pfizer", "code": "PFE", "rate": -1.2, "world_pos": Vector2(-5800, 1400), "desc": "코로나 백신 기저효과 둔화"},
-				{"name": "Merck", "code": "MRK", "rate": 2.5, "world_pos": Vector2(-4000, 0), "desc": "키트루다 항암제 글로벌 1위 매출"}
+				{"name": "EliLilly", "code": "LLY", "rate": 5.4, "world_pos": Vector2(-4800, -650), "desc": "💉 [시총 1조달러 도전] 마운자로·젭바운드 독주"},
+				{"name": "NovoNordisk", "code": "NVO", "rate": 4.2, "world_pos": Vector2(-4340, -460), "desc": "🧪 위고비·오젬픽 글로벌 공급망 확대"},
+				{"name": "AbbVie", "code": "ABBV", "rate": 2.1, "world_pos": Vector2(-4150, 0), "desc": "💊 스카이리치·린버크 면역학 치료제 신기록"},
+				{"name": "Pfizer", "code": "PFE", "rate": 1.8, "world_pos": Vector2(-4340, 460), "desc": "🔬 비만 치료제 신약 파이프라인 개발 가속"},
+				{"name": "Merck", "code": "MRK", "rate": 2.5, "world_pos": Vector2(-4800, 650), "desc": "🏆 키트루다 항암제 전 세계 1위 매출"},
+				{"name": "Amgen", "code": "AMGN", "rate": 3.8, "world_pos": Vector2(-5260, 460), "desc": "🧬 월 1회 투여 차세대 비만치료제 마리타이드"},
+				{"name": "Vertex", "code": "VRTX", "rate": 4.5, "world_pos": Vector2(-5450, 0), "desc": "🧪 낭포성 섬유증 및 유전자 가위 신약 승인"},
+				{"name": "Gilead", "code": "GILD", "rate": 3.2, "world_pos": Vector2(-5260, -460), "desc": "💊 연 2회 투여 차세대 에이즈(HIV) 예방약"}
 			],
 			"theme_color": Color(0.2, 0.9, 0.6, 0.22),
 			"is_top_bull": false
 		}
 
-		# 8. NORTH-WEST (-3400, -3400): Retail & Consumer Titans
+		# 10시 (-4157, -2400): 리테일 & 소비재
 		sectors["retail"] = {
 			"key": "retail",
 			"name": "리테일 & 소비재",
 			"sub_title": "탄탄한 미국 내수 소비 & 경기방어주 요새",
-			"direction_hint": "↖️ 북서",
-			"position": Vector2(-3400, -3400),
-			"radius": 2400.0,
+			"direction_hint": "🕙 %s",
+			"position": Vector2(-4157, -2400),
+			"radius": 1250.0,
 			"change_rate": 3.9,
-			"lead_stock": "Netflix (+6.8%)",
+			"lead_stock": "Costco (+4.5%)",
 			"stocks": [
-				{"name": "Walmart", "code": "WMT", "rate": 3.2, "world_pos": Vector2(-3400, -4900), "desc": "🛒 [유통 황제] 전자상거래 고성장 & 사상 최고가"},
-				{"name": "Costco", "code": "COST", "rate": 4.5, "world_pos": Vector2(-4400, -3400), "desc": "📦 충성 유료 멤버십 기반 마르지 않는 현금흐름"},
-				{"name": "Netflix", "code": "NFLX", "rate": 6.8, "world_pos": Vector2(-3400, -2200), "desc": "🍿 글로벌 OTT 독점 & 광고형 요금제 흑자"},
-				{"name": "McDonalds", "code": "MCD", "rate": 1.8, "world_pos": Vector2(-2400, -3400), "desc": "🍔 전 세계 4만 개 매장 글로벌 경기방어주"},
-				{"name": "HomeDepot", "code": "HD", "rate": 2.9, "world_pos": Vector2(-4200, -4200), "desc": "🏠 주택 개보수 및 인프라 소비 회복"}
+				{"name": "Walmart", "code": "WMT", "rate": 3.2, "world_pos": Vector2(-4157, -3050), "desc": "🛒 [유통 황제] 전자상거래 고성장 사상 최고가"},
+				{"name": "Costco", "code": "COST", "rate": 4.5, "world_pos": Vector2(-3697, -2860), "desc": "📦 충성 유료 멤버십 기반 마르지 않는 현금흐름"},
+				{"name": "Target", "code": "TGT", "rate": 2.8, "world_pos": Vector2(-3507, -2400), "desc": "🎯 당일 픽업 배송 및 PB 브랜드 마진 개선"},
+				{"name": "HomeDepot", "code": "HD", "rate": 2.9, "world_pos": Vector2(-3697, -1940), "desc": "🏠 주택 개보수 및 인프라 소비 회복"},
+				{"name": "McDonalds", "code": "MCD", "rate": 1.8, "world_pos": Vector2(-4157, -1750), "desc": "🍔 전 세계 4만 개 매장 글로벌 경기방어주"},
+				{"name": "Starbucks", "code": "SBUX", "rate": 4.2, "world_pos": Vector2(-4617, -1940), "desc": "☕ 치폴레 브라이언 니콜 CEO 영입 턴어라운드"},
+				{"name": "Nike", "code": "NKE", "rate": 3.1, "world_pos": Vector2(-4807, -2400), "desc": "👟 혁신 러닝화 라인업 재구축 & D2C 전략"},
+				{"name": "CocaCola", "code": "KO", "rate": 1.9, "world_pos": Vector2(-4617, -2860), "desc": "🥤 글로벌 필수소비재 배당왕 60년 연속 증액"}
 			],
 			"theme_color": Color(0.85, 0.4, 0.75, 0.22),
 			"is_top_bull": false
 		}
-		
-		# US Sector News
+
+		# 11시 (-2400, -4157): 산업재 & 글로벌 인프라
+		sectors["industrial_infra"] = {
+			"key": "industrial_infra",
+			"name": "산업재 & 글로벌 인프라",
+			"sub_title": "제조업 리쇼어링 & AI 전력망 인프라 슈퍼사이클",
+			"direction_hint": "🕚 %s",
+			"position": Vector2(-2400, -4157),
+			"radius": 1250.0,
+			"change_rate": 4.8,
+			"lead_stock": "Caterpillar (+6.4%)",
+			"stocks": [
+				{"name": "Caterpillar", "code": "CAT", "rate": 6.4, "world_pos": Vector2(-2400, -4807), "desc": "🚜 [중장비 제왕] 글로벌 광산 & 인프라 붐"},
+				{"name": "Deere", "code": "DE", "rate": 3.8, "world_pos": Vector2(-1940, -4617), "desc": "🌾 정밀 농업 자율주행 트랙터 스마트 솔루션"},
+				{"name": "UnionPacific", "code": "UNP", "rate": 3.2, "world_pos": Vector2(-1750, -4157), "desc": "🚂 북미 대륙 횡단 화물 철도 독점 운송"},
+				{"name": "UPS", "code": "UPS", "rate": 2.5, "world_pos": Vector2(-1940, -3697), "desc": "📦 글로벌 항공 및 육상 물류 효율화 흑자"},
+				{"name": "Honeywell", "code": "HON", "rate": 3.9, "world_pos": Vector2(-2400, -3507), "desc": "🛩️ 항공우주 자동화 및 빌딩 제어 시스템"},
+				{"name": "GEAerospace", "code": "GE", "rate": 5.8, "world_pos": Vector2(-2860, -3697), "desc": "✈️ 상업용 제트엔진 3만 개 유지보수 MRO"},
+				{"name": "Emerson", "code": "EMR", "rate": 4.1, "world_pos": Vector2(-3050, -4157), "desc": "🏭 공장 자동화 및 데이터센터 열관리 솔루션"},
+				{"name": "Eaton", "code": "ETN", "rate": 7.2, "world_pos": Vector2(-2860, -4617), "desc": "🔌 데이터센터 지능형 전력 배전 시스템 완판"}
+			],
+			"theme_color": Color(0.5, 0.7, 0.9, 0.25),
+			"is_top_bull": false
+		}
+
 		sector_news_dict = {
-			"ai_chips": [
-				"Blackwell GPU 수요 폭발로 2025년 공급 완판... 빅테크 주문 쟁탈전",
-				"빅테크 4사 AI 데이터센터 CAPEX 투자액 2000억 달러 사상 최고치",
-				"3nm 최선단 파운드리 및 2.5D 첨단 패키징 라인 100% 가동률 기록"
-			],
-			"ai_power": [
-				"AI 데이터센터 전력 소비 10배 폭증으로 미국 전력주 연초 대비 200% 폭등",
-				"원자력 규제 위원회(NRC), 차세대 소형 모듈 원자로(SMR) 설계 승인 가속",
-				"마이크로소프트·아마존, 원전 기업과 사상 최초 20년 무탄소 전력 직거래 계약"
-			],
-			"big_tech": [
-				"빅3 클라우드(AWS·Azure·GCP) AI 결합 워크로드 매출 30% 급증",
-				"온디바이스 AI 스마트폰 및 AI 에이전트 교체 슈퍼사이클 본격화",
-				"빅테크 자체 ASIC AI 가속기 칩 내재화 확대로 마진 방어"
-			],
-			"defense_tech": [
-				"미 국방부 차세대 전장 AI 통합 지휘 시스템(CJADC2) 조 단위 예산 집행",
-				"글로벌 지정학 위기 심화로 NATO 방위비 지출 GDP 2% 의무화 압박",
-				"스텔스 전투기·무인 편대기(CCA) 자율비행 AI 소프트웨어 테스트 성공"
-			],
-			"ev_auto": [
-				"글로벌 전기차 가격 인하 경쟁 완화... 마진율 저점 통과 기대",
-				"유럽 및 북미 대규모 ESS(에너지저장장치) 배터리 수요 급증",
-				"자율주행 FSD 완전 무인 로보택시 시범 운행 승인 추진"
-			],
-			"wall_street": [
-				"연준 금리 인하 사이클 진입... M&A 자문 수수료 및 주식 발행(IPO) 시장 부활",
-				"월가 대형 은행들 사상 최대 예대마진 및 비트코인 수탁 자산 폭증",
-				"버크셔 해서웨이 사상 최초 시가총액 1조 달러 돌파... 가치투자 승리"
-			],
-			"pharma": [
-				"GLP-1 비만 치료제 시장 글로벌 처방 급증... 생산 설비 4배 증설",
-				"경구용(먹는) 차세대 비만약 임상 3상 데이터 호조 기대감 고조",
-				"글로벌 빅파마 ADC 및 이중항체 바이오텍 M&A 인수전 치열"
-			],
-			"retail": [
-				"미국 견조한 고용 지표와 탄탄한 소비자 지출로 리테일 실적 서프라이즈",
-				"월마트 전자상거래 매출 22% 급증... 아마존과의 이커머스 격차 축소",
-				"넷플릭스 유료 구독자 분기 순증 사상 최대치... 오징어 게임2 흥행 기대"
-			]
+			"ai_chips": ["Blackwell GPU 수요 폭발로 공급 완판", "3nm 파운드리 및 첨단 패키징 풀가동"],
+			"ai_power": ["AI 데이터센터 전력 소비 10배 폭증... 전력주 폭등", "NRC 차세대 소형 모듈 원자로(SMR) 승인 가속"],
+			"defense_tech": ["미 국방부 차세대 전장 AI 통합 지휘 시스템 예산 집행", "스텔스 전투기·무인 편대기 자율 AI 수주"],
+			"big_tech": ["빅3 클라우드 AI 워크로드 매출 30% 급증", "온디바이스 AI 스마트폰 교체 슈퍼사이클 본격화"],
+			"cyber_saas": ["글로벌 제로트러스트 보안 소프트웨어 구독 급증", "엔터프라이즈 AI 자동화 SaaS 마진율 40% 돌파"],
+			"media_entertain": ["글로벌 스트리밍 유료 구독자 및 광고 수익 사상 최대", "블록버스터 차세대 콘솔 신작 게임 발매 예고"],
+			"ev_auto": ["글로벌 전기차 가격 인하 경쟁 완화... 마진 저점 통과", "대규모 ESS 에너지저장장치 배터리 수주 급증"],
+			"traditional_energy": ["글로벌 지정학 위기로 국제 유가 및 정제마진 반등", "미국 대형 셰일오일 기업 대규모 자사주 소각"],
+			"wall_street": ["금리 인하 사이클 진입... M&A 자문 및 IPO 부활", "비트코인 현물 ETF 1위 및 10조달러 운용 자산"],
+			"pharma": ["GLP-1 비만 치료제 글로벌 처방 급증 설비 증설", "경구용 비만약 임상 3상 데이터 호조 기대감"],
+			"retail": ["미국 견조한 내수 소비 지출로 리테일 호실적", "이커머스 당일 배송 및 멤버십 현금흐름 창출"],
+			"industrial_infra": ["미국 인프라 투자법(IIJA) 집행으로 중장비 수요 폭증", "데이터센터 전력 배전 및 산업 자동화 주문 쇄도"]
 		}
 		
-		# US Stock News
 		stock_news_dict = {
-			"NVIDIA": [
-				"블랙웰(Blackwell) B200 칩 공급 부족 지속... 빅테크 주문 폭주",
-				"AI 슈퍼클러스터 데이터센터 매출 전년비 150% 폭증"
-			],
-			"Broadcom": [
-				"빅테크 커스텀 AI ASIC 칩 및 이더넷 스위치 매출 300% 폭증",
-				"VMware 클라우드 통합으로 고마진 소프트웨어 현금흐름 창출"
-			],
-			"AMD": [
-				"MI300X AI 가속기 마이크로소프트 및 메타 채택 가속화",
-				"차세대 AI GPU 로드맵 공개... 엔비디아 대항마 입지 강화"
-			],
-			"TSMC": [
-				"3나노 및 2나노 최선단 파운드리 공정 웨이퍼 판가 인상 합의",
-				"CoWoS 첨단 패키징 생산 능력 2배 증설 완료"
-			],
-			"Micron": [
-				"HBM3E 메모리 2025년 생산 물량 완판 기록",
-				"서버용 고용량 DDR5 및 SSD 판가 급등으로 실적 어닝서프라이즈"
-			],
-			"Constellation": [
-				"마이크로소프트와 3마일 아일랜드 원전 1호기 20년 재가동 전력 계약 체결",
-				"미국 최대 원자력 발전사로 빅테크 PPA 수주 독점"
-			],
-			"Vistra": [
-				"텍사스 및 동부 데이터센터 전력 공급 계약 쇄도로 주가 연초 대비 3배 폭등",
-				"천연가스 및 원자력 포트폴리오를 갖춘 고수익 독립 발전사"
-			],
-			"Oklo": [
-				"샘 올트먼 지원 차세대 소형 모듈 원자로(SMR) 데이터센터 상용화 가속",
-				"미 에너지부(DOE) 오로라 고속로 핵연료 재활용 승인"
-			],
-			"GE Vernova": [
-				"AI 데이터센터 전력 백업용 가스터빈 수주잔고 1000억 달러 돌파",
-				"글로벌 송배전 그리드 현대화 장비 쇼티지로 판가 인상"
-			],
-			"NextEra": [
-				"미국 최대 유틸리티 기업... 태양광 및 배터리 ESS 설비 3GW 추가 증설",
-				"플로리다 인구 유입에 따른 탄탄한 전력 수요 및 배당 성장"
-			],
-			"Microsoft": [
-				"Azure AI 클라우드 성장률 30% 돌파, Copilot 기업용 유료 구독 급증",
-				"OpenAI와 차세대 AI 슈퍼컴퓨터 '스타게이트' 1000억 달러 투자"
-			],
-			"Apple": [
-				"Apple Intelligence 탑재로 아이폰 교체 슈퍼사이클 시동",
-				"M4 칩 탑재 Mac 라인업 및 서비스 부문 사상 최대 매출"
-			],
-			"Alphabet": [
-				"Gemini 1.5 Pro 검색 엔진 통합으로 AI 오버뷰 트래픽 증가",
-				"구글 클라우드 분기 영업이익률 11% 돌파... AI 인프라 수주 호조"
-			],
-			"Meta": [
-				"오픈소스 Llama 3 생태계 장악... AI 추천 알고리즘으로 체류시간 20% 증가",
-				"Ray-Ban Meta 스마트 안경 판매 호조... AR 글래스 공개 임박"
-			],
-			"Amazon": [
-				"AWS 클라우드 연환산 매출 1000억 달러 돌파... 생성형 AI 수혜 본격화",
-				"물류센터 로봇 자동화 도입으로 배송 비용 20% 절감"
-			],
-			"Palantir": [
-				"AIP(인공지능 플랫폼) 상용 고객 전년비 80% 폭증... S&P500 편입",
-				"미 국방부 타이탄 프로젝트 및 나토 전장 AI 데이터 독점 계약"
-			],
-			"Lockheed": [
-				"F-35 5세대 스텔스 전투기 글로벌 인도량 1000대 돌파",
-				"극초음속 미사일 방어 시스템 개발 및 록히드 마틴 수주잔고 사상 최대"
-			],
-			"RTX": [
-				"패트리어트 미사일 요격 시스템 글로벌 동맹국 추가 발주 폭주",
-				"프랫&휘트니 기어드 터보팬(GTF) 엔진 정비 정상화"
-			],
-			"Northrop": [
-				"B-21 레이더 차세대 스텔스 폭격기 저율 초도 생산 본격화",
-				"우주 군사 위성 및 차세대 ICBM 센티넬 프로그램 주도"
-			],
-			"GeneralDynamics": [
-				"컬럼비아급 차세대 탄도미사일 원자력 잠수함 건조 순항",
-				"걸프스트림 비즈니스 제트기 신기종 인도 개시로 마진 급등"
-			],
-			"Tesla": [
-				"로보택시(Cybercab) 완전 자율주행 시범 운행 발표",
-				"메가팩 에너지 저장장치(ESS) 분기 배터리 설치량 150% 급증"
-			],
-			"Rivian": [
-				"폭스바겐 그룹 50억 달러 전략적 지분 투자 유치로 현금 확보",
-				"중형 전기 SUV 'R2' 사전 예약 10만 대 돌파... 2026년 양산"
-			],
-			"Lucid": [
-				"사우디 국부펀드(PIF) 15억 달러 추가 지원 확보",
-				"럭셔리 전기 SUV '그래비티' 사전 주문 개시"
-			],
-			"Enphase": [
-				"유럽 및 캘리포니아 태양광 인버터 재고 소진 후 출하량 바닥 통과",
-				"가정용 배터리 백업 시스템 신제품 출시"
-			],
-			"Albemarle": [
-				"글로벌 리튬 생산 1위... 배터리 원자재 가격 안정화 기대",
-				"칠레 및 호주 광산 채굴 원가 절감 프로젝트 추진"
-			],
-			"JPMorgan": [
-				"제이미 다이먼 회장 '미국 경제 연착륙 자신'... 분기 순이익 130억 달러",
-				"월가 트레이딩 및 신용카드 소비 지표 호조로 목표주가 상향"
-			],
-			"Goldman Sachs": [
-				"글로벌 투자은행(IB) 자문 수수료 전년비 40% 급증",
-				"사모펀드 및 자산관리(AUM) 부문 역대 최고 수익 기록"
-			],
-			"Berkshire": [
-				"워런 버핏의 현금 보유액 3000억 달러 돌파... 애플 지분 일부 차익실현",
-				"보험 및 철도, 에너지 핵심 사업부의 안정적 현금흐름 유지"
-			],
-			"Visa": [
-				"글로벌 해외 여행 결제액 및 국경 간 결제 거래량 두 자릿수 증가",
-				"생성형 AI 결제 사기 방지 솔루션으로 금융 보안 강화"
-			],
-			"BlackRock": [
-				"비트코인 현물 ETF(IBIT) 자산 200억 달러 최단기 돌파",
-				"글로벌 총 운용자산(AUM) 10.6조 달러 사상 최고치 경신"
-			],
-			"Eli Lilly": [
-				"비만치료제 젭바운드 주간 처방량 신기록 갱신... 생산 시설 4배 확장",
-				"경구용 비만 치료제 올포글리프론 임상 3상 데이터 호조 기대"
-			],
-			"Novo Nordisk": [
-				"위고비 글로벌 50개국 출시 확대 및 심혈관 질환 적응증 승인",
-				"카탈란트 생산 시설 인수로 공급 병목 현상 해소 가속"
-			],
-			"AbbVie": [
-				"자가면역 치료제 스카이리치·린버크 매출이 휴미라 공백 완벽 대체",
-				"신경과학 및 표적항암제 신약 파이프라인 임상 순항"
-			],
-			"Pfizer": [
-				"시젠(Seagen) 인수를 통한 차세대 항암제 포트폴리오 가동",
-				"원가 절감 프로그램 가동으로 수익성 회복 및 배당 수익률 방어"
-			],
-			"Merck": [
-				"면역항암제 키트루다 글로벌 단일 의약품 매출 1위 기록",
-				"심혈관 및 폐동맥 고혈압 신약 윈레베어 FDA 승인 후 처방 급증"
-			],
-			"Walmart": [
-				"미국 내 온라인 픽업 및 배송 매출 급증으로 실적 어닝 서프라이즈",
-				"광고 사업부 월마트 커넥트 고마진 성장... 51년 연속 배당 증액"
-			],
-			"Costco": [
-				"연회비 인상에도 유료 회원 갱신율 93% 경이적 충성도",
-				"글로벌 신규 매장 오픈 가속 및 골드바/은화 판매 흥행"
-			],
-			"Netflix": [
-				"유료 구독자 2억 8000만 명 돌파... 계정 공유 유료화 안착",
-				"라이브 스포츠 중계(NFL, WWE) 진출로 광고 단가 상승"
-			],
-			"McDonalds": [
-				"5달러 세트 메뉴 프로모션으로 고객 발길 유입 반등",
-				"글로벌 디지털 주문 및 코스모스 신규 음료 브랜드 확장"
-			],
-			"HomeDepot": [
-				"금리 인하 시작으로 주택 담보 대출 및 리모델링 수요 개선 기대",
-				"전문 건축업자(Pro) 전용 공급망 인수로 점유율 확대"
-			]
+			"NVIDIA": ["블랙웰 B200 칩 공급 부족 지속 빅테크 주문 폭주", "AI 데이터센터 매출 전년비 150% 폭증"],
+			"Broadcom": ["빅테크 커스텀 AI ASIC 칩 및 이더넷 스위치 폭증", "VMware 클라우드 고마진 소프트웨어 창출"],
+			"AMD": ["MI300X AI 가속기 빅테크 채택 가속화", "차세대 AI GPU 로드맵 엔비디아 대항마"],
+			"TSMC": ["3나노 및 2나노 최선단 파운드리 웨이퍼 판가 인상", "CoWoS 첨단 패키징 생산 능력 2배 증설"],
+			"Micron": ["HBM3E 메모리 2025년 생산 물량 완판", "서버용 DDR5 및 SSD 판가 급등 어닝서프라이즈"],
+			"Qualcomm": ["스냅드래곤 온디바이스 AI 칩셋 글로벌 1위", "오토모티브 및 PC AI 칩 영역 확장"],
+			"Arm": ["차세대 v9 아키텍처 로열티 라이선스 급성장", "빅테크 자체 칩 개발로 라이선스 매출 폭증"],
+			"Intel": ["미국 반도체법 85억 달러 보조금 최종 확정", "18A 공정 외부 파운드리 고객 확보 시동"],
+			"Constellation": ["MS와 스리마일 아일랜드 20년 재가동 전력 계약", "미국 최대 무탄소 원전 발전사 수주 독점"],
+			"Vistra": ["데이터센터 전력 공급 계약 쇄도로 주가 폭등", "원자력 및 가스 포트폴리오 독립 발전 1위"],
+			"Oklo": ["샘 올트먼의 소형 모듈 원자로(SMR) 상용화 가속", "미국 에너지부 오로라 고속로 핵연료 재활용 승인"],
+			"GE Vernova": ["데이터센터 전력 백업용 가스터빈 1000억 달러 수주", "송배전 그리드 장비 쇼티지로 판가 인상"],
+			"NextEra": ["미국 최대 유틸리티 태양광 및 ESS 3GW 증설", "플로리다 인구 유입 탄탄한 배당 성장"],
+			"Cameco": ["글로벌 우라늄 수급 불균형 판가 사상 최고치", "원전 르네상스로 장기 공급 계약 체결"],
+			"NuScale": ["미국 원자력규제위 SMR 설계 승인 유일 기업", "동유럽 및 데이터센터 전력 공급 파트너십"],
+			"NRG": ["텍사스 ERCOT 전력 시장 현물 판가 상승", "소매 전력 및 데이터센터 직접 공급 협상"],
+			"Palantir": ["미 국방부 전장 AI 플랫폼 AIP 수주 폭증", "기업용 부트캠프 고객 전환율 80% 달성"],
+			"Lockheed": ["F-35 스텔스 전투기 글로벌 인도 재개", "극초음속 미사일 국방 예산 최대 수혜"],
+			"RTX": ["패트리어트 방공 미사일 글로벌 완판 주문", "프랫앤휘트니 항공기 엔진 서비스 호조"],
+			"Northrop": ["B-21 레이더 차세대 스텔스 폭격기 양산", "우주 군사 위성 및 미사일 방어 체계"],
+			"GeneralDynamics": ["콜롬비아급 전략 핵잠수함 대량 건조", "미 육군 차세대 스트라이커 장갑차 공급"],
+			"Boeing": ["737 맥스 생산 정상화 및 인도량 회복", "우주 방산 부문 흑자 전환 로드맵"],
+			"Kratos": ["발키리 자율비행 무인 전투 드론 테스트 성공", "미 공군 협동 전투기(CCA) 프로젝트 참여"],
+			"RocketLab": ["일렉트론 로켓 50회 연속 발사 성공", "중대형 재사용 로켓 뉴트론 개발 순항"],
+			"Microsoft": ["Azure AI 클라우드 30% 성장 Copilot 구독 급증", "OpenAI 스타게이트 슈퍼컴퓨터 투자"],
+			"Apple": ["Apple Intelligence 아이폰 슈퍼사이클 시동", "M4 Mac 라인업 및 서비스 사상 최대 매출"],
+			"Alphabet": ["Gemini 1.5 검색 엔진 통합 AI 오버뷰 증가", "구글 클라우드 영업이익률 11% 돌파"],
+			"Meta": ["Llama 3 AI 오픈소스 생태계 및 광고 효율 급증", "스마트 안경 레이밴 메타 판매량 폭발"],
+			"Amazon": ["AWS 클라우드 인프라 매출 가속 및 AI 가속기", "북미 이커머스 배송 효율화로 역대급 영업이익"],
+			"Oracle": ["OCI 멀티클라우드 수주잔고 800억 달러", "MS 및 구글 클라우드와 상호 연결 파트너십"],
+			"IBM": ["왓슨x 생성형 AI 컨설팅 프로젝트 수주 20억 달러", "레드햇 오픈시프트 하이브리드 클라우드 성장"],
+			"Salesforce": ["Agentforce 자율형 비즈니스 AI 에이전트 런칭", "데이터 클라우드 고객 기반 마진율 30%"],
+			"CrowdStrike": ["팔콘 플랫폼 차세대 엔드포인트 보안 1위", "클라우드 보안 및 신원 보안 모듈 도입 가속"],
+			"PaloAlto": ["프리시전 AI 기반 네트워크 방화벽 통합", "플랫폼화 전략으로 조 단위 연간 반복 매출(ARR)"],
+			"ServiceNow": ["기업 업무 자동화 워크플로우 AI 플랫폼 독점", "재계약률 98% 마르지 않는 현금흐름"],
+			"Snowflake": ["데이터 클라우드 분석 AI 모델 서빙 성장", "코텍스 AI 기능 도입으로 사용량 확대"],
+			"Datadog": ["클라우드 모니터링 및 APM 시장 점유율 1위", "LLM 옵저버빌리티 AI 솔루션 매출 기여"],
+			"MongoDB": ["아틀라스 클라우드 벡터 검색 AI 애플리케이션", "현대적 개발자 데이터베이스 표준 안착"],
+			"Cloudflare": ["글로벌 엣지 네트워크 CDN 및 사이버 공격 방어", "워커스 AI 분산 컴퓨팅 플랫폼 가속"],
+			"Zscaler": ["클라우드 제로트러스트 보안 교환소 점유율 확대", "ZTNA 원격 보안 솔루션 대기업 공급"],
+			"Netflix": ["유료 구독자 분기 순증 사상 최대 오징어게임2 기대", "광고형 요금제 도입으로 추가 수익성 확보"],
+			"Disney": ["디즈니+ 스트리밍 부문 흑자 전환 달성", "인사이드 아웃2 등 글로벌 박스오피스 대흥행"],
+			"Spotify": ["글로벌 유료 구독자 2억 5천만 명 돌파", "가격 인상 후에도 이탈 없는 충성 팬덤"],
+			"WarnerBros": ["맥스(MAX) 스트리밍 글로벌 서비스 론칭", "해리포터 및 DC 유니버스 텐트폴 제작"],
+			"EA": ["EA 스포츠 FC 24 글로벌 독점 흥행 랠리", "모바일 및 라이브 서비스 탄탄한 현금흐름"],
+			"TakeTwo": ["GTA 6 전 세계 최고 기대작 릴리즈 카운트다운", "NBA 2K 시리즈 탄탄한 인게임 결제"],
+			"Roblox": ["일간 활성 이용자 8000만 명 메타버스 돌파", "개발자 생태계 및 브랜드 광고 플랫폼 급성장"],
+			"AppLovin": ["AI 기반 모바일 광고 엔진 액손 2.0 폭풍 성장", "영업이익률 40% 돌파 전자상거래 확장"],
+			"Tesla": ["사이버캡 완전 무인 로보택시 공개", "옵티머스 휴머노이드 로봇 공장 투입"],
+			"Rivian": ["폭스바겐 50억 달러 합작 투자 파트너십", "R2 중형 SUV 2026년 양산 준비 순항"],
+			"Lucid": ["사우디 국부펀드 지원 럭셔리 SUV 그래비티 양산", "글로벌 최고 수준 전비 효율성 기술력"],
+			"Enphase": ["태양광 마이크로 인버터 재고 소진 완료", "유럽 및 미국 주거용 태양광 수요 반등"],
+			"Albemarle": ["리튬 가격 바닥 통과 기대감 생산비 절감", "북미 및 칠레 고순도 리튬 공급망 장악"],
+			"Ford": ["하이브리드 F-150 트럭 수요 폭증 마진 방어", "전기차 투자 속도 조절로 손실 축소"],
+			"GeneralMotors": ["자사주 100억 달러 매입 및 강력한 현금흐름", "얼티엄 EV 생산 확대 및 쉐보레 판매 호조"],
+			"QuantumScape": ["폭스바겐과 전고체 배터리 상용화 기술 이전", "차세대 무음극 전고체 배터리 테스트 성공"],
+			"ExxonMobil": ["파이오니어 합병으로 미국 셰일오일 1위", "사상 최대 현금 창출 및 배당 42년 연속 증액"],
+			"Chevron": ["헤스 인수 완료로 가이아나 유전 생산량 급증", "저원가 심해 유전 및 LNG 포트폴리오 강화"],
+			"ConocoPhillips": ["마라톤 오일 인수로 퍼미안 분지 규모의 경제", "LNG 장기 수출 계약 마진 극대화"],
+			"Schlumberger": ["글로벌 해상 유전 디지털 시추 소프트웨어 성장", "중동 및 남미 오프쇼어 프로젝트 수주"],
+			"EOG": ["퍼미안 분지 최고 프리미엄 유전 시추 효율", "무부채에 가까운 탄탄한 재무구조"],
+			"Occidental": ["워런 버핏 옥시 지분 지속 매수 신뢰", "직접 공기 포집(DAC) 탄소 제거 상용화"],
+			"Marathon": ["미국 최대 정유사 정제마진 회복", "대규모 자사주 매입 소각 주주환원율 최고"],
+			"Valero": ["미국 걸프만 저원가 정제설비 독보적 경쟁력", "지속가능항공유(SAF) 친환경 정유 선점"],
+			"JPMorgan": ["사상 최대 순이자이익(NII) 제이미 다이먼 리더십", "자산관리 및 글로벌 IB 시장 1위"],
+			"GoldmanSachs": ["글로벌 M&A 자문 수수료 회복 실적 서프라이즈", "자산운용 및 사모펀드 자금 유입 확대"],
+			"Berkshire": ["워런 버핏의 3000억 달러 현금성 자산 요새", "보험 및 철도 유틸리티 탄탄한 현금흐름"],
+			"Visa": ["글로벌 결제 처리 금액 15조 달러 돌파", "국경 간 거래 결제 수수료 독점 캐시카우"],
+			"Mastercard": ["전 세계 30억 장 카드 결제 네트워크 장악", "사이버 보안 및 부가 서비스 두 자릿수 성장"],
+			"BlackRock": ["비트코인 현물 ETF IBIT 글로벌 1위 안착", "총 운용 자산(AUM) 사상 최초 11조 달러 돌파"],
+			"Coinbase": ["미국 암호화폐 제도권 수탁 기관 1위", "베이스(Base) 레이어2 네트워크 트래픽 급증"],
+			"MicroStrategy": ["비트코인 25만 개 이상 보유 프록시 랠리", "전환사채 발행을 통한 비트코인 추가 매입"],
+			"EliLilly": ["마운자로·젭바운드 비만약 공급 쇼티지", "시가총액 1조 달러 도전 글로벌 제약 1위"],
+			"NovoNordisk": ["위고비 글로벌 처방 확대 생산 시설 3배 증설", "심혈관 질환 적응증 추가 승인 호재"],
+			"AbbVie": ["스카이리치·린버크 면역학 신약 역대급 성장", "보톡스 메디컬 에스테틱 탄탄한 현금흐름"],
+			"Pfizer": ["비만 치료제 후보물질 임상 파이프라인 가속", "원가 절감 40억 달러 및 배당 수익률 6%"],
+			"Merck": ["키트루다 항암제 글로벌 1위 독주 체제", "피하주사(SC) 제형 전환으로 특허 방어"],
+			"Amgen": ["월 1회 투여 차세대 비만치료제 마리타이드 임상 호조", "골다공증 및 희귀질환 포트폴리오 성장"],
+			"Vertex": ["카스게비 세계 최초 유전자 가위 치료제 승인", "낭포성 섬유증 시장 독점적 지배력"],
+			"Gilead": ["연 2회 투여 레나카파비르 HIV 예방률 100%", "항암제 트로델비 파이프라인 확장"],
+			"Walmart": ["이커머스 및 광고 사업 고성장 사상 최고가", "고소득층 고객 유입으로 미국 유통 지배"],
+			"Costco": ["멤버십 연회비 인상에도 갱신율 93% 신기록", "식료품 및 이커머스 매출 서프라이즈"],
+			"Target": ["당일 픽업 서비스 및 PB 브랜드 마진 개선", "디지털 풀필먼트 효율화로 수익성 회복"],
+			"HomeDepot": ["주택 리모델링 전문 업자(Pro) 수주 확대", "금리 인하 사이클 주택 거래 회복 수혜"],
+			"McDonalds": ["5달러 세트 메뉴 프로모션으로 고객 발길 유입", "글로벌 디지털 주문 및 코스모스 음료 브랜드"],
+			"Starbucks": ["치폴레 턴어라운드 주역 브라이언 니콜 CEO 영입", "매장 주문 대기 시간 단축 및 혁신"],
+			"Nike": ["에어 혁신 러닝화 라인업 재구축", "도매 유통 채널 파트너십 복원으로 반등"],
+			"CocaCola": ["글로벌 가격 결정력 및 탄탄한 음료 포트폴리오", "62년 연속 배당 증액 글로벌 경기방어주"],
+			"Caterpillar": ["글로벌 광산 및 인프라 건설 중장비 수주 호조", "영업이익률 21% 사상 최고 마진 기록"],
+			"Deere": ["자율주행 정밀 농업 트랙터 소프트웨어 구독", "글로벌 곡물 및 농가 장비 현대화 사이클"],
+			"UnionPacific": ["북미 대륙 횡단 철도 독점 운송 네트워크", "정밀 일정 철도(PSR) 운영으로 영업마진 개선"],
+			"UPS": ["항공 및 육상 물류 자동화 허브 효율화", "고수익 헬스케어 및 B2B 물류 비중 확대"],
+			"Honeywell": ["항공우주 제트엔진 부품 수주잔고 사상 최대", "산업 자동화 및 빌딩 제어 솔루션 성장"],
+			"GEAerospace": ["상업용 항공기 엔진 44,000대 MRO 서비스 잭팟", "LEAP 엔진 차세대 라인업 독점 공급"],
+			"Emerson": ["데이터센터 액체 냉각 및 공장 프로세스 제어", "자동화 소프트웨어 고마진 수주 급증"],
+			"Eaton": ["데이터센터 초고압 전력 인프라 장비 2년 완판", "메가프로젝트 전력망 솔루션 수주 폭증"]
 		}
 		
 		news_pool = [
-			{"headline": "🚀 [속보] 북쪽 실리콘밸리 AI 칩으로 가세요! NVDA 블랙웰 주문 폭주!", "sector": "ai_chips", "type": "buff", "duration": 15.0},
-			{"headline": "⚡ [속보] 북동쪽 AI 전력망·SMR 원전에 빅테크 무탄소 전력 독점 수주!", "sector": "ai_power", "type": "buff", "duration": 15.0},
-			{"headline": "🎯 [속보] 남동쪽 국방 AI 팔란티어 AIP 수주 폭증! 미 국방부 전장 장악!", "sector": "defense_tech", "type": "buff", "duration": 15.0},
-			{"headline": "🏛️ [속보] 남서쪽 월가 메가뱅크 M&A 부활 및 자산운용 수수료 사상 최대!", "sector": "wall_street", "type": "buff", "duration": 15.0},
-			{"headline": "🛒 [속보] 북서쪽 리테일 월마트·넷플릭스 내수 소비 서프라이즈 랠리!", "sector": "retail", "type": "buff", "duration": 15.0},
-			{"headline": "📉 [경고] 남쪽 전기차 지대에 공매도 투하! 마진 악화 우려로 패닉셀!", "sector": "ev_auto", "type": "debuff", "duration": 15.0},
-			{"headline": "💉 [속보] 일라이릴리 비만 치료제 FDA 패스트트랙 승인! 서쪽 숲 급등!", "sector": "pharma", "type": "buff", "duration": 12.0}
+			{"headline": "🚀 [속보] 12시 실리콘밸리 AI 칩으로 가세요! NVDA 블랙웰 주문 폭주!", "sector": "ai_chips", "type": "buff", "duration": 15.0},
+			{"headline": "⚡ [속보] 1시 AI 전력망·SMR 원전에 빅테크 무탄소 전력 독점 수주!", "sector": "ai_power", "type": "buff", "duration": 15.0},
+			{"headline": "🎯 [속보] 2시 국방 AI 팔란티어 AIP 수주 폭증! 미 국방부 전장 장악!", "sector": "defense_tech", "type": "buff", "duration": 15.0},
+			{"headline": "🧠 [속보] 3시 빅테크 M7 생성형 AI 클라우드 인프라 매출 사상 최대!", "sector": "big_tech", "type": "buff", "duration": 15.0},
+			{"headline": "🔒 [속보] 4시 사이버 보안 크라우드스트라이크 제로트러스트 플랫폼 폭풍 성장!", "sector": "cyber_saas", "type": "buff", "duration": 15.0},
+			{"headline": "🍿 [속보] 5시 미디어 넷플릭스 유료 구독자 분기 순증 사상 최대치 랠리!", "sector": "media_entertain", "type": "buff", "duration": 15.0},
+			{"headline": "📉 [경고] 6시 전기차 지대에 공매도 투하! 마진 악화 우려로 패닉셀!", "sector": "ev_auto", "type": "debuff", "duration": 15.0},
+			{"headline": "🛢️ [속보] 7시 에너지 엑손모빌 셰일오일 합병 잭팟! 배당 사상 최고치!", "sector": "traditional_energy", "type": "buff", "duration": 15.0},
+			{"headline": "🏛️ [속보] 8시 월가 메가뱅크 M&A 부활 및 비트코인 자산운용 수수료 사상 최대!", "sector": "wall_street", "type": "buff", "duration": 15.0},
+			{"headline": "💉 [속보] 9시 글로벌 헬스케어 일라이릴리 비만 치료제 FDA 패스트트랙 승인!", "sector": "pharma", "type": "buff", "duration": 15.0},
+			{"headline": "🛒 [속보] 10시 리테일 코스트코·월마트 견조한 내수 소비 서프라이즈 랠리!", "sector": "retail", "type": "buff", "duration": 15.0},
+			{"headline": "🚜 [속보] 11시 산업재 캐터필러 인프라 수주 잭팟! 중장비 주문 쇄도!", "sector": "industrial_infra", "type": "buff", "duration": 15.0}
 		]
 
 	for k in sectors.keys():
