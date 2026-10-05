@@ -53,29 +53,12 @@ func _ready():
 	player = get_tree().get_first_node_in_group("player")
 	_setup_stats()
 	_setup_speech_bubble()
-	if not Global.level_up.is_connected(_on_player_level_up):
-		Global.level_up.connect(_on_player_level_up)
 	# 스폰 직후 유저와 마주쳤을 때 0.4~1.5초 내에 첫 대사를 바로 발동하도록 단축
 	bubble_check_timer = randf_range(0.4, 1.5)
 
 func _exit_tree():
-	if Global.level_up.is_connected(_on_player_level_up):
-		Global.level_up.disconnect(_on_player_level_up)
 	if is_instance_valid(speech_bubble):
 		speech_bubble.queue_free()
-
-func _on_player_level_up(_new_level: int):
-	if is_dead:
-		return
-	# 최종 보스 격파 전에는 필드 적 강화 없음 (개미가 성장하는 재미 보장)
-	if Global.trump_defeated_count <= 0:
-		return
-	# 🐜 포스트 보스 단계: 레벨업 시 필드 적들도 즉시 강화 (+12% HP, +6% 데미지)
-	var hp_boost = 1.12
-	max_hp *= hp_boost
-	hp *= hp_boost
-	contact_damage *= 1.06
-	queue_redraw()
 
 func _setup_stats():
 	var col_shape = $CollisionShape2D if has_node("CollisionShape2D") else null
@@ -86,17 +69,18 @@ func _setup_stats():
 	var time_hp_scale = 1.0 + (Global.game_time / 60.0) * 0.15
 	var time_dmg_scale = 1.0 + (Global.game_time / 60.0) * 0.08
 
-	# 🏆 최종 보스(TRUMP) 격파 이후에만 개미 레벨 비례 강화 발동
-	#    (격파 시점 레벨을 기준점으로, 이후 오른 레벨만큼만 가산)
+	# 🏆 계단식 강화: 트럼프를 격파할 때만 적 능력치가 한 단계 상승
+	#    - 격파 사이에는 개미가 레벨업해도 적 레벨 강화는 동결
+	#    - 마지막 격파 레벨 − 첫 격파 레벨 만큼 레벨 가산 + 격파마다 HP +25%
 	var level_hp_scale = 1.0
 	var level_dmg_scale = 1.0
 	var exp_scale = 1.0
 	if Global.trump_defeated_count > 0:
-		var post_lvls = max(0, Global.player_level - Global.level_at_first_trump_kill)
-		var tier_bonus = 1.0 + (Global.trump_defeated_count - 1) * 0.25 # 추가 TRUMP 격파마다 +25%
-		level_hp_scale = (1.0 + post_lvls * 0.12) * tier_bonus
-		level_dmg_scale = 1.0 + post_lvls * 0.06
-		exp_scale = 1.0 + post_lvls * 0.07
+		var frozen_lvls = max(0, Global.level_at_last_trump_kill - Global.level_at_first_trump_kill)
+		var tier_bonus = 1.0 + Global.trump_defeated_count * 0.25
+		level_hp_scale = (1.0 + frozen_lvls * 0.12) * tier_bonus
+		level_dmg_scale = (1.0 + frozen_lvls * 0.06) * (1.0 + Global.trump_defeated_count * 0.10)
+		exp_scale = (1.0 + frozen_lvls * 0.07) * (1.0 + Global.trump_defeated_count * 0.15)
 
 	var total_hp_scale = level_hp_scale * time_hp_scale
 	var total_dmg_scale = level_dmg_scale * time_dmg_scale
@@ -757,6 +741,7 @@ func _die():
 			# 🏆 최종 보스 격파 → 이후부터 개미 레벨 비례 적 강화 단계 진입
 			if Global.trump_defeated_count == 0:
 				Global.level_at_first_trump_kill = Global.player_level
+			Global.level_at_last_trump_kill = Global.player_level
 			Global.trump_defeated_count += 1
 			Global.market_event_triggered.emit("🏆 [보스 격파!] 관세맨 TRUMP 격파!", "관세 장벽 돌파! 이제 시장이 개미의 성장에 맞춰 더 강해집니다! (심화 %d단계)" % Global.trump_defeated_count)
 			SoundManager.play_level_up()
