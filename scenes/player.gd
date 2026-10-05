@@ -21,7 +21,10 @@ var auto_target_pos: Vector2 = Vector2.ZERO
 var auto_status_text: String = "🤖 AUTO 사냥 중"
 var patrol_timer: float = 0.0
 var current_target_stock: Dictionary = {}
-var target_reevaluate_timer: float = 0.0
+var stay_at_target_timer: float = 0.0
+var is_on_highway_cruise: bool = false
+var visited_stock_cooldowns: Dictionary = {}
+var visited_sector_cooldowns: Dictionary = {}
 
 func _ready():
 	add_to_group("player")
@@ -38,14 +41,24 @@ func _ready():
 		Global.auto_play_toggled.connect(_on_auto_play_toggled)
 	is_auto_play = Global.auto_play_enabled
 
+func _rotate_to_next_sector():
+	if not current_target_stock.is_empty():
+		var old_stock_name = current_target_stock.get("name", "")
+		var old_sec_key = current_target_stock.get("sector_key", "")
+		visited_stock_cooldowns[old_stock_name] = 60.0 # 동일 종목 60초간 재방문 방지
+		if not old_sec_key.is_empty():
+			visited_sector_cooldowns[old_sec_key] = 45.0 # 동일 섹터 45초간 재방문 방지 (타 섹터 적극 순회!)
+	current_target_stock = _select_best_rising_stock()
+
 func _on_stock_vi_triggered(stock_name: String, _duration: float):
 	if not current_target_stock.is_empty() and current_target_stock.get("name", "") == stock_name:
-		var old_name = current_target_stock.get("name", "")
-		current_target_stock = _select_best_rising_stock()
+		visited_stock_cooldowns[stock_name] = 75.0
+		stay_at_target_timer = 0.0
+		_rotate_to_next_sector()
 		var new_name = current_target_stock.get("name", "다음 급등주")
-		var new_rate = current_target_stock.get("rate", 0.0)
-		auto_status_text = "🚨 [%s VI 발동] -> [%s (+%.1f%%)] 이동!" % [old_name, new_name, new_rate]
-		print("[AutoPlay AI] VI 발동 감지! %s 거래 정지 -> 새로운 상승 종목 %s(으)로 즉시 전환!" % [old_name, new_name])
+		var new_sec = current_target_stock.get("sector_name", "")
+		auto_status_text = "🚨 [%s VI 발동] -> [%s (%s)] 즉시 이동!" % [stock_name, new_name, new_sec]
+		print("[AutoPlay AI] VI 발동 감지! %s 거래 정지 -> 새로운 섹터 %s(%s)로 이동!" % [stock_name, new_name, new_sec])
 
 func _on_auto_play_toggled(enabled: bool):
 	is_auto_play = enabled
@@ -194,6 +207,8 @@ func _physics_process(delta):
 
 	var scalping_lvl = Global.skills["scalping"]["level"] if Global.skills.has("scalping") else 0
 	var speed_mult = (1.6 if is_hodl_active else 1.0) * Global.player_speed_modifier * Global.bonus_speed_multiplier * (1.0 + scalping_lvl * 0.10)
+	if is_auto_play and is_on_highway_cruise:
+		speed_mult *= 1.4 # 섹터 간 고속도로 이동 시 쾌속 순항 가속 +40%!
 	
 	if not is_auto_play:
 		velocity = input_dir.normalized() * move_speed * speed_mult
@@ -216,11 +231,11 @@ func _physics_process(delta):
 		iframe_timer -= delta
 
 # ------------------------------------------------------------------------------
-# 🤖 방치형 자율 사냥 & 급등주 추적 AI (Auto-Play Logic)
+# 🤖 방치형 자율 사냥 & 전국/글로벌 섹터 순회 AI (Auto-Play Logic)
 # ------------------------------------------------------------------------------
 func _select_best_rising_stock() -> Dictionary:
 	var best_stock: Dictionary = {}
-	var best_score: float = -99999.0
+	var best_score: float = -999999.0
 	
 	for sec_key in MarketDataManager.sectors.keys():
 		var sec = MarketDataManager.sectors[sec_key]
@@ -235,41 +250,66 @@ func _select_best_rising_stock() -> Dictionary:
 			var st_pos = stock.get("world_pos", sec.get("position", Vector2.ZERO))
 			var dist = global_position.distance_to(st_pos)
 			
-			# 상승 종목 최우선 가중치 (상승률이 높을수록 압도적 우선순위)
-			# 1. 상승률 가산: 1%당 200점
-			# 2. 양수(상승) 프리미엄: +2000점
-			# 3. 거리 패널티: 1000px당 100점 (너무 먼 곳보다는 합리적 경로)
-			var score = (rate * 200.0) - (dist / 10.0)
+			# 1. 상승률(rate) 기본 점수 (1%당 300점)
+			var score = (rate * 300.0)
+			
+			# 2. 양수(상승) 프리미엄
 			if rate > 0.0:
-				score += 2000.0
+				score += 3000.0
 			if rate >= 8.0:
-				score += 1000.0 # 상한가/급등주 초우선
+				score += 1500.0 # 고수익 급등주 추가 보너스
+				
+			# 3. 새로운 섹터 우선 탐방 보너스 (여러 섹터 적극 순회!)
+			if not current_target_stock.is_empty():
+				var cur_sec = current_target_stock.get("sector_key", "")
+				if sec_key != cur_sec and not visited_sector_cooldowns.has(sec_key):
+					score += 2500.0 # 다른 미방문 섹터로 이동하는 강력한 인센티브!
+			
+			# 4. 최근 방문 종목/섹터 감점 (방금 수확 완료한 곳 제외)
+			if visited_stock_cooldowns.has(stock["name"]):
+				score -= 8000.0
+			if visited_sector_cooldowns.has(sec_key):
+				score -= 4000.0
+				
+			# 5. 거리 감점 대폭 완화 (기존 dist / 10.0 -> dist * 0.015 로 98% 완화!)
+			# 5000px 거리라도 감점은 고작 75점에 불과하여 전 섹터를 자유롭게 순회!
+			score -= (dist * 0.015)
 				
 			if score > best_score:
 				best_score = score
-				best_stock = stock
+				best_stock = stock.duplicate()
+				best_stock["sector_key"] = sec_key
+				best_stock["sector_name"] = sec.get("name", "")
 				
 	return best_stock
 
 func _calculate_auto_play_direction(delta: float) -> Vector2:
-	# 1. 속보 긴급 목표가 유효하고 아직 도착하지 않았을 때
+	# 1. 최근 방문 쿨다운 타이머 감쇄
+	for k in visited_stock_cooldowns.keys():
+		visited_stock_cooldowns[k] -= delta
+		if visited_stock_cooldowns[k] <= 0.0:
+			visited_stock_cooldowns.erase(k)
+			
+	for k in visited_sector_cooldowns.keys():
+		visited_sector_cooldowns[k] -= delta
+		if visited_sector_cooldowns[k] <= 0.0:
+			visited_sector_cooldowns.erase(k)
+
+	# 2. 속보 긴급 목표가 유효하고 아직 도착하지 않았을 때
 	if auto_target_pos != Vector2.ZERO:
 		var to_news = auto_target_pos - global_position
 		if to_news.length() > 220.0:
 			auto_status_text = "🚨 속보 성역으로 고속도로 질주!"
+			is_on_highway_cruise = true
 			return to_news.normalized()
 		else:
 			auto_target_pos = Vector2.ZERO # 도착 완료
 			
-	# 2. 주기적으로 최적의 상승 종목 재평가 (6초 주기 또는 타겟이 비었거나 VI에 걸렸을 때)
-	target_reevaluate_timer += delta
-	if current_target_stock.is_empty() or current_target_stock.get("is_halted", false) or target_reevaluate_timer >= 6.0:
-		target_reevaluate_timer = 0.0
-		var new_target = _select_best_rising_stock()
-		if not new_target.is_empty():
-			current_target_stock = new_target
+	# 3. 현재 타겟 검증 및 없으면 즉시 선택
+	if current_target_stock.is_empty() or current_target_stock.get("is_halted", false):
+		current_target_stock = _select_best_rising_stock()
 
-	# 3. 주변 적 위험 감지 (근접 위협 적 회피 & 카이팅)
+	# 4. 근접 위험 적 회피 & 카이팅 (< 230px)
 	var enemies = get_tree().get_nodes_in_group("enemy")
 	var danger_enemy: Node2D = null
 	var min_danger_dist: float = 230.0
@@ -291,35 +331,52 @@ func _calculate_auto_play_direction(delta: float) -> Vector2:
 			# 측면 회피 기동
 			return Vector2(-to_danger.y, to_danger.x).normalized() * 0.85
 
-	# 4. 근처 배당금 젬(EXP) 흡수 (가까운 반경 220px)
+	# 5. 근처 배당금 젬(EXP) 흡수 (가까운 반경 220px)
 	var gems = get_tree().get_nodes_in_group("exp_gem")
 	if not gems.is_empty():
 		for g in gems:
 			if is_instance_valid(g) and global_position.distance_to(g.global_position) < 220.0:
 				return (g.global_position - global_position).normalized()
 
-	# 5. 상승 종목 성역으로 질주 & 수확
+	# 6. 상승 종목 성역으로 질주 & 순회 파밍
 	if not current_target_stock.is_empty():
 		var st_name = current_target_stock.get("name", "상승 종목")
 		var st_rate = current_target_stock.get("rate", 0.0)
+		var sec_name = current_target_stock.get("sector_name", "")
 		var st_pos = current_target_stock.get("world_pos", global_position)
 		var to_st = st_pos - global_position
 		var dist_to_st = to_st.length()
 		
-		# 해당 종목 성역으로 이동 중
-		if dist_to_st > 320.0:
+		# 해당 종목 성역으로 이동 중 (고속도로 쾌속 이동)
+		if dist_to_st > 350.0:
+			is_on_highway_cruise = true
 			var sign_str = "+" if st_rate >= 0.0 else ""
-			auto_status_text = "🚀 [급등주 추적] %s (%s%.1f%%)" % [st_name, sign_str, st_rate]
+			auto_status_text = "🛣️ [%s] %s (%s%.1f%%) 고속 순항" % [sec_name, st_name, sign_str, st_rate]
 			return to_st.normalized()
 		else:
-			# 성역 도착: 해당 종목 제단 주변을 순회하며 집중 사냥 & 배당 수확!
+			# 성역 도착: 해당 종목 제단 주변에서 16초간 체류하며 집중 사냥 & 배당 수확!
+			is_on_highway_cruise = false
+			stay_at_target_timer += delta
+			var time_left = int(ceil(max(0.0, 16.0 - stay_at_target_timer)))
+			auto_status_text = "🔥 [%s +%.1f%%] 수확 중 (%ds)" % [st_name, st_rate, time_left]
+			
+			# 16초 체류 완료 시 다음 섹터 급등주로 전환!
+			if stay_at_target_timer >= 16.0:
+				stay_at_target_timer = 0.0
+				_rotate_to_next_sector()
+				if not current_target_stock.is_empty():
+					var next_st = current_target_stock.get("name", "")
+					var next_sec = current_target_stock.get("sector_name", "")
+					auto_status_text = "✅ [%s] 수확 완료! -> [%s (%s)] 출발!" % [st_name, next_st, next_sec]
+				return Vector2.ZERO
+				
 			patrol_timer += delta
-			auto_status_text = "🔥 [%s +%.1f%%] 상승 랠리 집중 사냥" % [st_name, st_rate]
-			var orbit_vec = Vector2(cos(patrol_timer * 1.6), sin(patrol_timer * 1.6)) * 140.0
+			var orbit_vec = Vector2(cos(patrol_timer * 1.6), sin(patrol_timer * 1.6)) * 150.0
 			var patrol_target = st_pos + orbit_vec
 			return (patrol_target - global_position).normalized()
 
-	# 6. 기본 폴백: 중앙 광장 주변 완만한 패트롤
+	# 7. 기본 폴백: 중앙 광장 주변 완만한 패트롤
+	is_on_highway_cruise = false
 	patrol_timer += delta
 	return Vector2(cos(patrol_timer * 0.8), sin(patrol_timer * 0.8))
 
