@@ -2,6 +2,9 @@ extends Node
 
 # Procedural audio generator & Mobile Haptic Vibration Manager (Optimized)
 
+signal sound_toggled(enabled: bool)
+
+var sound_enabled: bool = true
 var haptic_enabled: bool = true
 
 # 1. Fixed Audio Player Pool (8 Channels to eliminate runtime node instancing & GC lag)
@@ -27,6 +30,11 @@ var last_kill_time: float = 0.0
 func _ready():
 	process_mode = PROCESS_MODE_ALWAYS
 	
+	# 부드럽고 편안한 마스터 볼륨 레벨 설정 (-6 dB)
+	var master_bus = AudioServer.get_bus_index("Master")
+	if master_bus >= 0:
+		AudioServer.set_bus_volume_db(master_bus, -6.0)
+	
 	# Pre-instantiate fixed audio players
 	for i in range(POOL_SIZE):
 		var p = AudioStreamPlayer.new()
@@ -37,21 +45,32 @@ func _ready():
 	# Pre-bake procedural audio wave streams
 	_prebake_audio_streams()
 
+func toggle_sound() -> bool:
+	set_sound_enabled(not sound_enabled)
+	return sound_enabled
+
+func set_sound_enabled(enabled: bool):
+	sound_enabled = enabled
+	var master_bus = AudioServer.get_bus_index("Master")
+	if master_bus >= 0:
+		AudioServer.set_bus_mute(master_bus, not sound_enabled)
+	sound_toggled.emit(sound_enabled)
+
 func _prebake_audio_streams():
-	# Generate procedural WAV streams once in memory
-	cached_streams["beam"] = _generate_synth_stream(600.0, 1200.0, 0.09, 0.15, "square")
-	cached_streams["hit"] = _generate_synth_stream(220.0, 75.0, 0.06, 0.18, "noise")
-	cached_streams["kill_bull"] = _generate_synth_stream(880.0, 1760.0, 0.08, 0.22, "sine")
-	cached_streams["kill_bear"] = _generate_synth_stream(180.0, 60.0, 0.08, 0.20, "sawtooth")
-	cached_streams["coin"] = _generate_synth_stream(1046.5, 2093.0, 0.05, 0.12, "sine")
-	cached_streams["boss_alert"] = _generate_synth_stream(140.0, 280.0, 0.35, 0.30, "sawtooth")
-	cached_streams["shockwave"] = _generate_synth_stream(280.0, 45.0, 0.25, 0.25, "sawtooth")
+	# Generate procedural WAV streams once in memory with soft, gentle volumes
+	cached_streams["beam"] = _generate_synth_stream(600.0, 1200.0, 0.09, 0.07, "square")
+	cached_streams["hit"] = _generate_synth_stream(220.0, 75.0, 0.06, 0.08, "noise")
+	cached_streams["kill_bull"] = _generate_synth_stream(880.0, 1760.0, 0.08, 0.10, "sine")
+	cached_streams["kill_bear"] = _generate_synth_stream(180.0, 60.0, 0.08, 0.09, "sawtooth")
+	cached_streams["coin"] = _generate_synth_stream(1046.5, 2093.0, 0.05, 0.06, "sine")
+	cached_streams["boss_alert"] = _generate_synth_stream(140.0, 280.0, 0.35, 0.15, "sawtooth")
+	cached_streams["shockwave"] = _generate_synth_stream(280.0, 45.0, 0.25, 0.12, "sawtooth")
 	
 	# Arpeggio notes for Level Up
 	var note_freqs = [523.25, 659.25, 783.99, 1046.5]
 	for i in range(note_freqs.size()):
 		var f = note_freqs[i]
-		cached_streams["levelup_%d" % i] = _generate_synth_stream(f, f * 1.04, 0.08, 0.18, "square")
+		cached_streams["levelup_%d" % i] = _generate_synth_stream(f, f * 1.04, 0.08, 0.08, "square")
 
 # --- Haptic Feedback Methods with Throttling ---
 
@@ -131,6 +150,8 @@ func play_shockwave():
 # --- Core Player Pooling & Throttling Logic ---
 
 func _play_stream_throttled(stream_key: String, cooldown: float, pitch: float = 1.0) -> bool:
+	if not sound_enabled:
+		return false
 	var now = Time.get_ticks_msec() / 1000.0
 	var last_time = last_sound_times.get(stream_key, 0.0)
 	if now - last_time < cooldown:
@@ -141,6 +162,8 @@ func _play_stream_throttled(stream_key: String, cooldown: float, pitch: float = 
 	return true
 
 func _play_cached_stream(stream_key: String, pitch: float = 1.0):
+	if not sound_enabled:
+		return
 	if not cached_streams.has(stream_key):
 		return
 		

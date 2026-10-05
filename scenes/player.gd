@@ -78,8 +78,8 @@ func _rotate_to_next_sector():
 		say_monologue("🚀 다음 목표는 [%s %s (+%.1f%%)]! 전력 질주!" % [sec_name, st_name, st_rate], 3.8, true)
 
 func _on_stock_vi_triggered(stock_name: String, _duration: float):
+	visited_stock_cooldowns[stock_name] = 600.0 # VI 발동 종목 10분(600초) 쿨타임
 	if not current_target_stock.is_empty() and current_target_stock.get("name", "") == stock_name:
-		visited_stock_cooldowns[stock_name] = 120.0 # VI 발동 종목 2분(120초) 쿨타임
 		stay_at_target_timer = 0.0
 		_rotate_to_next_sector()
 		var new_name = current_target_stock.get("name", "다음 급등주")

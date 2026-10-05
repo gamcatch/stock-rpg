@@ -12,6 +12,7 @@ extends CanvasLayer
 @onready var yield_label: Label = $HUDControl/HeaderPanel/YieldLabel
 @onready var theme_button: Button = $HUDControl/HeaderPanel/ThemeButton
 @onready var auto_button: Button = $HUDControl/HeaderPanel/AutoButton
+@onready var sound_button: Button = $HUDControl/HeaderPanel/SoundButton
 @onready var speed_button: Button = $HUDControl/HeaderPanel/SpeedButton
 @onready var sector_panel: Panel = $HUDControl/SectorPanel
 @onready var sector_ticker_label: Label = $HUDControl/SectorPanel/SectorTickerLabel
@@ -49,6 +50,10 @@ func _ready():
 	if auto_button:
 		auto_button.pressed.connect(_on_auto_button_pressed)
 		_update_auto_button_ui()
+	if sound_button:
+		sound_button.pressed.connect(_on_sound_button_pressed)
+		SoundManager.sound_toggled.connect(func(_enabled): _update_sound_button_ui())
+		_update_sound_button_ui()
 	if speed_button:
 		speed_button.pressed.connect(_on_speed_button_pressed)
 		_update_speed_button_ui()
@@ -279,6 +284,20 @@ func _update_auto_button_ui():
 		else:
 			auto_button.text = "🕹️ 수동"
 			auto_button.add_theme_color_override("font_color", Color(0.7, 0.85, 1.0))
+
+func _on_sound_button_pressed():
+	SoundManager.haptic_tap()
+	SoundManager.toggle_sound()
+	_update_sound_button_ui()
+
+func _update_sound_button_ui():
+	if sound_button:
+		if SoundManager.sound_enabled:
+			sound_button.text = "🔊 소리"
+			sound_button.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))
+		else:
+			sound_button.text = "🔇 음소거"
+			sound_button.add_theme_color_override("font_color", Color(1.0, 0.4, 0.4))
 
 func _on_speed_button_pressed():
 	SoundManager.haptic_tap()
