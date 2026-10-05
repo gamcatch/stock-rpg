@@ -784,32 +784,32 @@ func _try_spawn_return_popup(text_str: String, col: Color):
 func _setup_speech_bubble():
 	speech_bubble = PanelContainer.new()
 	speech_bubble.top_level = true
-	speech_bubble.z_index = 120
+	speech_bubble.z_index = 150 # 화면 최상단에 또렷하게 표시
 	speech_bubble.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	
 	var sb = StyleBoxFlat.new()
 	var is_bull = (polarity == Polarity.BULL)
-	var border_col = Color(1.0, 0.35, 0.35, 0.95) if is_bull else Color(0.35, 0.75, 1.0, 0.95)
+	var border_col = Color(1.0, 0.3, 0.3, 1.0) if is_bull else Color(0.3, 0.75, 1.0, 1.0)
 	if is_boss:
-		border_col = Color(1.0, 0.85, 0.25, 0.95)
-	sb.bg_color = Color(0.06, 0.08, 0.14, 0.92)
+		border_col = Color(1.0, 0.85, 0.2, 1.0)
+	sb.bg_color = Color(0.04, 0.07, 0.13, 0.96)
 	sb.border_color = border_col
-	sb.set_border_width_all(2)
-	sb.set_corner_radius_all(8)
-	sb.content_margin_left = 12.0
-	sb.content_margin_right = 12.0
-	sb.content_margin_top = 6.0
-	sb.content_margin_bottom = 6.0
-	sb.shadow_color = Color(0, 0, 0, 0.6)
-	sb.shadow_size = 6
+	sb.set_border_width_all(3)
+	sb.set_corner_radius_all(14)
+	sb.content_margin_left = 18.0
+	sb.content_margin_right = 18.0
+	sb.content_margin_top = 8.0
+	sb.content_margin_bottom = 8.0
+	sb.shadow_color = Color(0, 0, 0, 0.75)
+	sb.shadow_size = 8
 	speech_bubble.add_theme_stylebox_override("panel", sb)
 	
 	speech_label = Label.new()
 	speech_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	speech_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	speech_label.add_theme_font_size_override("font_size", 18) # 18pt로 시원하고 또렷하게!
-	speech_label.add_theme_color_override("font_color", Color(1.0, 0.96, 0.90))
-	speech_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
+	speech_label.add_theme_font_size_override("font_size", 22) # 22pt 시원하고 큼직한 폰트!
+	speech_label.add_theme_color_override("font_color", Color(1.0, 0.97, 0.90))
+	speech_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.95))
 	speech_label.add_theme_constant_override("shadow_offset_x", 1)
 	speech_label.add_theme_constant_override("shadow_offset_y", 1)
 	speech_bubble.add_child(speech_label)
@@ -818,9 +818,9 @@ func _setup_speech_bubble():
 	speech_tail.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	speech_tail.draw.connect(func():
 		var pts = PackedVector2Array([
-			Vector2(-6, 0),
-			Vector2(6, 0),
-			Vector2(0, 7)
+			Vector2(-8, 0),
+			Vector2(8, 0),
+			Vector2(0, 9)
 		])
 		speech_tail.draw_colored_polygon(pts, border_col)
 	)
@@ -829,7 +829,7 @@ func _setup_speech_bubble():
 	speech_bubble.modulate.a = 0.0
 	add_child(speech_bubble)
 
-func say_bubble(text: String, duration: float = 3.0):
+func say_bubble(text: String, duration: float = 3.5):
 	if not is_instance_valid(speech_bubble) or not is_instance_valid(speech_label):
 		return
 	speech_label.text = text
@@ -838,10 +838,14 @@ func say_bubble(text: String, duration: float = 3.0):
 	is_speech_active = true
 	speech_timer = duration
 	
+	# 즉시 보이도록 위치 갱신
+	var b_size = speech_bubble.size
+	speech_bubble.global_position = global_position - Vector2(b_size.x * 0.5, b_size.y + 42.0)
+	
 	speech_bubble.scale = Vector2(0.85, 0.85)
 	var tw = create_tween()
 	tw.tween_property(speech_bubble, "modulate:a", 1.0, 0.15)
-	tw.parallel().tween_property(speech_bubble, "scale", Vector2(1.05, 1.05), 0.12)
+	tw.parallel().tween_property(speech_bubble, "scale", Vector2(1.06, 1.06), 0.12)
 	tw.tween_property(speech_bubble, "scale", Vector2(1.0, 1.0), 0.1)
 
 func _process_speech_bubble(delta: float):
@@ -850,7 +854,7 @@ func _process_speech_bubble(delta: float):
 		
 	# 적 머리 위에 수평 고정 (노드 회전 무시)
 	var b_size = speech_bubble.size
-	speech_bubble.global_position = global_position - Vector2(b_size.x * 0.5, b_size.y + 45.0)
+	speech_bubble.global_position = global_position - Vector2(b_size.x * 0.5, b_size.y + 42.0)
 	speech_bubble.rotation = 0.0
 	if is_instance_valid(speech_tail):
 		speech_tail.position = Vector2(b_size.x * 0.5, b_size.y - 1.0)
@@ -864,24 +868,24 @@ func _process_speech_bubble(delta: float):
 			tw.tween_property(speech_bubble, "modulate:a", 0.0, 0.3)
 			tw.parallel().tween_property(speech_bubble, "scale", Vector2(0.9, 0.9), 0.3)
 	else:
-		# 침묵 중일 때 랜덤 확률로 대사 발동 검사
+		# 침묵 중일 때 주기적으로 대사 발동 검사
 		bubble_check_timer -= delta
 		if bubble_check_timer <= 0.0:
-			bubble_check_timer = randf_range(3.5, 6.5)
+			bubble_check_timer = randf_range(2.0, 4.0)
 			_maybe_trigger_speech()
 
 func _maybe_trigger_speech():
 	if is_dead or not is_instance_valid(player):
 		return
-	# 화면 안 혹은 플레이어와 750px 이내에 있을 때만 대사 출력
-	if global_position.distance_to(player.global_position) > 750.0:
+	# 화면 안 (플레이어와 850px 이내)에 있을 때 발동
+	if global_position.distance_to(player.global_position) > 850.0:
 		return
 	var now = Time.get_ticks_msec()
-	# 화면 전체에서 적들이 동시에 떠들지 않도록 글로벌 1.8초 쿨다운
-	if not is_boss and (now - last_enemy_speech_time_msec < 1800):
+	# 화면에서 적들이 활발히 말할 수 있도록 글로벌 쿨다운 0.8초로 완화
+	if not is_boss and (now - last_enemy_speech_time_msec < 800):
 		return
-	# 보스는 50% 확률, 일반 적은 18% 확률로 대사 발동
-	var chance = 0.50 if is_boss else 0.18
+	# 보스는 70% 확률, 일반 적은 45% 확률로 풍성하게 대사 발동!
+	var chance = 0.70 if is_boss else 0.45
 	if randf() > chance:
 		return
 	last_enemy_speech_time_msec = now
@@ -893,7 +897,7 @@ func _maybe_trigger_speech():
 				"🇺🇸 100% 관세 폭탄 맛 좀 봐라!",
 				"📢 가짜 뉴스는 절대 용납 못 해!",
 				"🦅 Make America Great Again!",
-				"💥 시장은 내가 움직인다!"
+				"💥 글로벌 증시는 내가 움직인다!"
 			]
 		else:
 			lines = [
@@ -907,94 +911,85 @@ func _maybe_trigger_speech():
 			CharacterArchetype.CHIP_GOLEM:
 				lines = [
 					"%s 웨이퍼를 사수하라!" % name_prefix,
-					"⚡ HBM 반도체 풀가동!",
-					"🦾 나노 공정의 위력을 봐라!"
+					"%s HBM 반도체 풀가동!" % name_prefix,
+					"%s 나노 공정의 위력을 봐라!" % name_prefix
 				]
 			CharacterArchetype.BATTERY_MECHA:
 				lines = [
 					"%s 2차전지 방전 불가!" % name_prefix,
-					"🔋 리튬 에너지 100% 충전!",
-					"⚡ 배터리 화력 맛 좀 봐라!"
+					"%s 리튬 에너지 100%% 충전!" % name_prefix,
+					"%s 배터리 화력 맛 좀 봐라!" % name_prefix
 				]
 			CharacterArchetype.BIO_CHIMERA:
 				lines = [
 					"%s 임상 3상 완료!" % name_prefix,
-					"🧬 바이오 시밀러의 역습!",
-					"🧪 신약 파이프라인 가동!"
+					"%s 바이오 시밀러의 역습!" % name_prefix,
+					"%s 신약 파이프라인 가동!" % name_prefix
 				]
 			CharacterArchetype.AI_ANDROID:
 				lines = [
 					"%s AI 연산 과열 중!" % name_prefix,
-					"🤖 알고리즘이 네 패배를 계산했다!",
-					"💡 딥러닝 텐서 폭격!"
+					"%s 알고리즘이 네 패배를 계산했다!" % name_prefix,
+					"%s 딥러닝 텐서 폭격!" % name_prefix
 				]
 			CharacterArchetype.REACTOR_TITAN:
 				lines = [
-					"%s 원전 출력 200%!",
-					"⚡ 초고압 전력망 과부하!",
-					"🔥 에너지 대란을 일으켜주마!"
+					"%s 원전 출력 200%%!" % name_prefix,
+					"%s 초고압 전력망 과부하!" % name_prefix,
+					"%s 에너지 대란을 일으켜주마!" % name_prefix
 				]
 			CharacterArchetype.DREADNOUGHT:
 				lines = [
-					"%s 전함 주포 일제 발포!",
-					"⚓ 수주 대박의 물결이다!",
-					"🌊 대양을 지배하는 K-조선!"
+					"%s 전함 주포 일제 발포!" % name_prefix,
+					"%s 수주 대박의 물결이다!" % name_prefix,
+					"%s 대양을 지배하는 K-조선!" % name_prefix
 				]
 			CharacterArchetype.GOLD_VAULT:
 				lines = [
-					"%s 밸류업 금고를 열어라!",
-					"💰 배당금 방어막 발동!",
-					"🏦 자사주 소각 맛을 봐라!"
+					"%s 밸류업 금고를 열어라!" % name_prefix,
+					"%s 배당금 방어막 발동!" % name_prefix,
+					"%s 자사주 소각 맛을 봐라!" % name_prefix
 				]
 			CharacterArchetype.DEFENSE_MECHA:
 				lines = [
-					"%s 미사일 록온 완료!",
-					"🚀 K-방산 수출 대박!",
-					"🎯 타겟 조준... 발사!"
+					"%s 미사일 록온 완료!" % name_prefix,
+					"%s K-방산 수출 대박!" % name_prefix,
+					"%s 타겟 조준... 발사!" % name_prefix
 				]
 	else:
+		var name_prefix = "[%s]" % stock_name if not stock_name.is_empty() else ""
 		if polarity == Polarity.BULL:
 			lines = [
-				"📈 오늘 상한가 간다!",
-				"🚀 불기둥 뚫고 가즈아~!",
-				"🔥 물타기 금지! 풀매수다!"
+				"%s 오늘 상한가 간다!" % name_prefix,
+				"%s 불기둥 뚫고 가즈아~!" % name_prefix,
+				"%s 물타기 금지! 풀매수다!" % name_prefix
 			]
 		else:
 			lines = [
-				"📉 공매도 폭탄 투하!",
-				"😱 패닉셀이다! 던져라!",
-				"❄️ 파란불의 공포를 봐라!"
+				"%s 공매도 폭탄 투하!" % name_prefix,
+				"%s 패닉셀이다! 던져라!" % name_prefix,
+				"%s 파란불의 공포를 봐라!" % name_prefix
 			]
-	say_bubble(lines.pick_random(), randf_range(2.5, 3.2))
+	say_bubble(lines.pick_random(), randf_range(2.8, 3.6))
 
 # ------------------------------------------------------------------------------
 # 🎮 종목별 RPG 캐릭터 렌더링 시스템 (Stock Character Renderers)
 # ------------------------------------------------------------------------------
-func _draw_stock_badge_and_hp(_is_bull: bool, font: Font):
-	if stock_name.is_empty():
+func _draw_stock_badge_and_hp(_is_bull: bool, _font: Font):
+	# 보스는 전용 대형 HP 바가 따로 렌더링되므로 중복 생략
+	if is_boss:
 		return
-	var sign_str = "▲+" if stock_rate >= 0 else "▼"
-	var rate_abs = abs(stock_rate)
-	var text_str = "%s %s%.1f%%" % [stock_name, sign_str, rate_abs] if rate_abs > 0.0 else stock_name
-	var badge_col = Global.get_up_color() if stock_rate >= 0 else Global.get_down_color()
-	
-	# Node 회전 상쇄하여 수평 유지 및 크고 또렷하게 표시 (폰트 18pt)
-	var badge_offset = Vector2(0, -48).rotated(-rotation)
-	var badge_w = clampf(text_str.length() * 19.0 + 26.0, 130.0, 280.0)
-	var badge_rect = Rect2(badge_offset + Vector2(-badge_w * 0.5, -14), Vector2(badge_w, 28))
-	
-	draw_rect(badge_rect, Color(0.04, 0.08, 0.16, 0.92), true)
-	draw_rect(badge_rect, badge_col, false, 2.0)
-	draw_string(font, badge_offset + Vector2(-badge_w * 0.5, 6), text_str, HORIZONTAL_ALIGNMENT_CENTER, badge_w, 18, badge_col)
-	
-	# Mini HP Bar
+		
+	# 지저분한 사각형 텍스트 박스를 제거하고, 깔끔한 미니 HP 게이지 바만 머리 위에 표시
+	var hp_offset = Vector2(0, -32).rotated(-rotation)
 	var hp_ratio = clampf(hp / max(1.0, max_hp), 0.0, 1.0)
-	var hp_w = 52.0
-	var hp_rect = Rect2(badge_offset + Vector2(-hp_w * 0.5, 18), Vector2(hp_w, 6))
-	draw_rect(hp_rect, Color(0.08, 0.08, 0.12, 0.85), true)
+	var hp_w = 44.0
+	var hp_rect = Rect2(hp_offset + Vector2(-hp_w * 0.5, -3), Vector2(hp_w, 6))
+	
+	draw_rect(hp_rect, Color(0.04, 0.08, 0.14, 0.85), true)
 	var hp_col = Color(0.2, 1.0, 0.4) if hp_ratio > 0.35 else Color(1.0, 0.25, 0.25)
 	draw_rect(Rect2(hp_rect.position, Vector2(hp_w * hp_ratio, 6)), hp_col, true)
-	draw_rect(hp_rect, Color(0.35, 0.6, 0.85, 0.6), false, 1.2)
+	draw_rect(hp_rect, Color(0.35, 0.65, 0.9, 0.7), false, 1.2)
 
 # 1. 반도체 실리콘 칩 골렘 (삼성전자, SK하이닉스, NVIDIA 등)
 func _draw_chip_golem(theme_color: Color, rim_color: Color, _is_bull: bool, _font: Font):
