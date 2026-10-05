@@ -6,6 +6,7 @@ extends CanvasLayer
 var pending_level_ups: int = 0
 var auto_pick_timer: float = 3.5
 var current_level_shown: int = 1
+var is_selection_in_progress: bool = false
 
 func _ready():
 	process_mode = PROCESS_MODE_ALWAYS
@@ -13,7 +14,7 @@ func _ready():
 	Global.level_up.connect(_on_level_up)
 
 func _process(delta):
-	if visible and Global.auto_play_enabled:
+	if visible and Global.auto_play_enabled and not is_selection_in_progress:
 		auto_pick_timer -= delta
 		if auto_pick_timer <= 0.0:
 			auto_pick_timer = 3.5
@@ -22,6 +23,8 @@ func _process(delta):
 			title_label.text = "📈 투자 전략 매수 (Lv. %d)  [🤖 %d초 후 자동선택]" % [current_level_shown, int(ceil(auto_pick_timer))]
 
 func _auto_pick_card():
+	if is_selection_in_progress:
+		return
 	if card_container.get_child_count() > 0:
 		var first_card = card_container.get_child(0)
 		if first_card is Button:
@@ -36,6 +39,7 @@ func _show_level_up_screen(level_to_show: int):
 	SoundManager.play_level_up()
 	get_tree().paused = true
 	visible = true
+	is_selection_in_progress = false
 	current_level_shown = level_to_show
 	auto_pick_timer = 3.5
 	
@@ -86,9 +90,11 @@ func _generate_choices(skill_pool: Array):
 		fallback_btn.alignment = HORIZONTAL_ALIGNMENT_CENTER
 		fallback_btn.add_theme_font_size_override("font_size", 32)
 		fallback_btn.pressed.connect(func():
-			Global.heal_player(Global.player_max_hp * 0.5)
-			Global.portfolio_return += 50.0
-			_finish_choice()
+			_highlight_and_select(fallback_btn, func():
+				Global.heal_player(Global.player_max_hp * 0.5)
+				Global.portfolio_return += 50.0
+				_finish_choice()
+			, "특별 배당금 수령")
 		)
 		card_container.add_child(fallback_btn)
 
@@ -106,7 +112,7 @@ func _create_card(skill_id: String, info: Dictionary) -> Button:
 	btn.add_theme_font_size_override("font_size", 30)
 	
 	btn.pressed.connect(func():
-		_select_upgrade(skill_id)
+		_highlight_and_select(btn, func(): _select_upgrade(skill_id), "%s %s (%s)" % [info["icon"], info["name"], action_text])
 	)
 	return btn
 
@@ -122,10 +128,45 @@ func _create_bonus_card(bonus_info: Dictionary) -> Button:
 	btn.add_theme_font_size_override("font_size", 30)
 	
 	btn.pressed.connect(func():
-		_apply_bonus(bonus_info["id"])
-		_finish_choice()
+		_highlight_and_select(btn, func():
+			_apply_bonus(bonus_info["id"])
+			_finish_choice()
+		, "%s %s" % [bonus_info["icon"], bonus_info["name"]])
 	)
 	return btn
+
+func _highlight_and_select(card_btn: Button, callback: Callable, card_title: String):
+	if is_selection_in_progress:
+		return
+	is_selection_in_progress = true
+	
+	SoundManager.play_level_up()
+	SoundManager.haptic_impact()
+	
+	# 선택된 카드는 황금빛 네온으로 강조하고, 나머지 카드는 반투명 페이드아웃!
+	for child in card_container.get_children():
+		if child is Button:
+			if child == card_btn:
+				child.modulate = Color(1.3, 1.25, 0.45) # 황금빛 네온 발광
+				var tween = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+				tween.tween_property(child, "scale", Vector2(1.04, 1.04), 0.15)
+				tween.tween_property(child, "scale", Vector2(1.0, 1.0), 0.15)
+			else:
+				var tween = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+				tween.tween_property(child, "modulate:a", 0.25, 0.2)
+				
+	# 상단 타이틀 배너에 체결된 전략 공지
+	title_label.text = "✅ [투자 전략 체결] %s" % card_title
+	title_label.modulate = Color(1.0, 0.88, 0.2)
+	
+	# 실시간 증시 속보 티커로도 체결 타전
+	Global.market_event_triggered.emit("📈 [전략 매수 체결]", "%s 전략 매수 완료!" % card_title)
+	
+	# 유저가 어떤 카드가 선택되었는지 충분히 볼 수 있도록 0.85초간 하이라이트 유지!
+	var timer = get_tree().create_timer(0.85, true, false, true)
+	await timer.timeout
+	
+	callback.call()
 
 func _get_bonus_cards() -> Array:
 	return [

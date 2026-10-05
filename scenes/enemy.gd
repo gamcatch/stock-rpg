@@ -972,4 +972,3 @@ func _draw_defense_mecha(_theme_color: Color, rim_color: Color, _is_bull: bool, 
 	draw_circle(Vector2(14, 0), 4.0, Color(1.0, 0.3, 0.3))
 	draw_line(Vector2(8, 0), Vector2(20, 0), Color(1, 1, 1), 1.5)
 	draw_line(Vector2(14, -6), Vector2(14, 6), Color(1, 1, 1), 1.5)
-
