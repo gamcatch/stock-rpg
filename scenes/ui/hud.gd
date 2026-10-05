@@ -191,7 +191,7 @@ func _update_sector_info():
 		]
 	elif cur_sec["key"] == "plaza":
 		new_color = Color(0.85, 0.95, 1.0)
-		new_text = "🏛️ [중앙 증시 대교차로]  ❖  360도 고속도로를 통해 4대 섹터로 전진하세요  ❖  실시간 섹터별/종목별 속보 및 호재를 확인하세요!"
+		new_text = "🏛️ [중앙 증시 대교차로]  ❖  360도 고속도로를 통해 8대 섹터로 전진하세요  ❖  실시간 섹터별/종목별 속보 및 호재를 확인하세요!"
 	else:
 		# Player has entered a specific sector: reveal its stock rates & sector news!
 		var is_bull = (cur_sec.get("key", "") == top_sec.get("key", ""))

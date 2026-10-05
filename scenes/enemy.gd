@@ -14,6 +14,7 @@ const ProjectileScript = preload("res://scenes/projectile.gd")
 @export var exp_reward: int = 3
 @export var is_boss: bool = false
 
+var stock_name: String = ""
 var hp: float = 30.0
 var is_dead: bool = false
 var player: Node2D = null
@@ -40,32 +41,32 @@ func _setup_stats():
 			max_hp = 20.0
 			move_speed = 135.0
 			contact_damage = 6.0
-			exp_reward = 2
+			exp_reward = 8 # 1/4 스폰 주기에 맞춰 4배 상향
 			r = 24.0
 		EnemyType.FAKE_NEWS:
 			max_hp = 45.0
 			move_speed = 110.0
 			contact_damage = 9.0
-			exp_reward = 5
+			exp_reward = 18
 			r = 28.0
 		EnemyType.RED_CANDLE:
 			max_hp = 85.0
 			move_speed = 85.0
 			contact_damage = 14.0
-			exp_reward = 10
+			exp_reward = 36
 			r = 34.0
 		EnemyType.BEAR_BOSS:
 			max_hp = 650.0
 			move_speed = 95.0
 			contact_damage = 22.0
-			exp_reward = 50
+			exp_reward = 160
 			is_boss = true
 			r = 60.0
 		EnemyType.TRUMP_BOSS:
 			max_hp = 2500.0
 			move_speed = 80.0
 			contact_damage = 32.0
-			exp_reward = 350
+			exp_reward = 1000
 			is_boss = true
 			r = 80.0
 	hp = max_hp
@@ -95,6 +96,11 @@ func _draw():
 	draw_circle(Vector2.ZERO, 28.0, glow_color)
 
 	var font = ThemeDB.fallback_font
+
+	# Stock Name Tag (종목명/섹터명 뱃지 표시)
+	if not stock_name.is_empty():
+		var tag_col = Color(1.0, 0.90, 0.35) if is_bull else Color(0.65, 0.88, 1.0)
+		draw_string(font, Vector2(-60, -32), stock_name, HORIZONTAL_ALIGNMENT_CENTER, 120, 13, tag_col)
 
 	match type:
 		EnemyType.PANIC_SELL:
@@ -580,17 +586,17 @@ func _die():
 	Global.kills_count += 1
 	SoundManager.play_enemy_death(polarity == Polarity.BULL)
 	
-	# Polarity Rewards & Penalties:
-	# 🔴 BULL (상승/과열) 적 처치: 수익률 대폭 상승 (+3.5% * exp_reward)
-	# 🔵 BEAR (하락/공매도) 적 처치: 수익률 하락 손실 (-1.5% * exp_reward)
+	# Polarity Rewards:
+	# 🔴 BULL (상승/과열) 적 처치: 상승 랠리 수익 (+2.5% * exp_reward)
+	# 🔵 BEAR (하락/공매도) 적 처치: 공매도 숏스퀴즈/방어 성공 (+1.5% * exp_reward)
 	if polarity == Polarity.BULL:
-		var yield_gain = exp_reward * 3.5
+		var yield_gain = exp_reward * 2.5
 		Global.portfolio_return += yield_gain
 		_try_spawn_return_popup("+%.1f%% 떡상!" % yield_gain, Global.get_up_color())
 	else:
-		var yield_loss = exp_reward * 1.5
-		Global.portfolio_return = max(-99.0, Global.portfolio_return - yield_loss)
-		_try_spawn_return_popup("-%.1f%% 손실!" % yield_loss, Global.get_down_color())
+		var yield_gain = exp_reward * 1.5
+		Global.portfolio_return += yield_gain
+		_try_spawn_return_popup("+%.1f%% 숏커버링!" % yield_gain, Global.get_down_color())
 	
 	# Spawn exp gem
 	_spawn_exp_gem()

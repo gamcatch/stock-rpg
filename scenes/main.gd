@@ -494,8 +494,8 @@ func _end_current_event():
 
 func _process_enemy_spawning(delta):
 	spawn_timer += delta
-	# Fast spawn cycle: starts at 0.7s and accelerates down to 0.20s
-	spawn_interval = max(0.20, 0.70 - (Global.game_time / 180.0) * 0.50)
+	# 방치형 RPG 감상 템포: 2.2초 ~ 3.4초 간격 스폰 (기존의 1/4 수준으로 대폭 완화)
+	spawn_interval = max(2.2, 3.4 - (Global.game_time / 300.0) * 0.8)
 	
 	if spawn_timer >= spawn_interval:
 		spawn_timer = 0.0
@@ -512,16 +512,17 @@ func _process_enemy_spawning(delta):
 	if Global.game_time >= 120.0 and not candle_boss_spawned:
 		candle_boss_spawned = true
 		if is_instance_valid(player):
-			for i in range(4):
-				var angle = i * (TAU / 4.0)
+			for i in range(2): # 4마리 -> 2마리로 완화
+				var angle = i * (TAU / 2.0)
 				var spawn_pos = player.global_position + Vector2(cos(angle), sin(angle)) * 620.0
 				var candle_e = enemy_scene.instantiate()
 				candle_e.type = Enemy.EnemyType.RED_CANDLE
 				candle_e.polarity = Enemy.Polarity.BEAR
+				candle_e.stock_name = "하한가 음봉"
 				candle_e.global_position = spawn_pos
 				enemy_container.add_child(candle_e)
 		SoundManager.play_boss_alert()
-		Global.market_event_triggered.emit("📉 [어닝 쇼크] 거대 하한가 캔들 군단 출현!", "거대한 음봉 캔들들이 화면을 뒤덮습니다!")
+		Global.market_event_triggered.emit("📉 [어닝 쇼크] 거대 하한가 캔들 출현!", "하한가 음봉 캔들이 등장했습니다!")
 		
 	# 3. 180초 (3분): 최종 결전 [관세맨 TRUMP]
 	if Global.game_time >= 180.0 and not trump_boss_spawned:
@@ -531,24 +532,24 @@ func _process_enemy_spawning(delta):
 		Global.market_event_triggered.emit("🏛️ [최종 결전] 관세맨 TRUMP 등장!", "🚨 전방위 관세 폭탄 100% 발령! 글로벌 증시를 구원하세요!")
 
 func _spawn_enemy_wave():
-	# Cap enemy count to protect mobile 60fps performance
-	if enemy_container.get_child_count() >= 130:
+	# 방치형 RPG: 화면 내 최대 몬스터 수를 24마리로 제한 (과도한 물량 공세 방지)
+	if enemy_container.get_child_count() >= 24:
 		return
 
 	if not is_instance_valid(player):
 		return
 
 	var t = Global.game_time
-	# Wave count: 3~5 early game, scaling up to 7~11 enemies per wave late game
-	var wave_count = int(clampf(3 + int(t / 25.0) * 1.5, 3, 11))
+	# 웨이브당 1~2마리, 후반부 최대 3마리 스폰 (기존 3~11마리에서 1/4로 축소)
+	var wave_count = int(clampf(1 + int(t / 60.0) * 0.5, 1, 3))
 	if not Global.current_market_event.is_empty():
-		wave_count += 3
+		wave_count = mini(wave_count + 1, 4)
 
 	var p_pos = player.global_position
 	var nearby_stocks = MarketDataManager.get_stocks_near(p_pos, 2200.0)
 
 	# 1. Nearby Stock Sanctuary Spawning:
-	# If player is near a stock, enemies stream directly from that stock!
+	# 특정 종목 성역 근처일 때는 해당 종목의 캔들 몬스터가 1~2마리 출현
 	if nearby_stocks.size() > 0:
 		var closest_stock = nearby_stocks[0]
 		var min_d = p_pos.distance_to(closest_stock.get("world_pos", Vector2.ZERO))
@@ -564,56 +565,51 @@ func _spawn_enemy_wave():
 		
 		# If the stock is in VI Cooldown (거래 정지):
 		if is_halted:
-			# Do NOT spawn free red profits! Spawn blue profit-taking selling pressure
-			for i in range(mini(wave_count, 4)):
-				var type_to_spawn = _pick_enemy_type(t)
-				var enemy = enemy_scene.instantiate()
-				enemy.type = type_to_spawn
-				enemy.polarity = Enemy.Polarity.BEAR # Profit taking selling pressure!
-				var spawn_pos = p_pos + Vector2(cos(randf() * TAU), sin(randf() * TAU)) * randf_range(520.0, 700.0)
-				enemy.global_position = spawn_pos
-				enemy_container.add_child(enemy)
+			var enemy = enemy_scene.instantiate()
+			enemy.type = _pick_enemy_type(t)
+			enemy.polarity = Enemy.Polarity.BEAR # Profit taking selling pressure!
+			enemy.stock_name = closest_stock["name"]
+			var spawn_pos = p_pos + Vector2(cos(randf() * TAU), sin(randf() * TAU)) * randf_range(520.0, 680.0)
+			enemy.global_position = spawn_pos
+			enemy_container.add_child(enemy)
 		else:
-			# Active Stock: Record spawns towards VI Quota (28 max)
-			MarketDataManager.record_stock_spawn(closest_stock["name"], wave_count)
+			# Active Stock: 1~2마리만 성역에서 출현
+			var sanctuary_spawns = mini(wave_count, 2)
+			MarketDataManager.record_stock_spawn(closest_stock["name"], sanctuary_spawns)
 			
-			# Stream enemies directly from or towards the stock altar
-			for i in range(wave_count):
+			for i in range(sanctuary_spawns):
 				var type_to_spawn = _pick_enemy_type(t)
 				var enemy = enemy_scene.instantiate()
 				enemy.type = type_to_spawn
 				enemy.polarity = Enemy.Polarity.BULL if is_bull else Enemy.Polarity.BEAR
+				enemy.stock_name = closest_stock["name"]
 				
 				var spawn_pos: Vector2
 				if min_d <= 750.0:
-					# Right at the stock altar: erupts directly from the altar!
-					spawn_pos = st_pos + Vector2(randf_range(-90, 90), randf_range(-90, 90))
+					spawn_pos = st_pos + Vector2(randf_range(-60, 60), randf_range(-60, 60))
 				else:
-					# Marching from the stock towards player: stream along the highway line
 					var dir_to_player = (p_pos - st_pos).normalized()
-					var march_point = p_pos - dir_to_player * randf_range(520.0, 720.0)
-					spawn_pos = march_point + Vector2(randf_range(-120, 120), randf_range(-120, 120))
+					var march_point = p_pos - dir_to_player * randf_range(500.0, 660.0)
+					spawn_pos = march_point + Vector2(randf_range(-80, 80), randf_range(-80, 80))
 					
 				enemy.global_position = spawn_pos
 				enemy_container.add_child(enemy)
 	else:
 		# 2. Open Highway / Central Plaza Spawning:
-		# Spawn right around the visible camera perimeter (500~720px) so they engage immediately!
-		var base_angle = randf() * TAU
+		var cur_sec = MarketDataManager.get_sector_at(p_pos)
+		var rate = cur_sec.get("change_rate", 0.0)
+		var bull_chance = clampf(0.50 + rate * 0.08, 0.15, 0.85)
+		
 		for i in range(wave_count):
 			var type_to_spawn = _pick_enemy_type(t)
-			var cluster_spread = randf_range(-0.4, 0.4)
-			var angle = base_angle + cluster_spread + (float(i) / wave_count) * 0.75
-			var spawn_dist = randf_range(500.0, 720.0)
+			var angle = randf() * TAU
+			var spawn_dist = randf_range(520.0, 700.0)
 			var spawn_pos = p_pos + Vector2(cos(angle), sin(angle)) * spawn_dist
 			
 			var enemy = enemy_scene.instantiate()
 			enemy.type = type_to_spawn
-			
-			var cur_sec = MarketDataManager.get_sector_at(p_pos)
-			var rate = cur_sec.get("change_rate", 0.0)
-			var bull_chance = clampf(0.50 + rate * 0.08, 0.15, 0.85)
 			enemy.polarity = Enemy.Polarity.BULL if randf() < bull_chance else Enemy.Polarity.BEAR
+			enemy.stock_name = cur_sec.get("name", "지수 캔들")
 			enemy.global_position = spawn_pos
 			enemy_container.add_child(enemy)
 
